@@ -253,6 +253,7 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .home-title p{font-size:14px;color:var(--text-muted);margin-top:4px}
 .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .app-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 14px 18px;text-align:center;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .15s,transform .1s}
+a.app-tile{display:block;text-decoration:none}
 .app-tile:hover{border-color:var(--accent)}
 .app-tile:active{transform:scale(.97)}
 .app-ico{width:64px;height:64px;margin:0 auto 12px;border-radius:18px;background:var(--accent-soft);border:1px solid rgba(196,133,58,.35);display:flex;align-items:center;justify-content:center;font-size:30px}
@@ -350,6 +351,11 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <div class="app-name">Yarn Status</div>
       <div class="app-sub">Dashboard · Entry · Orders</div>
     </button>
+    <a class="app-tile" href="https://script.google.com/macros/s/AKfycbwKWmrcl-B3goqXfdgUJaMZlJ-tP4-5pi7sTR6Q2yw6U1FhGGsh1bddPjfxvC9KppQd/exec" target="_blank" rel="noopener">
+      <div class="app-ico">🏷️</div>
+      <div class="app-name">Finished Goods</div>
+      <div class="app-sub">Opens in a new tab</div>
+    </a>
   </div>
   <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()">⬇ Install app</button></div>
   <div class="ios-hint" id="iosHint">To install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b></div>
