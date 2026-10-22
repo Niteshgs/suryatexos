@@ -1,1 +1,1 @@
-{ "functions": { "api/sheet.js": { "maxDuration": 30 } } }
+{ "functions": { "api/sheet.js": { "maxDuration": 30 }, "api/fg.js": { "maxDuration": 60 } } }
