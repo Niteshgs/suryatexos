@@ -248,6 +248,9 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 
 /* ═════════ HOME ═════════ */
 #v-home{max-width:720px;padding:32px 16px 40px}
+#v-fg{max-width:none;padding:0}
+#v-fg iframe{display:block;width:100%;height:calc(100vh - 60px - env(safe-area-inset-top));height:calc(100dvh - 60px - env(safe-area-inset-top));border:0;background:var(--bg)}
+body.fg-on{padding-bottom:0;overflow:hidden}
 .home-title{margin-bottom:24px}
 .home-title h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .home-title p{font-size:14px;color:var(--text-muted);margin-top:4px}
@@ -329,6 +332,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
+    <a class="icon-btn" id="fgExt" href="https://script.google.com/macros/s/AKfycbwKWmrcl-B3goqXfdgUJaMZlJ-tP4-5pi7sTR6Q2yw6U1FhGGsh1bddPjfxvC9KppQd/exec" target="_blank" rel="noopener" aria-label="Open in browser" title="Open in browser" style="display:none;text-decoration:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
   </div>
 </header>
@@ -351,15 +355,18 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <div class="app-name">Yarn Status</div>
       <div class="app-sub">Dashboard · Entry · Orders</div>
     </button>
-    <a class="app-tile" href="https://script.google.com/macros/s/AKfycbwKWmrcl-B3goqXfdgUJaMZlJ-tP4-5pi7sTR6Q2yw6U1FhGGsh1bddPjfxvC9KppQd/exec" target="_blank" rel="noopener">
+    <button class="app-tile" onclick="openFG()">
       <div class="app-ico">🏷️</div>
       <div class="app-name">Finished Goods</div>
-      <div class="app-sub">Opens in a new tab</div>
-    </a>
+      <div class="app-sub">Snapweaves Stock</div>
+    </button>
   </div>
   <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()">⬇ Install app</button></div>
   <div class="ios-hint" id="iosHint">To install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b></div>
 </div>
+
+<!-- FINISHED GOODS -->
+<div class="view" id="v-fg"><iframe id="fgFrame" title="Finished Goods" allow="clipboard-write"></iframe></div>
 
 <!-- DASHBOARD -->
 <div class="view" id="v-dash">
@@ -514,7 +521,9 @@ function openYarn(){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock']};
+var FG_URL='https://script.google.com/macros/s/AKfycbwKWmrcl-B3goqXfdgUJaMZlJ-tP4-5pi7sTR6Q2yw6U1FhGGsh1bddPjfxvC9KppQd/exec';
+function openFG(){var f=document.getElementById('fgFrame');if(!f.getAttribute('src'))f.setAttribute('src',FG_URL);go('fg');}
 function goHome(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
 function go(v,fromPop){
   current=v; closeAll();
@@ -524,8 +533,11 @@ function go(v,fromPop){
   document.getElementById('hSub').textContent=HEAD[v][1];
   document.getElementById('refreshBtn').style.display=(v==='dash')?'flex':'none';
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
-  document.querySelector('.bnav').style.display=(v==='home')?'none':'';
-  document.body.classList.toggle('nav-on',v!=='home');
+  var noNav=(v==='home'||v==='fg');
+  document.querySelector('.bnav').style.display=noNav?'none':'';
+  document.body.classList.toggle('nav-on',!noNav);
+  document.body.classList.toggle('fg-on',v==='fg');
+  document.getElementById('fgExt').style.display=(v==='fg')?'flex':'none';
   if(!fromPop&&v!=='home'){try{if(!(history.state&&history.state.s))history.pushState({s:1},'');}catch(e){}}
   window.scrollTo(0,0);
 }
