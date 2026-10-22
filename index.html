@@ -418,6 +418,12 @@ a.app-tile{display:block;text-decoration:none}
   .pf-row.c3:last-child .pf-field:nth-child(3){border-bottom:none}
 }
 
+/* NATIVE CONTROLS FOLLOW THE THEME (date picker icon, dropdowns, scrollbars) */
+:root{color-scheme:dark}
+body.light{color-scheme:light}
+html:has(body.light){color-scheme:light}
+#v-proc input[type=date]::-webkit-calendar-picker-indicator{opacity:.8}
+
 /* FOCUS */
 button:focus-visible,a:focus-visible,[onclick]:focus-visible,select:focus-visible,.custom-select-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #v-entry .field:focus-within,#v-proc .pf-field:focus-within,.lock .pf-field:focus-within{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
@@ -449,7 +455,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   #v-home{max-width:860px;padding:48px 24px 56px}
   .home-hero .logo-big{width:110px;height:110px}
   .home-hero h1{font-size:34px}
-  .app-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px}
+  .app-grid{grid-template-columns:repeat(auto-fit,minmax(200px,240px));justify-content:center;gap:18px}
 }
 @media(min-width:1300px){
   body.nav-on{padding-left:232px}
@@ -504,7 +510,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   <div class="app-grid">
     <button class="app-tile" onclick="openYarn()">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
-      <div class="app-name">Yarn Status</div>
+      <div class="app-name">Yarn Stock</div>
       <div class="app-sub">Dashboard · Entry · Orders</div>
     </button>
     <button class="app-tile" onclick="openFG()">
