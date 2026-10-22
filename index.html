@@ -54,6 +54,19 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .logo>div{min-width:0}
 .logo-mark{width:36px;height:36px;flex:0 0 auto;display:block;filter:drop-shadow(0 2px 6px rgba(196,133,58,.35))}
 .logo-text,.logo-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.app-ico{color:var(--accent)}.app-ico .ic{width:32px;height:32px;stroke-width:1.75}
+.bnav button .ic{width:22px;height:22px}
+.theme-btn .ic{width:16px;height:16px;vertical-align:-.2em}
+.stat-label .ic{width:13px;height:13px;vertical-align:-.16em;margin-right:3px}
+.stat-card.danger .stat-label .ic{color:var(--danger)}.stat-card.success .stat-label .ic{color:var(--success)}.stat-card.warn .stat-label .ic{color:var(--warn)}
+.badge .ic{width:13px;height:13px;vertical-align:-.16em;margin-right:4px}
+.card-header .ic{width:15px;height:15px;vertical-align:-.18em;margin-right:6px}
+.mat-footer .ic{width:15px;height:15px;color:var(--text-muted)}
+.success-icon{color:var(--accent)}.success-icon .ic{width:44px;height:44px}
+.stock-search-icon .ic,.search-icon .ic{width:15px;height:15px;display:block}
+.install-btn .ic{width:16px;height:16px}
+.empty-state .ic{width:16px;height:16px;color:var(--warn);margin-right:4px}
 .home-hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin:10px 0 28px}
 .home-hero .logo-big{width:92px;height:92px;display:block;filter:drop-shadow(0 8px 22px rgba(196,133,58,.35));margin-bottom:14px}
 .home-hero h1{font-size:28px;font-weight:800;letter-spacing:-.5px}
@@ -430,7 +443,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="sx-logo" viewBox="0 0 96 96"><rect width="96" height="96" rx="22" fill="#C4853A"/><circle cx="48" cy="48" r="15" fill="#FFF6E8"/><g stroke="#FFF6E8" stroke-width="6" stroke-linecap="round"><line x1="73.0" y1="48.0" x2="82.0" y2="48.0"/><line x1="65.7" y1="65.7" x2="72.0" y2="72.0"/><line x1="48.0" y1="73.0" x2="48.0" y2="82.0"/><line x1="30.3" y1="65.7" x2="24.0" y2="72.0"/><line x1="23.0" y1="48.0" x2="14.0" y2="48.0"/><line x1="30.3" y1="30.3" x2="24.0" y2="24.0"/><line x1="48.0" y1="23.0" x2="48.0" y2="14.0"/><line x1="65.7" y1="30.3" x2="72.0" y2="24.0"/></g></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="sx-logo" viewBox="0 0 96 96"><rect width="96" height="96" rx="22" fill="#C4853A"/><circle cx="48" cy="48" r="15" fill="#FFF6E8"/><g stroke="#FFF6E8" stroke-width="6" stroke-linecap="round"><line x1="73.0" y1="48.0" x2="82.0" y2="48.0"/><line x1="65.7" y1="65.7" x2="72.0" y2="72.0"/><line x1="48.0" y1="73.0" x2="48.0" y2="82.0"/><line x1="30.3" y1="65.7" x2="24.0" y2="72.0"/><line x1="23.0" y1="48.0" x2="14.0" y2="48.0"/><line x1="30.3" y1="30.3" x2="24.0" y2="24.0"/><line x1="48.0" y1="23.0" x2="48.0" y2="14.0"/><line x1="65.7" y1="30.3" x2="72.0" y2="24.0"/></g></symbol><symbol id="i-spool" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="3" rx="1"/><rect x="5" y="19" width="14" height="3" rx="1"/><path d="M7 5v14M17 5v14"/><path d="M7 9.5l10-2M7 13.5l10-2M7 17.5l10-2"/></symbol><symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></symbol><symbol id="i-dashboard" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol><symbol id="i-entry" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12.4 14.6a2 2 0 0 1-.85.5L8.7 16a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol><symbol id="i-warehouse" viewBox="0 0 24 24"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12M6 14h12"/><rect width="12" height="12" x="6" y="10"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol><symbol id="i-clearance" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6M9 9h.01M15 15h.01"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2M15 18H9M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol><symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8M10 9H8"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></symbol></svg>
 
 <header>
   <div class="hdr-left">
@@ -450,7 +463,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
 
@@ -468,17 +481,17 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 <div class="view show" id="v-home">
   <div class="app-grid">
     <button class="app-tile" onclick="openYarn()">
-      <div class="app-ico">🧵</div>
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
       <div class="app-name">Yarn Status</div>
       <div class="app-sub">Dashboard · Entry · Orders</div>
     </button>
     <button class="app-tile" onclick="openFG()">
-      <div class="app-ico">🏷️</div>
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-package"/></svg></div>
       <div class="app-name">Finished Goods</div>
       <div class="app-sub">Snapweaves Stock</div>
     </button>
   </div>
-  <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()">⬇ Install app</button></div>
+  <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Install app</button></div>
   <div class="ios-hint" id="iosHint">To install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b></div>
 </div>
 
@@ -493,17 +506,17 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 <div class="view" id="v-dash">
   <div class="sync-time" id="syncTime">Loading…</div>
   <div class="stats-row">
-    <div class="stat-card danger active" onclick="setMainTab('reorder')" id="tabReorder"><div class="stat-num" id="statReorder">—</div><div class="stat-label">🔴 Re-Order</div></div>
-    <div class="stat-card success" onclick="setMainTab('safe')" id="tabSafe"><div class="stat-num" id="statSafe">—</div><div class="stat-label">🟢 Safe</div></div>
-    <div class="stat-card warn" onclick="setMainTab('orders')" id="tabOrders"><div class="stat-num" id="statOrders">—</div><div class="stat-label">📦 Orders Placed</div></div>
+    <div class="stat-card danger active" onclick="setMainTab('reorder')" id="tabReorder"><div class="stat-num" id="statReorder">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>Re-Order</div></div>
+    <div class="stat-card success" onclick="setMainTab('safe')" id="tabSafe"><div class="stat-num" id="statSafe">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Safe</div></div>
+    <div class="stat-card warn" onclick="setMainTab('orders')" id="tabOrders"><div class="stat-num" id="statOrders">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-truck"/></svg>Orders Placed</div></div>
   </div>
   <div id="cardsSection">
-    <div class="stock-toolbar"><div class="stock-search-wrap"><span class="stock-search-icon">🔍</span><input class="stock-search" id="stockSearch" placeholder="Search shade or denier…" oninput="renderCards()"></div></div>
+    <div class="stock-toolbar"><div class="stock-search-wrap"><span class="stock-search-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></span><input class="stock-search" id="stockSearch" placeholder="Search shade or denier…" oninput="renderCards()"></div></div>
     <div class="cards-grid" id="cardsGrid"><div class="loading"><div class="spinner"></div>Loading stock data…</div></div>
   </div>
   <div id="ordersSection" style="display:none;">
     <div class="orders-toolbar">
-      <div class="search-wrap"><span class="search-icon">🔍</span><input class="orders-search" id="orderSearch" placeholder="Search shade, vendor, denier…" oninput="applyOrderFilters()"></div>
+      <div class="search-wrap"><span class="search-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></span><input class="orders-search" id="orderSearch" placeholder="Search shade, vendor, denier…" oninput="applyOrderFilters()"></div>
       <div class="order-tabs">
         <button class="otab active-all" data-tab="all" onclick="setOrderTab(this)">All</button>
         <button class="otab" data-tab="new" onclick="setOrderTab(this)">New Order</button>
@@ -520,7 +533,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 <div class="view" id="v-entry">
   <div class="page-title"><h1>Log Raw Material</h1><p>Select shade and denier, then enter stock quantities.</p></div>
   <div class="card">
-    <div class="card-header">🎨 Material</div>
+    <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg>Material</div>
     <div class="field">
       <label>Shade</label>
       <div class="custom-select">
@@ -537,7 +550,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
     </div>
   </div>
   <div class="card">
-    <div class="card-header">📦 Quantity</div>
+    <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Quantity</div>
     <div class="qty-grid">
       <div class="field"><label for="e_full">Full Boxes</label><input type="number" id="e_full" min="0" placeholder="0" oninput="eTotal()"></div>
       <div class="field"><label for="e_open">Open Boxes</label><input type="number" id="e_open" min="0" placeholder="0" oninput="eTotal()"></div>
@@ -551,13 +564,13 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 <div class="view" id="v-proc">
   <div class="page-title"><h1>Place Procurement Order</h1><p>Select material and fill order details.</p></div>
   <div class="success-banner" id="p_banner">
-    <div class="success-icon">✅</div><div class="success-title">Order Placed!</div>
+    <div class="success-icon"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div><div class="success-title">Order Placed!</div>
     <div class="success-detail" id="p_detail"></div>
     <button class="btn-new-order" onclick="pReset()">Place Another Order</button>
   </div>
   <div class="card" id="p_material"></div>
   <div class="card">
-    <div class="card-header">🏭 Order Details</div>
+    <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-factory"/></svg>Order Details</div>
     <div class="pf-row c3">
       <div class="pf-field"><div class="pf-label">Vendor</div>
         <div class="dd-wrap">
@@ -590,7 +603,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
     </div>
   </div>
   <div class="card">
-    <div class="card-header">📋 Optional</div>
+    <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg>Optional</div>
     <div class="pf-row c2">
       <div class="pf-field"><div class="pf-label">Remarks</div><input type="text" id="p_remarks" placeholder="Any notes…"></div>
       <div class="pf-field"><div class="pf-label">Entered By</div><input type="text" id="p_name" placeholder="Your name"></div>
@@ -600,14 +613,14 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 </div>
 
 <nav class="bnav" id="yarnNav">
-  <button class="on" data-v="dash" onclick="go('dash')"><span>📊</span>Dashboard</button>
-  <button data-v="entry" onclick="go('entry')"><span>📦</span>Entry</button>
-  <button data-v="proc" onclick="go('proc')"><span>🛒</span>Order</button>
+  <button class="on" data-v="dash" onclick="go('dash')"><span><svg class="ic" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Dashboard</button>
+  <button data-v="entry" onclick="go('entry')"><span><svg class="ic" aria-hidden="true"><use href="#i-entry"/></svg></span>Entry</button>
+  <button data-v="proc" onclick="go('proc')"><span><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg></span>Order</button>
 </nav>
 <nav class="bnav" id="fgNav" style="display:none">
-  <button data-v="fg" onclick="openFG('fg')"><span>🏷️</span>Stock</button>
-  <button data-v="fgpo" onclick="openFG('fgpo')"><span>🧾</span>POs</button>
-  <button data-v="fgsw" onclick="openFG('fgsw')"><span>📸</span>Sweep</button>
+  <button data-v="fg" onclick="openFG('fg')"><span><svg class="ic" aria-hidden="true"><use href="#i-warehouse"/></svg></span>Stock</button>
+  <button data-v="fgpo" onclick="openFG('fgpo')"><span><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg></span>PO Track</button>
+  <button data-v="fgsw" onclick="openFG('fgsw')"><span><svg class="ic" aria-hidden="true"><use href="#i-clearance"/></svg></span>Sweep</button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -647,7 +660,7 @@ function openYarn(){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Tracker','Finished Goods'],fgsw:['Stock Sweep','Finished Goods']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock']};
 function goHome(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
 function go(v,fromPop){
   current=v; closeAll();
@@ -665,8 +678,10 @@ function go(v,fromPop){
   window.scrollTo(0,0);
 }
 window.addEventListener('popstate',function(){go('home',true);});
-function toggleTheme(){var l=document.body.classList.toggle('light');document.getElementById('themeBtn').textContent=l?'☀️':'🌙';try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
-try{if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='☀️';}}catch(e){}
+var ICON_OK='<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>',ICON_RE='<svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>',ICON_CLOCK='<svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>';
+var ICON_SUN='<svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>',ICON_MOON='<svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg>';
+function toggleTheme(){var l=document.body.classList.toggle('light');document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
+try{if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').innerHTML=ICON_SUN;}}catch(e){}
 function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');if(type){clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},3000);}}
 
 function showLock(msg){
@@ -687,7 +702,7 @@ function loadData(manual){
   return api('getAll').then(function(j){
     btn.disabled=false;icon.classList.remove('spin');
     if(j._status===401){return showLock(j.error);}
-    if(!j.ok){document.getElementById('cardsGrid').innerHTML='<div class="empty-state">⚠️ '+esc(j.error||'Could not load data')+'</div>';showToast('Failed to load data','danger');return;}
+    if(!j.ok){document.getElementById('cardsGrid').innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(j.error||'Could not load data')+'</div>';showToast('Failed to load data','danger');return;}
     loaded=true;lastLoad=Date.now();
     try{localStorage.setItem('sx_cache',JSON.stringify({t:Date.now(),d:j.data}));}catch(e){}
     allData=j.data.stock||[];allOrders=j.data.orders||[];
@@ -700,7 +715,7 @@ function loadData(manual){
     if(c&&c.d){allData=c.d.stock||[];allOrders=c.d.orders||[];loaded=true;updateStats();if(mainTab==='orders')renderOrderCards();else renderCards();
       document.getElementById('syncTime').textContent='Offline · showing data from '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
       showToast('Offline — showing last saved data','danger');return;}
-    document.getElementById('cardsGrid').innerHTML='<div class="empty-state">⚠️ Network error. Try refreshing.</div>';});
+    document.getElementById('cardsGrid').innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>Network error. Try refreshing.</div>';});
 }
 function setSyncTime(){var n=new Date();document.getElementById('syncTime').textContent='Last synced: '+n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+' at '+n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
 
@@ -725,10 +740,10 @@ function renderCards(){
   if(!f.length){document.getElementById('cardsGrid').innerHTML='<div class="empty-state">No materials found.</div>';return;}
   document.getElementById('cardsGrid').innerHTML=f.map(function(r){
     var safe=r.reorder!=='YES',pct=r.minReq>0?Math.min(Math.round(r.total/r.minReq*100),100):100,diff=r.total-r.minReq,ds=diff>=0?'+'+diff:''+diff,dc=diff>=0?'success':'danger';
-    return '<div class="mat-card '+(safe?'safe':'reorder')+'"><div class="mat-card-top"><div><div class="mat-shade">'+esc(r.shade)+'</div><div class="mat-denier">'+esc(r.denier)+'</div></div><span class="badge '+(safe?'safe':'reorder')+'">'+(safe?'🟢 Safe':'🔴 Re-Order')+'</span></div>'
+    return '<div class="mat-card '+(safe?'safe':'reorder')+'"><div class="mat-card-top"><div><div class="mat-shade">'+esc(r.shade)+'</div><div class="mat-denier">'+esc(r.denier)+'</div></div><span class="badge '+(safe?'safe':'reorder')+'">'+(safe?ICON_OK+'Safe':ICON_RE+'Re-Order')+'</span></div>'
     +'<div class="mat-progress"><div class="progress-bg"><div class="progress-fill '+(safe?'':'danger')+'" style="width:'+pct+'%"></div></div><div class="progress-labels"><span>0</span><span>'+pct+'% of min</span><span>'+r.minReq+'</span></div></div>'
     +'<div class="mat-stats"><div class="mat-stat"><div class="mat-stat-val">'+r.total+'</div><div class="mat-stat-label">Current</div></div><div class="mat-stat"><div class="mat-stat-val">'+r.minReq+'</div><div class="mat-stat-label">Min Req</div></div><div class="mat-stat"><div class="mat-stat-val '+dc+'">'+ds+'</div><div class="mat-stat-label">'+(diff>=0?'Surplus':'Deficit')+'</div></div></div>'
-    +'<div class="mat-footer">🕐 '+(r.lastUpdated&&r.lastUpdated!=='-'?'Updated '+esc(r.lastUpdated):'Not yet updated')+'</div></div>';
+    +'<div class="mat-footer">'+ICON_CLOCK+(r.lastUpdated&&r.lastUpdated!=='-'?'Updated '+esc(r.lastUpdated):'Not yet updated')+'</div></div>';
   }).join('');
 }
 function statusKey(s){return s==='Pending'?'pend':s==='On Route'?'route':s==='Cleared'?'clear':'new';}
@@ -805,7 +820,7 @@ function eSubmit(){
 var pv={shade:'',denier:'',vendor:'',status:'New Order'},pDenierOn=false,pDDs=['denier','vendor','status'];
 function pRenderMaterial(){
   var opts=Object.keys(combinations).map(function(s){return '<div class="dd-opt" onclick="pPickShade(\''+s+'\')">'+s+'</div>';}).join('');
-  document.getElementById('p_material').innerHTML='<div class="card-header">🧵 Material</div><div class="pf-row c2">'
+  document.getElementById('p_material').innerHTML='<div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg>Material</div><div class="pf-row c2">'
   +'<div class="pf-field"><div class="pf-label">Shade</div><div class="dd-wrap"><div class="combo-wrap"><input class="combo-input" id="p_shadeInput" placeholder="Type or select…" autocomplete="off" oninput="pFilter(this.value)" onfocus="pOpenShade()" onblur="pBlurShade()"><span class="combo-arrow" id="p_shadeArrow" onmousedown="pToggleShade(event)">▼</span></div><div class="dd-menu" id="p_shadeMenu">'+opts+'</div></div></div>'
   +'<div class="pf-field"><div class="pf-label">Denier</div><div class="dd-wrap"><button type="button" class="dd-trigger empty disabled" id="p_denierTrigger" onclick="pToggle(\'denier\')"><span id="p_denierVal">Select shade first</span><span class="arr-lg">▼</span></button><div class="dd-menu" id="p_denierMenu"></div></div></div></div>';
 }
@@ -969,7 +984,7 @@ var FG=(function(){
   }
   function shellSW(){
     var d=DATA.sweep; if(d.error)return '<div class="state err">'+esc(d.error)+'</div>';
-    return '<p class="sub">Physical stock-take entries, newest first</p>'+searchBox('q-sw','Search tape…',S.q.sw)+'<div id="r-sw"></div>';
+    return '<p class="sub">Clearance stock list, newest first</p>'+searchBox('q-sw','Search tape…',S.q.sw)+'<div id="r-sw"></div>';
   }
 
   /* ---------- search ---------- */
@@ -988,7 +1003,7 @@ var FG=(function(){
     var rows=q?searchPick(pool(S.mach),hay,q):pool(S.mach);
     var more=(q&&S.mach!=='ALL')?Math.max(0,searchPick(pool('ALL'),hay,q).length-rows.length):0;
     var moreBtn=more?'<button class="more" data-mach="ALL">'+more+' more match'+(more===1?'':'es')+' in other machines · Show all</button>':'';
-    if(!rows.length){r.innerHTML='<div class="state">No tapes match'+(S.mach!=='ALL'?' in '+esc(S.mach.charAt(0)+S.mach.slice(1).toLowerCase()):'')+'.</div>'+moreBtn;return;}
+    if(!rows.length){r.innerHTML='<div class="state">No tapes match'+(S.mach&&S.mach!=='ALL'?' in '+esc(S.mach.charAt(0)+S.mach.slice(1).toLowerCase()):'')+'.</div>'+moreBtn;return;}
     var hasM=DATA.fg.rows.some(function(x){return x.mtrs!=null;}),totM=0; rows.forEach(function(x){if(x.mtrs)totM+=x.mtrs;});
     var h='<div class="meta">'+rows.length+' tape'+(rows.length===1?'':'s')+(hasM?' · '+fmt(totM)+' m in stock':'')+'</div>'
       +'<div class="card"><table><thead><tr><th>Tape</th><th>Min</th><th class="hm">Open</th><th>Actual</th>'+(hasM?'<th class="hm">Metres</th>':'')+'<th>Status</th></tr></thead><tbody>';
