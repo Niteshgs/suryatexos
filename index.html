@@ -402,6 +402,22 @@ a.app-tile{display:block;text-decoration:none}
 .lock .btn-submit{margin-top:12px}
 .lock .err{color:var(--danger);font-size:13px;margin-top:10px;text-align:center}
 
+/* ENTRY SUMMARY */
+.e-sum{display:none;margin:0 0 12px;padding:12px 14px;border-radius:var(--radius);border:1px dashed var(--border);background:var(--surface);font-size:15px;line-height:1.45;color:var(--text)}
+.e-sum.show{display:block}
+.e-sum.ready{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.e-sum i{font-style:normal;color:var(--text-muted)}
+.e-sum-k{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px}
+.e-sum.ready .e-sum-k{color:var(--accent)}
+
+/* ORDER FORM ON PHONES: two per row, third field full width */
+@media(max-width:480px){
+  .pf-row.c3 .pf-field{border-bottom:1px solid var(--border)}
+  .pf-row.c3 .pf-field:nth-child(2){border-right:none}
+  .pf-row.c3 .pf-field:nth-child(3){grid-column:1/-1;border-right:none}
+  .pf-row.c3:last-child .pf-field:nth-child(3){border-bottom:none}
+}
+
 /* FOCUS */
 button:focus-visible,a:focus-visible,[onclick]:focus-visible,select:focus-visible,.custom-select-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #v-entry .field:focus-within,#v-proc .pf-field:focus-within,.lock .pf-field:focus-within{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
@@ -558,11 +574,12 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   <div class="card">
     <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Quantity</div>
     <div class="qty-grid">
-      <div class="field"><label for="e_full">Full Boxes</label><input type="number" id="e_full" min="0" placeholder="0" oninput="eTotal()"></div>
-      <div class="field"><label for="e_open">Open Boxes</label><input type="number" id="e_open" min="0" placeholder="0" oninput="eTotal()"></div>
+      <div class="field"><label for="e_full">Full Boxes</label><input type="number" id="e_full" min="0" inputmode="numeric" placeholder="Boxes" oninput="eTotal()"></div>
+      <div class="field"><label for="e_open">Open Boxes</label><input type="number" id="e_open" min="0" inputmode="numeric" placeholder="Boxes" oninput="eTotal()"></div>
     </div>
     <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--accent-soft);border-top:1px solid rgba(196,133,58,0.2);"><span style="font-size:13px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Total Quantity</span><span><span id="e_tot" style="font-size:22px;font-weight:800;color:var(--accent);">0</span><span style="font-size:12px;color:var(--text-muted);margin-left:4px;">boxes</span></span></div>
   </div>
+  <div class="e-sum" id="e_sum" aria-live="polite"></div>
   <button type="button" class="btn-submit" id="e_submit" onclick="eSubmit()">Save Entry</button>
 </div>
 
@@ -800,10 +817,19 @@ function eSelShade(v){
   document.getElementById('e_denierDisplay').textContent='Select Denier';
   var dd=document.getElementById('e_denierDropdown');dd.innerHTML='';
   (combinations[v]||[]).forEach(function(d){var o=document.createElement('div');o.className='custom-option';o.textContent=d;o.onclick=function(){eSelDenier(d);};dd.appendChild(o);});
-  eCloseAll();
+  eCloseAll();eSummary();
 }
-function eSelDenier(v){eDenier=v;document.getElementById('e_denierDisplay').textContent=v;document.getElementById('e_denierTrigger').classList.remove('empty');eCloseAll();}
-function eTotal(){var f=parseInt(document.getElementById('e_full').value)||0,o=parseInt(document.getElementById('e_open').value)||0;document.getElementById('e_tot').textContent=f+o;}
+function eSelDenier(v){eDenier=v;document.getElementById('e_denierDisplay').textContent=v;document.getElementById('e_denierTrigger').classList.remove('empty');eCloseAll();eSummary();}
+function eTotal(){var f=parseInt(document.getElementById('e_full').value)||0,o=parseInt(document.getElementById('e_open').value)||0;document.getElementById('e_tot').textContent=f+o;eSummary();}
+function eSummary(){
+  var el=document.getElementById('e_sum'),fv=document.getElementById('e_full').value,ov=document.getElementById('e_open').value;
+  if(!eShade&&fv===''&&ov===''){el.classList.remove('show');el.innerHTML='';return;}
+  var f=parseInt(fv,10)||0,o=parseInt(ov,10)||0,ok=eShade&&eDenier&&(f||o);
+  var what=eShade?esc(eShade)+' · '+(eDenier?esc(eDenier):'<i>select denier</i>'):'<i>select shade</i>';
+  var qty=(f||o)?'<b>'+f+'</b> full + <b>'+o+'</b> open = <b>'+(f+o)+' boxes</b>':'<i>enter boxes</i>';
+  el.innerHTML='<span class="e-sum-k">'+(ok?'You are saving':'Before saving')+'</span>'+what+' → '+qty;
+  el.classList.add('show');el.classList.toggle('ready',!!ok);
+}
 function eSubmit(){
   var full=parseInt(document.getElementById('e_full').value,10),open=parseInt(document.getElementById('e_open').value,10),btn=document.getElementById('e_submit');
   if(!eShade){showToast('Please select a Shade','danger');return;}
@@ -818,7 +844,7 @@ function eSubmit(){
     document.getElementById('e_shadeDisplay').textContent='Select Shade';document.getElementById('e_shadeTrigger').classList.add('empty');
     document.getElementById('e_denierDisplay').textContent='Select Shade First';document.getElementById('e_denierTrigger').classList.add('empty');
     var t=document.getElementById('e_denierTrigger');t.style.opacity='.6';t.style.cursor='not-allowed';document.getElementById('e_denierDropdown').innerHTML='';
-    btn.disabled=false;btn.textContent='Save Entry';loadData();
+    btn.disabled=false;btn.textContent='Save Entry';eSummary();loadData();
   }).catch(function(e){showToast('Error: '+(e.message||'failed'),'danger');btn.disabled=false;btn.textContent='Save Entry';});
 }
 
