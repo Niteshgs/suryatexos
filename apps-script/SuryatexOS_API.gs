@@ -31,6 +31,17 @@ function doPost(e) {
   }
 }
 
+// Optional check: pick "sxosTest" in the function menu and press Run. It only reads, and logs what it found.
+function sxosTest() {
+  var d = getAllData();
+  Logger.log('F.Goods rows: ' + d.fg.rows.length + (d.fg.error ? '  ERROR: ' + d.fg.error : ''));
+  Logger.log('POs: ' + d.po.pos.length + (d.po.error ? '  ERROR: ' + d.po.error : ''));
+  Logger.log('Sweep rows: ' + d.sweep.rows.length + (d.sweep.error ? '  ERROR: ' + d.sweep.error : ''));
+  var p = sxosPhotos_(false, null), n = 0;
+  for (var k in p.images) n += p.images[k].length;
+  Logger.log('Photos in first page: ' + n + ', rows in later pages: ' + p.more.length + (p.error ? '  ERROR: ' + p.error : ''));
+}
+
 function sxosJson_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
