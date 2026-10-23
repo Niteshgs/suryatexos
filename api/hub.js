@@ -1,5 +1,17 @@
 // Vercel serverless proxy → Suryatex OS Hub (standalone Apps Script).
 // Env: HUB_SCRIPT_URL, HUB_SCRIPT_TOKEN, APP_PASSCODE (optional, shared with the other routes)
+// When GOOGLE_SERVICE_KEY is set, knitted.* is served directly from Google Sheets (no Apps Script).
+// Set KNITTED_VIA_HUB=1 to switch back to the Hub script without a code change.
+const G = require('./_lib/google');
+const KN = require('./_lib/knitted');
+const direct = (fn) => G.enabled() && process.env.KNITTED_VIA_HUB !== '1' && !!KN.ROUTES[fn];
+async function run(fn, args, meta) {
+  if (direct(fn)) {
+    try { return { status: 200, json: { ok: true, data: await KN.ROUTES[fn](args || {}, meta || {}) } }; }
+    catch (e) { return { status: 200, json: { ok: false, error: e.message } }; }
+  }
+  return callHub(fn, args, meta);
+}
 const FUNCTIONS = [
   'knitted.getAll', 'knitted.saveBeams', 'knitted.verifyPin',
   'knitted.addTape', 'knitted.removeTape', 'knitted.renameTape',
@@ -25,9 +37,9 @@ module.exports = async (req, res) => {
   if (req.method === 'GET' && process.env.VERCEL_ENV === 'preview') {
     try {
       const t0 = Date.now();
-      const r = await callHub('knitted.getAll');
+      const r = await run('knitted.getAll');
       const d = r.json.data;
-      return res.status(200).json({ ok: r.json.ok, error: r.json.error || '', debug: r.json.ok ? undefined : { httpStatus: r.json.httpStatus, finalUrl: r.json.finalUrl, snippet: r.json.snippet }, ms: Date.now() - t0,
+      return res.status(200).json({ ok: r.json.ok, source: direct('knitted.getAll') ? 'google-sheets-direct' : 'hub-script', serviceAccount: G.serviceEmail() || null, error: r.json.error || '', debug: r.json.ok ? undefined : { httpStatus: r.json.httpStatus, finalUrl: r.json.finalUrl, snippet: r.json.snippet }, ms: Date.now() - t0,
         knitted: d ? { machines: Object.keys(d.cycleData).length, tapes: d.tapeList.length,
           beamsWithTape: Object.values(d.cycleData).flat().filter((b) => b.tape).length } : null });
     } catch (e) { return res.status(502).json({ ok: false, error: e.message }); }
@@ -45,7 +57,7 @@ module.exports = async (req, res) => {
   const m = body.meta || {};
   const meta = { user: String(m.user || '').slice(0, 60), device: String(m.device || '').slice(0, 80), pin: String(m.pin || '').slice(0, 20) };
   try {
-    const r = await callHub(body.fn, body.args, meta);
+    const r = await run(body.fn, body.args, meta);
     return res.status(r.status).json(r.json);
   } catch (e) {
     return res.status(502).json({ ok: false, error: 'Upstream error: ' + e.message });
