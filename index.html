@@ -1348,6 +1348,7 @@ var KN=(function(){
   function $(id){return document.getElementById(id);}
   function val(v){return (v===null||v===undefined||v==='')?'':v;}
   function num0(v){return (v===null||v===undefined||v==='')?0:v;}
+  function blank0(v){return Number(v)?v:'';}   // entry boxes: show empty instead of 0
   function deviceId(){try{var d=localStorage.getItem('sx_device');if(!d){d=(crypto.randomUUID?crypto.randomUUID():'dev-'+Math.random().toString(36).slice(2)+Date.now());localStorage.setItem('sx_device',d);}return d;}catch(e){return 'unknown';}}
   function userName(){try{return localStorage.getItem('sx_user_name')||'';}catch(e){return '';}}
   function meta(extra){return Object.assign({user:userName(),device:deviceId()},extra||{});}
@@ -1410,9 +1411,9 @@ var KN=(function(){
           +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
         +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th>'+(showC?'<th class="kn-c">Cycle</th>':'')
-        +(showW?'<th class="kn-n">Wt/Mtr</th><th class="kn-n">Wt/Roll</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>'
+        +(showW?'<th class="kn-n">Wt/Mtr (g)</th><th class="kn-n">Wt/Roll (kg)</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>'
         +'<div class="kn-sum">'+(showC?'<span>Total cycle <b>'+tc+'</b></span>':'<span></span>')
-        +(showW?'<span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+'</b></span>':'')+'</div></div>';
+        +(showW?'<span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+' kg</b></span>':'')+'</div></div>';
     });
     h+='</div><div class="kn-manage-wrap"><button class="kn-manage" data-kn-manage>'+ICON_TAG+'Manage Tapes</button></div>';
     $('knView').innerHTML=h;
@@ -1441,9 +1442,9 @@ var KN=(function(){
         +(i>0?'<button type="button" class="kn-ditto" data-kn-ditto="'+i+'" aria-label="Copy beam '+i+' into beam '+(i+1)+'" title="Same as beam '+i+'"><span aria-hidden="true">〃</span></button>':'')
         +'</div>'
         +'<div class="kn-3">'
-        +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" name="cycle'+(i+1)+'" autocomplete="off" class="'+(Number(b.cycle)?'':'zero')+'" value="'+num0(b.cycle)+'" data-kn-cyc="'+i+'"></label>'
-        +'<label class="kn-f" for="km_'+p+'"><span class="kn-l">Wt/Mtr</span><input type="number" inputmode="decimal" step="any" id="km_'+p+'" name="wtmtr'+(i+1)+'" autocomplete="off" class="'+(Number(b.weightMtr)?'':'zero')+'" value="'+num0(b.weightMtr)+'"></label>'
-        +'<label class="kn-f" for="kr_'+p+'"><span class="kn-l">Wt/Roll</span><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" name="wtroll'+(i+1)+'" autocomplete="off" class="'+(Number(b.weightRoll)?'':'zero')+'" value="'+num0(b.weightRoll)+'"></label>'
+        +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" name="cycle'+(i+1)+'" autocomplete="off" placeholder="0" class="'+(Number(b.cycle)?'':'zero')+'" value="'+blank0(b.cycle)+'" data-kn-cyc="'+i+'"></label>'
+        +'<label class="kn-f" for="km_'+p+'"><span class="kn-l">Wt/Mtr (g)</span><input type="number" inputmode="decimal" step="any" id="km_'+p+'" name="wtmtr'+(i+1)+'" autocomplete="off" placeholder="0" class="'+(Number(b.weightMtr)?'':'zero')+'" value="'+blank0(b.weightMtr)+'"></label>'
+        +'<label class="kn-f" for="kr_'+p+'"><span class="kn-l">Wt/Roll (kg)</span><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" name="wtroll'+(i+1)+'" autocomplete="off" placeholder="0" class="'+(Number(b.weightRoll)?'':'zero')+'" value="'+blank0(b.weightRoll)+'"></label>'
         +'</div></div>';
     });
     h+='</div><button class="btn-submit kn-save" id="knSave">Save '+m.name+'</button></div></div>';
@@ -1489,7 +1490,7 @@ var KN=(function(){
     var n=(D.cycleData[active]||[]).length;
     for(var i=0;i<n;i++){var p=active+'_'+i;
       var tt=$('kt_'+p);if(tt){tt.value='';knMark(tt);}var bx=$('ktb_'+p);if(bx)bx.classList.remove('invalid');
-      ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value='0';knMark(e);}});}
+      ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value='';knMark(e);}});}
     showToast('All beams cleared · Tap Save','');
   }
   function dittoBeam(i){
@@ -1525,7 +1526,7 @@ var KN=(function(){
     for(var i=0;i<(D.cycleData[id]||[]).length;i++){
       var p=id+'_'+i; if(!snap(i))bad=true;
       var c=$('kc_'+p).value,t=$('kt_'+p).value,wm=$('km_'+p).value,wr=$('kr_'+p).value;
-      beams.push({cycle:c===''?'':Number(c),tape:t,weightMtr:wm===''?'':Number(wm),weightRoll:wr===''?'':Number(wr)});
+      beams.push({cycle:c===''?0:Number(c),tape:t,weightMtr:wm===''?0:Number(wm),weightRoll:wr===''?0:Number(wr)});   // empty box = 0
     }
     if(bad){showToast('Pick tapes from the list (red boxes)','danger');pendingNav=null;return;}
     saving[id]=true; var btn=$('knSave'); btn.disabled=true; btn.textContent='Saving…';
