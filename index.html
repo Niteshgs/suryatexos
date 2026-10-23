@@ -430,7 +430,7 @@ html:has(body.light){color-scheme:light}
 .kn-sub{font-size:13px;color:var(--text-muted);margin:0 0 14px}
 .kn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .kn-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.kn-card-h{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.kn-card-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
 .kn-edit{min-height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .kn-edit:hover{color:var(--accent);border-color:var(--accent)}
 .kn-table{width:100%;border-collapse:collapse;font-size:14px}
@@ -1365,7 +1365,7 @@ var KN=(function(){
       var rows=beams.map(function(b,i){tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
         return '<tr><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
           +'<td><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td><td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td></tr>';}).join('');
-      h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span><button class="kn-edit" data-kn-edit="'+m.id+'" aria-label="Edit '+m.name+'">Edit</button></div>'
+      h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
         +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th><th>Cycle</th><th class="kn-n">Wt/Mtr</th><th class="kn-n">Wt/Roll</th></tr></thead><tbody>'+rows+'</tbody></table>'
         +'<div class="kn-sum"><span>Total cycle <b>'+tc+'</b></span><span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+'</b></span></div></div>';
     });
