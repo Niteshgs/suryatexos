@@ -539,6 +539,11 @@ body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
 .kn-mbtn{display:none}
 .kn-backdrop{display:none}
 .kn-dhead{padding-top:20px}
+.kn-seg{display:inline-flex;gap:4px;padding:4px;margin:0 0 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:420px}
+.kn-seg button{flex:1;min-height:40px;border:none;border-radius:9px;background:transparent;color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;transition:background-color .15s,color .15s}
+.kn-seg button.on{background:var(--accent-strong);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.kn-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.kn-table .kn-c{text-align:center}
 .kn-manage-wrap{display:flex;justify-content:center;padding:20px 0 4px}
 .kn-manage{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 22px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--accent);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .kn-manage:hover{background:var(--accent-soft);border-color:var(--accent)}
@@ -1368,16 +1373,25 @@ var KN=(function(){
     if(tab==='dash')renderDash(); else if(tab==='entry')renderEntry(); else renderTapes();
     $('knFoot').textContent='Synced '+(D.loaded||'');
   }
+  var dview=(function(){try{return localStorage.getItem('sx_kn_view')||'full';}catch(e){return 'full';}})();
+  var DVIEWS=[{id:'full',name:'Full'},{id:'cycles',name:'Cycles'},{id:'quality',name:'Quality'}];
   function renderDash(){
-    var h='<div class="kn-dhead"><h2 class="kn-title">All Machines</h2><p class="kn-sub">Latest saved beam data across every machine</p></div><div class="kn-grid">';
+    var h='<div class="kn-dhead"><h2 class="kn-title">All Machines</h2><p class="kn-sub">Latest saved beam data across every machine</p>'
+      +'<div class="kn-seg" role="tablist" aria-label="Dashboard view">'
+      +DVIEWS.map(function(v){return '<button type="button" role="tab" aria-selected="'+(v.id===dview)+'" class="'+(v.id===dview?'on':'')+'" data-kn-view="'+v.id+'">'+v.name+'</button>';}).join('')
+      +'</div></div><div class="kn-grid">';
+    var showC=dview!=='quality', showW=dview!=='cycles';
     MACHINES.forEach(function(m){
       var beams=D.cycleData[m.id]||[], tc=0, tr=0;
       var rows=beams.map(function(b,i){tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
-        return '<tr class="'+cyc(b.cycle)+'"><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
-          +'<td><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td><td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td></tr>';}).join('');
+        return '<tr class="'+(showC?cyc(b.cycle):'')+'"><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
+          +(showC?'<td class="kn-c"><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td>':'')
+          +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
-        +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th><th>Cycle</th><th class="kn-n">Wt/Mtr</th><th class="kn-n">Wt/Roll</th></tr></thead><tbody>'+rows+'</tbody></table>'
-        +'<div class="kn-sum"><span>Total cycle <b>'+tc+'</b></span><span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+'</b></span></div></div>';
+        +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th>'+(showC?'<th class="kn-c">Cycle</th>':'')
+        +(showW?'<th class="kn-n">Wt/Mtr</th><th class="kn-n">Wt/Roll</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>'
+        +'<div class="kn-sum">'+(showC?'<span>Total cycle <b>'+tc+'</b></span>':'<span></span>')
+        +(showW?'<span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+'</b></span>':'')+'</div></div>';
     });
     h+='</div><div class="kn-manage-wrap"><button class="kn-manage" data-kn-manage>'+ICON_TAG+'Manage Tapes</button></div>';
     $('knView').innerHTML=h;
@@ -1504,6 +1518,7 @@ var KN=(function(){
     if(t.closest('[data-kn-close-side]'))return closeSide();
     if(t.closest('[data-kn-manage]')){if(pin)return openKN('kntapes');return askPin();}
     if(t.closest('[data-kn-dash]'))return openKN('kn');
+    if((x=t.closest('[data-kn-view]'))){dview=x.getAttribute('data-kn-view');try{localStorage.setItem('sx_kn_view',dview);}catch(e){}renderDash();return;}
     if((x=t.closest('[data-kn-ditto]'))){closeLists();dittoBeam(+x.getAttribute('data-kn-ditto'));return;}
     if((x=t.closest('[data-kn-pick]'))){var i=+x.getAttribute('data-kn-pick');var ti=$('kt_'+active+'_'+i);ti.value=x.getAttribute('data-v');knMark(ti);closeLists();snap(i);return;}
     if((x=t.closest('[data-kn-arrow]'))){var j=+x.getAttribute('data-kn-arrow'),l=$('ktl_'+active+'_'+j);if(l.classList.contains('open')){closeLists();snap(j);}else listFor(j,true);return;}
