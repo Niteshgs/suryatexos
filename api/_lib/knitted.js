@@ -65,22 +65,21 @@ const MACHINE_NAMES = {
   comez: 'Comez', mainMuller: 'Main Muller', sideMuller: 'Side Muller', ky: 'KY', tch1: 'TCH 1', tch2: 'TCH 2',
   fastMuller1: 'Fast Muller 1', fastMuller2: 'Fast Muller 2', victory1: 'Victory 1', victory2: 'Victory 2',
 };
-// Entry Log columns: A Date | B Time | C User | D Device | E Role | F Action | G Machine | H..W = 4 beams x (Cycle, Tape, Wt/Mtr, Wt/Roll)
+// Entry Log columns (one row per beam):
+// A Date | B Time | C User | D Machine | E Beam | F Cycle | G Tape | H Wt/Mtr | I Wt/Roll | J Action | K Device ID | L Role
 const logNum = (v) => { if (v === null || v === undefined || v === '') return ''; const n = Number(v); return isNaN(n) ? safeText(v) : (n === 0 ? '' : n); };
-function beamCols(beams) {
-  const out = [];
-  for (let i = 0; i < 4; i++) { const b = (beams && beams[i]) || {}; out.push(logNum(b.cycle), safeText(b.tape || ''), logNum(b.weightMtr), logNum(b.weightRoll)); }
-  return out;
-}
-async function log(meta, action, machine, rest) {
+async function log(meta, rows) {
   try {
+    if (!rows.length) return;
     const titles = await G.sheetTitles(SHEET_ID);
     if (!titles.includes(LOG)) return;                       // never create tabs
     const t = nowParts(), m = meta || {};
-    const row = [t.date, t.time, safeText(m.user || 'Unknown'), safeText(m.device || 'Unknown'), 'Suryatex OS', safeText(action || ''), safeText(machine || '')].concat(rest || []);
-    await G.append(SHEET_ID, at(LOG, 'A:W'), [row], 'USER_ENTERED');
+    const out = rows.map((r) => [t.date, t.time, safeText(m.user || 'Unknown'), safeText(r.machine || ''), r.beam || '',
+      logNum(r.cycle), safeText(r.tape || ''), logNum(r.weightMtr), logNum(r.weightRoll), safeText(r.action || ''), safeText(m.device || ''), 'Suryatex OS']);
+    await G.append(SHEET_ID, at(LOG, 'A:L'), out, 'USER_ENTERED');
   } catch (e) { console.error('knitted log failed: ' + e.message); }
 }
+const hasData = (b) => [b.cycle, b.weightMtr, b.weightRoll].some((v) => Number(v)) || !!String(b.tape || '').trim();
 
 async function getAll() {
   const [grid, prod] = await G.batchGet(SHEET_ID, [at(TRACKER, 'A1:K80'), at(PRODUCT, 'A2:A')]);
@@ -101,6 +100,7 @@ async function saveBeams(machineId, beams, meta) {
   if (!Array.isArray(beams) || beams.length !== L.rows.length) throw new Error('Expected ' + L.rows.length + ' beams for ' + machineId);
   const list = await tapeList();
   const tapes = beams.map((b) => resolveTape(b && b.tape, list));   // fail before writing anything
+  const [before] = await G.batchGet(SHEET_ID, [at(TRACKER, 'A1:K80')]);
   const data = [];
   L.rows.forEach((row, i) => {
     const b = beams[i] || {};
@@ -111,7 +111,13 @@ async function saveBeams(machineId, beams, meta) {
     put('weightRoll', writeVal(b.weightRoll));
   });
   await G.batchUpdate(SHEET_ID, data, 'RAW');
-  await log(meta, 'Save Beams', MACHINE_NAMES[machineId] || machineId, beamCols(beams.map((b, i) => Object.assign({}, b, { tape: tapes[i] }))));
+  const name = MACHINE_NAMES[machineId] || machineId, rows = [];
+  beams.forEach((b, i) => {
+    const r = Object.assign({}, b || {}, { tape: tapes[i], machine: name, beam: i + 1 });
+    if (hasData(r)) rows.push(Object.assign(r, { action: 'Save' }));
+    else if (String(cell(before[L.rows[i] - 1], col(L.cols.tape))).trim()) rows.push({ machine: name, beam: i + 1, action: 'Cleared' });
+  });
+  await log(meta, rows);
   return true;
 }
 
@@ -126,7 +132,7 @@ async function addTape(name, meta) {
   const list = await tapeList();
   if (list.some((t) => norm(t) === norm(clean))) return list;
   await G.batchUpdate(SHEET_ID, [{ range: at(PRODUCT, 'A' + (last + 1)), values: [[clean]] }], 'RAW');
-  await log(meta, 'Add Tape', 'Tape list', [safeText(clean)]);
+  await log(meta, [{ machine: 'Tape list', tape: clean, action: 'Add Tape' }]);
   return tapeList();
 }
 
@@ -141,7 +147,7 @@ async function removeTape(name, meta) {
   if (idx !== -1) {
     values.splice(idx, 1); values.push('');
     await G.batchUpdate(SHEET_ID, [{ range: at(PRODUCT, 'A2:A' + last), values: values.map((v) => [v]) }], 'RAW');
-    await log(meta, 'Remove Tape', 'Tape list', [safeText(clean)]);
+    await log(meta, [{ machine: 'Tape list', tape: clean, action: 'Remove Tape' }]);
   }
   return tapeList();
 }
@@ -166,7 +172,7 @@ async function renameTape(oldName, newName, meta) {
     }
   }
   await G.batchUpdate(SHEET_ID, data, 'RAW');
-  await log(meta, 'Rename Tape', 'Tape list', [safeText(o + ' -> ' + n)]);
+  await log(meta, [{ machine: 'Tape list', tape: o + ' -> ' + n, action: 'Rename Tape' }]);
   return { tapeList: await tapeList(), updatedBeams: updated };
 }
 
