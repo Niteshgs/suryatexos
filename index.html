@@ -690,7 +690,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v64</span>
+    <span class="app-ver" id="appVer" title="App version">v65</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -936,6 +936,7 @@ function openYarn(){
 var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
+var ADMIN_SUB={knadmin:1,kntapes:1,knact:1};
 function go(v,fromPop){
   current=v; closeAll();
   document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('show',x.id==='v-'+(v.indexOf('fg')===0?'fg':v.indexOf('kn')===0?'kn':v));});
@@ -953,10 +954,19 @@ function go(v,fromPop){
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
-  if(!fromPop&&v!=='home'){try{if(!(history.state&&history.state.s))history.pushState({s:1},'');}catch(e){}}
+  if(!fromPop&&v!=='home'){try{
+    if(!(history.state&&history.state.s))history.pushState({s:1},'');
+    if(ADMIN_SUB[v]){if(!(history.state&&history.state.v===v))history.pushState({s:1,v:v},'');}   // each admin page = one Back step
+    else if(history.state&&history.state.v)history.replaceState({s:1},'');
+  }catch(e){}}
   window.scrollTo(0,0);
 }
-window.addEventListener('popstate',function(){if(window.KN&&KN.isDirty()){try{history.pushState({s:1},'');}catch(e){}KN.guard(function(){go('home',true);});return;}go('home',true);});
+window.addEventListener('popstate',function(e){
+  var st=e.state;
+  if(st&&st.v&&ADMIN_SUB[st.v]){openKN(st.v,true);return;}            // back to the previous admin page
+  if(st&&st.s&&ADMIN_SUB[current]){openKN('kn',true);return;}           // back out of Admin -> Knitted dashboard
+  if(window.KN&&KN.isDirty()){try{history.pushState({s:1},'');}catch(err){}KN.guard(function(){go('home',true);});return;}
+  go('home',true);});
 var ICON_OK='<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>',ICON_RE='<svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>',ICON_CLOCK='<svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>';
 var ICON_SUN='<svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>',ICON_MOON='<svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg>';
 function toggleTheme(){var l=document.body.classList.toggle('light');document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
@@ -1776,11 +1786,11 @@ var KN=(function(){
     if(t.closest('[data-kn-open-side]'))return openSide();
     if(t.closest('[data-kn-close-side]'))return closeSide();
     if(t.closest('[data-kn-manage]')){if(pin)return openKN('knadmin');return askPin();}
-    if(t.closest('[data-kn-admin]'))return openKN('knadmin');
+    if(t.closest('[data-kn-admin]')){if(history.state&&history.state.v&&ADMIN_SUB[history.state.v]&&history.state.v!=='knadmin')return history.back();return openKN('knadmin');}
     if(t.closest('[data-kn-go-tapes]'))return openKN('kntapes');
     if(t.closest('[data-kn-go-act]'))return openKN('knact');
     if((x=t.closest('[data-kn-month]'))){actMonth=x.getAttribute('data-kn-month');loadAct();return;}
-    if(t.closest('[data-kn-dash]'))return openKN('kn');
+    if(t.closest('[data-kn-dash]')){if(history.state&&history.state.v==='knadmin')return history.back();return openKN('kn');}
     if((x=t.closest('[data-kn-clear]'))){closeLists();clearBeams(x);return;}
     if((x=t.closest('[data-kn-view]'))){dview=x.getAttribute('data-kn-view');try{localStorage.setItem('sx_kn_view',dview);}catch(e){}renderDash();return;}
     if((x=t.closest('[data-kn-ditto]'))){closeLists();dittoBeam(+x.getAttribute('data-kn-ditto'));return;}
@@ -1813,7 +1823,7 @@ var KN=(function(){
   return {open:open,load:load,guard:guard,isDirty:function(){return isOn()&&tab==='entry'&&dirty;},loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
 var KN_TABS={kn:'dash',knentry:'entry',kntapes:'tapes',knadmin:'admin',knact:'act'};
-function openKN(v){v=v||'knentry';var run=function(){go(v);KN.open(KN_TABS[v]);};if(current==='knentry'&&v!=='knentry')KN.guard(run);else run();}
+function openKN(v,fromPop){v=v||'knentry';var run=function(){go(v,fromPop);KN.open(KN_TABS[v]);};if(current==='knentry'&&v!=='knentry')KN.guard(run);else run();}
 
 /* ══ PWA ══ */
 if('serviceWorker' in navigator){
