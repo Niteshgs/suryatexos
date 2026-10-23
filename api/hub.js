@@ -15,7 +15,7 @@ async function callHub(fn, args, meta) {
   });
   const text = await r.text();
   try { return { status: 200, json: JSON.parse(text) }; }
-  catch (e) { return { status: 502, json: { ok: false, error: 'Hub returned non-JSON (check deployment access = Anyone)' } }; }
+  catch (e) { return { status: 502, json: { ok: false, error: 'Hub returned non-JSON (check deployment access = Anyone)', ...(process.env.VERCEL_ENV === 'preview' ? { httpStatus: r.status, finalUrl: r.url.replace(/[?#].*$/, ''), snippet: text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 300) } : {}) } }; }
 }
 
 module.exports = async (req, res) => {
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
       const t0 = Date.now();
       const r = await callHub('knitted.getAll');
       const d = r.json.data;
-      return res.status(200).json({ ok: r.json.ok, error: r.json.error || '', ms: Date.now() - t0,
+      return res.status(200).json({ ok: r.json.ok, error: r.json.error || '', debug: r.json.ok ? undefined : { httpStatus: r.json.httpStatus, finalUrl: r.json.finalUrl, snippet: r.json.snippet }, ms: Date.now() - t0,
         knitted: d ? { machines: Object.keys(d.cycleData).length, tapes: d.tapeList.length,
           beamsWithTape: Object.values(d.cycleData).flat().filter((b) => b.tape).length } : null });
     } catch (e) { return res.status(502).json({ ok: false, error: e.message }); }
