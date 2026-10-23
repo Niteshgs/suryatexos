@@ -535,8 +535,7 @@ body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
   .kn-side{position:fixed;top:0;left:0;bottom:0;margin:0;max-height:none;width:270px;z-index:1100;transform:translateX(-105%);transition:transform .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.35);padding-top:env(safe-area-inset-top)}
   .kn-side.open{transform:none}
   .kn-backdrop.show{display:block;position:fixed;inset:0;z-index:1090;background:rgba(0,0,0,.5)}
-  .kn-mbtn{display:flex;align-items:center;gap:8px;width:100%;min-height:48px;padding:0 14px;margin-bottom:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
-  .kn-mbtn b{color:var(--accent);font-weight:800;margin-left:auto}
+  .kn-mbtn{display:inline-flex;align-items:center;gap:8px;width:auto;min-height:44px;padding:0 16px;margin-bottom:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
   .kn-mbtn .ic{width:18px;height:18px}
   .kn-title{font-size:21px}
   body.kn-on #refreshBtn{display:none!important}
@@ -1375,7 +1374,7 @@ var KN=(function(){
   function renderEntry(){
     var m=MACHINES.filter(function(x){return x.id===active;})[0], beams=D.cycleData[active]||[];
     var h='<div class="kn-shell">'+sideMenu()+'<div class="kn-main">'
-      +'<button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span><b>'+m.name+'</b>'+ICON_CHEV+'</button>'
+      +'<button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button>'
       +'<h2 class="kn-title">'+m.name+'</h2><p class="kn-sub">Update cycle, tape and weight values for each beam.</p><div class="kn-beams">';
     beams.forEach(function(b,i){
       var p=active+'_'+i;
