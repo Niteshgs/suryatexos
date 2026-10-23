@@ -446,26 +446,32 @@ html:has(body.light){color-scheme:light}
 .kn-sum b{color:var(--accent);font-weight:800}
 .kn-link{background:none;border:none;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:6px 2px;min-height:32px}
 .kn-dot{width:8px;height:8px;border-radius:50%;background:var(--success)}.kn-dot.err{background:var(--danger)}
-.kn-beams{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
-@media(min-width:760px){.kn-beams{grid-template-columns:1fr 1fr}}
-.kn-beam{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:background .2s,border-color .2s}
-.kn-beam.c1{background:var(--success-soft);border-color:rgba(76,175,130,.4)}
-.kn-beam.c2{background:var(--accent-soft);border-color:rgba(196,133,58,.4)}
-.kn-beam.c3{background:var(--danger-soft);border-color:rgba(224,85,85,.4)}
-.kn-beam-h{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
-.kn-f{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
-.kn-l{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase}
-.kn-f input{min-height:40px;background:transparent;border:none;outline:none;color:var(--text);font-size:16px;font-family:inherit;width:100%;-moz-appearance:textfield}
+.kn-beams{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}
+@media(min-width:760px){.kn-beams{grid-template-columns:1fr 1fr;gap:12px}}
+.kn-beam{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--border);border-radius:var(--radius-sm);padding:8px;display:flex;flex-direction:column;gap:8px;transition:background-color .2s,border-color .2s}
+.kn-beam.c1{background:var(--success-soft);border-color:rgba(76,175,130,.35);border-left-color:var(--success)}
+.kn-beam.c2{background:var(--accent-soft);border-color:rgba(196,133,58,.35);border-left-color:var(--accent)}
+.kn-beam.c3{background:var(--danger-soft);border-color:rgba(224,85,85,.35);border-left-color:var(--danger)}
+.kn-ehead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.kn-ehead .kn-title{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kn-row1{display:flex;align-items:center;gap:8px}
+.kn-row1 .kn-ac{flex:1;min-width:0}
+.kn-bno{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--accent);background:var(--surface2);border:1px solid var(--border);font-variant-numeric:tabular-nums}
+.kn-beam.c1 .kn-bno{color:var(--success)}.kn-beam.c3 .kn-bno{color:var(--danger)}
+.kn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.kn-f{display:flex;flex-direction:column;gap:1px;padding:5px 10px 3px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:text;min-width:0}
+.kn-f:focus-within{border-color:var(--accent)}
+.kn-l{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.6px;text-transform:uppercase}
+.kn-f:focus-within .kn-l{color:var(--accent)}
+.kn-f input,.kn-tbox input{min-height:28px;background:transparent;border:none;outline:none;color:var(--text);font-size:16px;font-weight:600;font-family:inherit;width:100%;padding:0;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .kn-f input::-webkit-outer-spin-button,.kn-f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--border)}
-.kn-3 .kn-f{border-right:1px solid var(--border)}.kn-3 .kn-f:last-child{border-right:none}
-.kn-3 .kn-f:focus-within,.kn-f:focus-within .kn-l{color:var(--accent)}
 .kn-ac{position:relative}
-.kn-tbox{display:flex;align-items:center;min-height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding-left:12px}
+.kn-tbox{display:flex;align-items:center;min-height:44px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding-left:12px}
 .kn-tbox:focus-within,.kn-tbox.open{border-color:var(--accent)}
 .kn-tbox.invalid{border-color:var(--danger);background:var(--danger-soft)}
-.kn-tbox input{flex:1;min-width:0}
-.kn-arrow{width:46px;min-height:46px;flex:0 0 auto;background:none;border:none;border-left:1px solid var(--border);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.kn-tbox input{flex:1;min-width:0;font-weight:500;text-overflow:ellipsis}
+.kn-arrow{width:44px;min-height:42px;flex:0 0 auto;background:none;border:none;border-left:1px solid var(--border);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .kn-arrow .ic{width:18px;height:18px;transition:transform .15s}
 .kn-tbox.open .kn-arrow .ic{transform:rotate(180deg);color:var(--accent)}
 .kn-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.3);max-height:260px;overflow-y:auto;z-index:60}
@@ -535,7 +541,7 @@ body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
   .kn-side{position:fixed;top:0;left:0;bottom:0;margin:0;max-height:none;width:270px;z-index:1100;transform:translateX(-105%);transition:transform .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.35);padding-top:env(safe-area-inset-top)}
   .kn-side.open{transform:none}
   .kn-backdrop.show{display:block;position:fixed;inset:0;z-index:1090;background:rgba(0,0,0,.5)}
-  .kn-mbtn{display:inline-flex;align-items:center;gap:8px;width:auto;min-height:44px;padding:0 16px;margin-bottom:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  .kn-mbtn{display:inline-flex;align-items:center;gap:8px;width:auto;min-height:44px;padding:0 16px;margin:0;flex:0 0 auto;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
   .kn-mbtn .ic{width:18px;height:18px}
   .kn-title{font-size:21px}
   body.kn-on #refreshBtn{display:none!important}
@@ -1374,18 +1380,22 @@ var KN=(function(){
   function renderEntry(){
     var m=MACHINES.filter(function(x){return x.id===active;})[0], beams=D.cycleData[active]||[];
     var h='<div class="kn-shell">'+sideMenu()+'<div class="kn-main">'
-      +'<button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button>'
-      +'<h2 class="kn-title">'+m.name+'</h2><p class="kn-sub">Update cycle, tape and weight values for each beam.</p><div class="kn-beams">';
+      +'<div class="kn-ehead"><h2 class="kn-title">'+m.name+'</h2>'
+      +'<button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button></div>'
+      +'<div class="kn-beams">';
     beams.forEach(function(b,i){
       var p=active+'_'+i;
-      h+='<div class="kn-beam '+cyc(b.cycle)+'" id="kb_'+p+'"><div class="kn-beam-h">Beam '+(i+1)+'</div>'
-        +'<div class="kn-f"><label class="kn-l" for="kt_'+p+'">Tape</label><div class="kn-ac"><div class="kn-tbox" id="ktb_'+p+'">'
-        +'<input type="text" id="kt_'+p+'" autocomplete="off" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
+      h+='<div class="kn-beam '+cyc(b.cycle)+'" id="kb_'+p+'">'
+        +'<div class="kn-row1"><span class="kn-bno" aria-hidden="true">B'+(i+1)+'</span>'
+        +'<div class="kn-ac"><label class="sr-only kn-sr" for="kt_'+p+'">Beam '+(i+1)+' tape</label><div class="kn-tbox" id="ktb_'+p+'">'
+        +'<input type="text" id="kt_'+p+'" name="tape'+(i+1)+'" autocomplete="off" spellcheck="false" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
         +'<button type="button" class="kn-arrow" data-kn-arrow="'+i+'" aria-label="Show all tapes">'+ICON_CHEV+'</button></div>'
         +'<div class="kn-list" id="ktl_'+p+'"></div></div></div>'
-        +'<div class="kn-3"><div class="kn-f"><label class="kn-l" for="kc_'+p+'">Cycle</label><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" value="'+num0(b.cycle)+'" data-kn-cyc="'+i+'"></div>'
-        +'<div class="kn-f"><label class="kn-l" for="km_'+p+'">Wt/Mtr</label><input type="number" inputmode="decimal" step="any" id="km_'+p+'" value="'+num0(b.weightMtr)+'"></div>'
-        +'<div class="kn-f"><label class="kn-l" for="kr_'+p+'">Wt/Roll</label><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" value="'+num0(b.weightRoll)+'"></div></div></div>';
+        +'<div class="kn-3">'
+        +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" name="cycle'+(i+1)+'" autocomplete="off" value="'+num0(b.cycle)+'" data-kn-cyc="'+i+'"></label>'
+        +'<label class="kn-f" for="km_'+p+'"><span class="kn-l">Wt/Mtr</span><input type="number" inputmode="decimal" step="any" id="km_'+p+'" name="wtmtr'+(i+1)+'" autocomplete="off" value="'+num0(b.weightMtr)+'"></label>'
+        +'<label class="kn-f" for="kr_'+p+'"><span class="kn-l">Wt/Roll</span><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" name="wtroll'+(i+1)+'" autocomplete="off" value="'+num0(b.weightRoll)+'"></label>'
+        +'</div></div>';
     });
     h+='</div><button class="btn-submit kn-save" id="knSave">Save '+m.name+'</button></div></div>';
     $('knView').innerHTML=h;
