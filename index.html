@@ -642,7 +642,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v55</span>
+    <span class="app-ver" id="appVer" title="App version">v56</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1442,7 +1442,7 @@ var KN=(function(){
         +'<input type="text"'+(KN_TOUCH?' readonly inputmode="none"':'')+' id="kt_'+p+'" name="tape'+(i+1)+'" autocomplete="off" spellcheck="false" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
         +'<button type="button" class="kn-arrow" data-kn-arrow="'+i+'" aria-label="Show all tapes">'+ICON_CHEV+'</button></div>'
         +'<div class="kn-list" id="ktl_'+p+'"></div></div>'
-        +(i>0?'<button type="button" class="kn-ditto" data-kn-ditto="'+i+'" aria-label="Copy beam '+i+' into beam '+(i+1)+'" title="Same as beam '+i+'"><span aria-hidden="true">〃</span></button>':'')
+        +(i>0?'<button type="button" class="kn-ditto" data-kn-ditto="'+i+'" aria-label="Copy beam '+i+' into beam '+(i+1)+'" title="Copy beam '+i+'"><span aria-hidden="true">〃</span></button>':'')
         +'</div>'
         +'<div class="kn-3">'
         +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" name="cycle'+(i+1)+'" autocomplete="off" placeholder="0" class="'+(Number(b.cycle)?'':'zero')+'" value="'+blank0(b.cycle)+'" data-kn-cyc="'+i+'"></label>'
@@ -1501,7 +1501,7 @@ var KN=(function(){
     ['kt_','kc_','km_','kr_'].forEach(function(k){var a=$(k+f),b=$(k+to);if(a&&b){b.value=a.value;knMark(b);}});
     snap(i);
     var card=$('kb_'+to); if(card){card.classList.remove('kn-flash');void card.offsetWidth;card.classList.add('kn-flash');}
-    showToast('Beam '+(i+1)+' copied from beam '+i,'success');
+    showToast('Copied beam '+i,'success');
   }
   function snap(i){
     var p=active+'_'+i, inp=$('kt_'+p), box=$('ktb_'+p); if(!inp)return true;
