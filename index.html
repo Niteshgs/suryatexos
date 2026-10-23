@@ -106,6 +106,9 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .b-shade{min-height:44px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation}
 .b-shade.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .b-rows{display:flex;flex-direction:column}
+.b-shadeName{padding:14px 14px 12px;border-bottom:1px solid var(--border);background:var(--accent-soft)}
+.b-shadeK{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted)}
+#b_shadeName{display:block;font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.15;color:var(--accent)}
 .b-row{display:grid;grid-template-columns:minmax(78px,1fr) 1fr 1fr 52px;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
 .b-row:last-child{border-bottom:none}
 .b-row.hdr{padding:8px 14px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px}
@@ -663,7 +666,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v59</span>
+    <span class="app-ver" id="appVer" title="App version">v60</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -797,7 +800,8 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <div class="b-shades" id="b_shades" role="radiogroup" aria-label="Shade"></div>
     </div>
     <div class="card" id="b_qty" hidden>
-      <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Quantity · <span id="b_shadeName"></span></div>
+      <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Quantity</div>
+      <div class="b-shadeName"><span class="b-shadeK">Entering for</span><span id="b_shadeName"></span></div>
       <div class="b-rows" id="b_rows"></div>
     </div>
     <div class="e-sum" id="b_sum" aria-live="polite"></div>
@@ -1089,7 +1093,6 @@ function eMode(force){
   document.getElementById('e_sub').textContent=bulk?'Pick a shade, then enter Full and Open for each denier.':'Select shade and denier, then enter stock quantities.';
   eCloseAll();
 }
-function bCurrent(sh,d){var r=allData.filter(function(x){return x.shade===sh&&x.denier===d;})[0];return r?r.total:null;}
 function bPick(sh){
   if(bBusy)return;
   if(bShade&&bShade!==sh&&bHasInput()&&!confirm('Discard the numbers entered for '+bShade+'?'))return;
@@ -1097,8 +1100,8 @@ function bPick(sh){
   document.querySelectorAll('#b_shades .b-shade').forEach(function(b){var on=b.textContent===sh;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');});
   document.getElementById('b_shadeName').textContent=sh;
   document.getElementById('b_rows').innerHTML='<div class="b-row hdr"><span>Denier</span><span>Full</span><span>Open</span><span style="text-align:right">Total</span></div>'
-    +(combinations[sh]||[]).map(function(d,i){var cur=bCurrent(sh,d);
-      return '<div class="b-row" data-den="'+esc(d)+'"><div class="b-den">'+esc(d)+(cur!==null?'<small>Now '+cur+'</small>':'')+'</div>'
+    +(combinations[sh]||[]).map(function(d,i){
+      return '<div class="b-row" data-den="'+esc(d)+'"><div class="b-den">'+esc(d)+'</div>'
         +'<input type="number" min="0" inputmode="numeric" placeholder="0" aria-label="'+esc(d)+' full boxes" id="b_f'+i+'" oninput="bTotals()">'
         +'<input type="number" min="0" inputmode="numeric" placeholder="0" aria-label="'+esc(d)+' open boxes" id="b_o'+i+'" oninput="bTotals()">'
         +'<div class="b-tot zero" id="b_t'+i+'">0</div></div>';}).join('');
