@@ -481,6 +481,7 @@ html:has(body.light){color-scheme:light}
 .kn-tbox.empty:not(:focus-within):not(.open){border:1.5px dashed var(--accent);background:var(--accent-soft)}
 .kn-tbox.empty input::placeholder{color:var(--accent);opacity:.85}
 .kn-tbox.invalid{border-color:var(--danger);background:var(--danger-soft)}
+.kn-tbox input[readonly]{cursor:pointer;-webkit-user-select:none;user-select:none;caret-color:transparent}
 .kn-tbox input{flex:1;min-width:0;font-size:16px;font-weight:600;text-overflow:ellipsis}
 .kn-arrow{width:38px;min-height:42px;flex:0 0 auto;background:none;border:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .kn-arrow .ic{width:18px;height:18px;transition:transform .15s}
@@ -1413,7 +1414,7 @@ var KN=(function(){
       h+='<div class="kn-beam" id="kb_'+p+'">'
         +'<div class="kn-row1"><span class="kn-bno" aria-hidden="true">'+(i+1)+'</span>'
         +'<div class="kn-ac"><label class="sr-only kn-sr" for="kt_'+p+'">Beam '+(i+1)+' tape</label><div class="kn-tbox'+(val(b.tape)?'':' empty')+'" id="ktb_'+p+'">'
-        +'<input type="text" id="kt_'+p+'" name="tape'+(i+1)+'" autocomplete="off" spellcheck="false" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
+        +'<input type="text"'+(KN_TOUCH?' readonly inputmode="none"':'')+' id="kt_'+p+'" name="tape'+(i+1)+'" autocomplete="off" spellcheck="false" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
         +'<button type="button" class="kn-arrow" data-kn-arrow="'+i+'" aria-label="Show all tapes">'+ICON_CHEV+'</button></div>'
         +'<div class="kn-list" id="ktl_'+p+'"></div></div>'
         +(i>0?'<button type="button" class="kn-ditto" data-kn-ditto="'+i+'" aria-label="Copy beam '+i+' into beam '+(i+1)+'" title="Same as beam '+i+'"><span aria-hidden="true">〃</span></button>':'')
@@ -1444,6 +1445,7 @@ var KN=(function(){
   function closeSide(){var s=$('knSide'),b=$('knBackdrop');if(s){s.classList.remove('open');b.classList.remove('show');}}
   function askPin(){$('knPin').value='';$('knPinErr').textContent='';$('knPinBox').classList.add('open');setTimeout(function(){$('knPin').focus();},50);}
   /* ---------- tape picker ---------- */
+  var KN_TOUCH=(function(){try{return window.matchMedia('(pointer:coarse)').matches;}catch(e){return false;}})();
   function listFor(i,showAll){
     var p=active+'_'+i, inp=$('kt_'+p), list=$('ktl_'+p), q=inp.value.trim().toLowerCase();
     closeLists(list); $('ktb_'+p).classList.remove('invalid');
@@ -1521,6 +1523,7 @@ var KN=(function(){
     if((x=t.closest('[data-kn-view]'))){dview=x.getAttribute('data-kn-view');try{localStorage.setItem('sx_kn_view',dview);}catch(e){}renderDash();return;}
     if((x=t.closest('[data-kn-ditto]'))){closeLists();dittoBeam(+x.getAttribute('data-kn-ditto'));return;}
     if((x=t.closest('[data-kn-pick]'))){var i=+x.getAttribute('data-kn-pick');var ti=$('kt_'+active+'_'+i);ti.value=x.getAttribute('data-v');knMark(ti);closeLists();snap(i);return;}
+    if(KN_TOUCH&&(x=t.closest('[data-kn-tape]'))){var q=+x.getAttribute('data-kn-tape');if(!$('ktl_'+active+'_'+q).classList.contains('open'))listFor(q,true);return;}
     if((x=t.closest('[data-kn-arrow]'))){var j=+x.getAttribute('data-kn-arrow'),l=$('ktl_'+active+'_'+j);if(l.classList.contains('open')){closeLists();snap(j);}else listFor(j,true);return;}
     if(t.closest('#knSave'))return save();
     if(t.closest('#knAddTape')){var n=$('knNewTape').value.trim();if(n)tapeOp('knitted.addTape',{name:n},'Tape added');return;}
@@ -1535,7 +1538,7 @@ var KN=(function(){
   });
   // two-tap remove: first tap arms the button, second tap within 3s removes (no browser dialogs)
   function confirmRemove(btn,name){if(btn.classList.contains('armed'))return true;btn.classList.add('armed');btn.setAttribute('aria-label','Tap again to remove '+name);showToast('Tap ✕ again to remove "'+name.trim()+'"','');setTimeout(function(){btn.classList.remove('armed');},3000);return false;}
-  document.addEventListener('focusin',function(e){var a=e.target.getAttribute&&e.target.getAttribute('data-kn-tape');if(a!==null&&a!==undefined&&isOn()){e.target.select();listFor(+a,true);}});
+  document.addEventListener('focusin',function(e){var a=e.target.getAttribute&&e.target.getAttribute('data-kn-tape');if(a!==null&&a!==undefined&&isOn()){if(!KN_TOUCH)e.target.select();listFor(+a,true);}});
   document.addEventListener('input',function(e){if(!isOn())return;var t=e.target,a=t.getAttribute('data-kn-tape');
     if(a!==null){knMark(t);return listFor(+a,false);}
     var c=t.getAttribute('data-kn-cyc'); if(c!==null){var v=t.value.replace(/[^0-9]/g,'');if(v.length>1)v=v.slice(-1);t.value=v;}
