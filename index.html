@@ -598,7 +598,8 @@ body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
 .kg-mn{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left!important;padding:0 8px;font-size:12px!important;color:var(--text)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:stretch;display:flex;align-items:center}
 .kg-head .kg-mn{color:var(--text-muted)!important}
 .kg-row>i{display:block;height:18px;border-radius:3px}
-.kg-row>i.on,.kn-legend i.on{background:var(--success)}.kg-row>i.idle,.kn-legend i.idle{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--border)}.kg-row>i.na,.kn-legend i.na{background:transparent;box-shadow:inset 0 0 0 1px var(--border);opacity:.4}
+.kg-row>i.change,.kn-legend i.change{background:var(--success)}.kg-row>i.run,.kn-legend i.run{background:var(--success);opacity:.28}.kg-row>i.late,.kn-legend i.late{background:var(--warning,#d99a2b)}.kg-row>i.wait{background:var(--surface2)}.kg-row>i.na,.kn-legend i.na{background:transparent;box-shadow:inset 0 0 0 1px var(--border);opacity:.4}
+.kn-act.late{border-color:var(--warning,#d99a2b)}.kn-late{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#1a1a1a;background:var(--warning,#d99a2b);border-radius:999px;padding:3px 8px}.kn-act-st b.warn{color:var(--warning,#d99a2b)}
 .kn-legend{display:flex;gap:16px;font-size:12px;color:var(--text-muted);margin-top:8px}.kn-legend span{display:inline-flex;align-items:center;gap:6px}.kn-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
 .kn-backlink{display:inline-flex;align-items:center;gap:6px;margin:16px 0 8px;min-height:40px;padding:0 4px;border:none;background:none;color:var(--accent);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .kn-modal-x{display:block;margin:10px auto 0}
@@ -689,7 +690,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v62</span>
+    <span class="app-ver" id="appVer" title="App version">v63</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1621,23 +1622,31 @@ var KN=(function(){
     if(actData&&actData.error&&!a){$('knView').innerHTML=h+'<div class="kn-state err">'+esc(actData.error)+'</div>';return;}
     if(!a){$('knView').innerHTML=h;return;}
     if(!a.trackedDays){$('knView').innerHTML=h+'<p class="kn-sub">'+(a.firstTracked?'Tracking started '+esc(a.firstTracked)+'. ':'')+'No tracked days in this month yet.</p>';return;}
-    var ms=a.machines.slice().sort(function(x,y){return y.changeovers-x.changeovers||y.active-x.active;});
-    var best=ms[0]&&ms[0].changeovers?ms[0].changeovers:0;
-    h+='<p class="kn-sub">'+a.trackedDays+' tracked day'+(a.trackedDays>1?'s':'')+(a.firstTracked&&a.trackedFromDay>1?' · tracking started '+esc(a.firstTracked):'')+' · active = a beam&#39;s cycle or tape changed that day</p>';
+    var ms=a.machines.slice().sort(function(x,y){return y.changes-x.changes||y.changeovers-x.changeovers;});
+    var best=ms[0]&&ms[0].changes?ms[0].changes:0;
+    function dd(x){return x==null?'–':(x<1?'today':Math.round(x)+' day'+(Math.round(x)===1?'':'s'));}
+    h+='<p class="kn-sub">'+(a.firstTracked?'Tracking since '+esc(a.firstTracked)+' · ':'')+'a change = any beam&#39;s cycle or tape changed · each machine learns its own normal gap after 3 changes</p>';
     h+='<div class="kn-actlist">'+ms.map(function(m,i){
-      var pct=best?Math.round(m.changeovers/best*100):0;
-      return '<div class="kn-act"><div class="kn-act-top"><span class="kn-act-rank">'+(i+1)+'</span><b>'+esc(m.name)+'</b><span class="kn-act-co">'+m.changeovers+'<small> changeover'+(m.changeovers===1?'':'s')+'</small></span></div>'
+      var pct=best?Math.round(m.changes/best*100):0;
+      return '<div class="kn-act'+(m.late?' late':'')+'"><div class="kn-act-top"><span class="kn-act-rank">'+(i+1)+'</span><b>'+esc(m.name)+'</b>'
+        +(m.late?'<span class="kn-late">Running late</span>':'')
+        +'<span class="kn-act-co">'+m.changes+'<small> change'+(m.changes===1?'':'s')+'</small></span></div>'
         +'<div class="kn-act-bar"><i style="width:'+pct+'%"></i></div>'
-        +'<div class="kn-act-st"><span><b class="ok">'+m.active+'</b> active</span><span><b>'+m.idle+'</b> idle</span><span><b>'+m.cycleChanges+'</b> cycle</span><span><b>'+m.tapeChanges+'</b> tape</span>'
-        +'<span>'+(m.avgDays==null?'–':'<b>'+m.avgDays+'</b> days')+' <em>turnaround</em></span></div></div>';}).join('')+'</div>';
+        +'<div class="kn-act-st">'
+        +(a.current?'<span>Last change <b'+(m.late?' class="warn"':'')+'>'+(m.daysSince==null?'none yet':dd(m.daysSince)+(m.daysSince>=1?' ago':''))+'</b></span>':'')
+        +'<span>Normal gap <b>'+(m.normalGap==null?'learning '+Math.min(m.historyChanges,3)+'/3':m.normalGap+' days')+'</b></span>'
+        +'<span>Longest gap <b>'+(m.longestGap==null?'–':dd(m.longestGap))+'</b></span>'
+        +'<span>Beam turnaround <b>'+(m.avgDays==null?'–':m.avgDays+' days')+'</b></span>'
+        +'<span><b>'+m.cycleChanges+'</b> cycle · <b>'+m.tapeChanges+'</b> tape</span></div></div>';}).join('')+'</div>';
     var cols='grid-template-columns:104px repeat('+a.days+',18px)',hd='<div class="kg-row kg-head" style="'+cols+'"><span class="kg-mn">Machine</span>';
     for(var d=1;d<=a.days;d++)hd+='<span>'+d+'</span>';
+    var LBL={change:'change',run:'running',late:'running late',wait:'no data yet','':'not tracked'};
     h+='<h3 class="kn-act-h">Day by day</h3><div class="kn-grid-wrap"><div class="kn-grid">'+hd+'</div>'
-      +a.machines.map(function(m){var c='<div class="kg-row" style="'+cols+'"><span class="kg-mn">'+esc(m.name)+'</span>';for(var d=1;d<=a.days;d++){var on=m.activeDays.indexOf(d)>-1,tr=d>=a.trackedFromDay&&d<=a.trackedToDay;
-        c+='<i class="'+(on?'on':tr?'idle':'na')+'" title="'+esc(m.name)+' · '+d+': '+(on?'active':tr?'idle':'not tracked')+'"></i>';}
+      +a.machines.map(function(m){var c='<div class="kg-row" style="'+cols+'"><span class="kg-mn">'+esc(m.name)+'</span>';
+        m.days.forEach(function(st,k){c+='<i class="'+(st||'na')+'" title="'+esc(m.name)+' · '+(k+1)+': '+LBL[st]+'"></i>';});
         return c+'</div>';}).join('')
-      +'</div></div><div class="kn-legend"><span><i class="on"></i>Active</span><span><i class="idle"></i>Idle</span><span><i class="na"></i>Not tracked</span></div>'
-      +'<p class="kn-sub" style="margin-top:12px">Turnaround = average days between changeovers on the same beam. Also saved in the sheet tab “Activity '+esc(a.label)+'”.</p>';
+      +'</div></div><div class="kn-legend"><span><i class="change"></i>Change</span><span><i class="run"></i>Running</span><span><i class="late"></i>Running late</span><span><i class="na"></i>Not tracked</span></div>'
+      +'<p class="kn-sub" style="margin-top:12px">Normal gap = typical days between changes on that machine. Running late = current gap is over '+a.lateFactor+'× its normal gap. Beam turnaround = average days between changes on the same beam. Also saved in the sheet tab “Activity '+esc(a.label)+'”.</p>';
     $('knView').innerHTML=h;
   }
   function showFresh(){

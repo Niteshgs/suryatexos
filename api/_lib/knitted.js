@@ -198,6 +198,10 @@ function dayFrac(v) {
 const ymd = (day) => new Date(DAY0 + day * 864e5).toISOString().slice(0, 10);
 const cnum = (v) => { const n = Number(v); return v === '' || v == null || isNaN(n) || n === 0 ? null : n; };
 
+const LATE_X = 1.5;                            // flag when the current gap is 1.5x the machine's own normal gap
+const median = (xs) => { const v = xs.slice().sort((x, y) => x - y), n = v.length; return n ? (n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2) : null; };
+const r1 = (x) => x == null ? null : Math.round(x * 10) / 10;
+
 async function computeActivity(month) {      // month = 'YYYY-MM'
   const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:J')], 'serial');
   const events = [];
@@ -209,50 +213,80 @@ async function computeActivity(month) {      // month = 'YYYY-MM'
   events.sort((a, b) => a.t - b.t);
   const [Y, M] = month.split('-').map(Number);
   const first = Math.round((Date.UTC(Y, M - 1, 1) - DAY0) / 864e5), ndays = new Date(Date.UTC(Y, M, 0)).getUTCDate(), last = first + ndays - 1;
-  const today = serialDay(nowParts().date), start = events.length ? events[0].day : null;
-  const out = {}; Object.keys(MACHINE_NAMES).forEach((id) => { out[id] = { id, name: MACHINE_NAMES[id], days: {}, cycleChanges: 0, tapeChanges: 0, stamps: {} }; });
+  const np = nowParts(), today = serialDay(np.date), now = today + dayFrac(np.time), start = events.length ? events[0].day : null;
+  const isCurrent = today >= first && today <= last, until = isCurrent ? now : last + 1;    // look at history up to now / month end
+  const out = {}; Object.keys(MACHINE_NAMES).forEach((id) => { out[id] = { cycleChanges: 0, tapeChanges: 0, stamps: {}, moments: [], seen: null }; });
   const lastSeen = {};
   for (const e of events) {
+    if (e.t >= until) break;
     const k = e.id + ':' + e.beam, prev = lastSeen[k], inMonth = e.day >= first && e.day <= last, o = out[e.id];
     let changed = false;
+    if (o.seen == null) o.seen = e.t;
     if (/clear/i.test(e.action)) changed = !!prev;
     else if (prev) {
       if (e.cycle != null && prev.cycle != null && e.cycle !== prev.cycle) { changed = true; if (inMonth) o.cycleChanges++; }
       if (e.tape && prev.tape && e.tape.toLowerCase() !== prev.tape.toLowerCase()) { changed = true; if (inMonth) o.tapeChanges++; }
     }
-    if (changed && inMonth) { o.days[e.day - first + 1] = 1; (o.stamps[e.beam] = o.stamps[e.beam] || []).push(e.t); }
+    if (changed) {
+      const mm = o.moments; if (!mm.length || e.t - mm[mm.length - 1] > 1 / 1440) mm.push(e.t);   // one save = one change moment
+      if (inMonth) (o.stamps[e.beam] = o.stamps[e.beam] || []).push(e.t);
+    }
     lastSeen[k] = { cycle: e.cycle != null ? e.cycle : (prev && prev.cycle), tape: e.tape || (prev && prev.tape) || '' };
   }
-  const countFrom = start == null ? null : Math.max(first, start), countTo = Math.min(last, today);
-  const tracked = countFrom == null || countTo < countFrom ? 0 : countTo - countFrom + 1;
-  const machines = Object.values(out).map((o) => {
-    const gaps = [];
-    Object.values(o.stamps).forEach((ts) => { for (let i = 1; i < ts.length; i++) gaps.push(ts[i] - ts[i - 1]); });
-    const active = Object.keys(o.days).length;
-    return { id: o.id, name: o.name, activeDays: Object.keys(o.days).map(Number), active, idle: Math.max(0, tracked - active),
+  const fromDay = start == null ? null : Math.max(first, start), toDay = Math.min(last, today);
+  const tracked = fromDay == null || toDay < fromDay ? 0 : toDay - fromDay + 1;
+  const machines = Object.keys(MACHINE_NAMES).map((id) => {
+    const o = out[id], mm = o.moments, gaps = [];
+    for (let i = 1; i < mm.length; i++) gaps.push(mm[i] - mm[i - 1]);
+    const normal = mm.length >= 3 ? median(gaps) : null;
+    const lastT = mm.length ? mm[mm.length - 1] : null;
+    const since = isCurrent && lastT != null ? now - lastT : null;
+    const late = !!(normal && since != null && since > normal * LATE_X);
+    // longest gap that touches this month (ongoing gap included for the current month)
+    let longest = null;
+    for (let i = 1; i < mm.length; i++) if (Math.floor(mm[i]) >= first && Math.floor(mm[i]) <= last) longest = Math.max(longest || 0, mm[i] - mm[i - 1]);
+    if (since != null) longest = Math.max(longest || 0, since);
+    // per-day state for the grid: change / running / late / no baseline
+    const days = [];
+    for (let d = 1; d <= ndays; d++) {
+      const day = first + d - 1;
+      if (fromDay == null || day < fromDay || day > toDay) { days.push(''); continue; }
+      if (mm.some((t) => Math.floor(t) === day)) { days.push('change'); continue; }
+      const end = day === today && isCurrent ? now : day + 1, before = mm.filter((t) => t < end);
+      if (!before.length) { days.push(o.seen != null && o.seen < end ? 'run' : 'wait'); continue; }
+      days.push(normal && end - before[before.length - 1] > normal * LATE_X ? 'late' : 'run');
+    }
+    const bgaps = [];
+    Object.values(o.stamps).forEach((ts) => { for (let i = 1; i < ts.length; i++) bgaps.push(ts[i] - ts[i - 1]); });
+    return { id, name: MACHINE_NAMES[id], changes: mm.filter((t) => Math.floor(t) >= first && Math.floor(t) <= last).length,
       cycleChanges: o.cycleChanges, tapeChanges: o.tapeChanges, changeovers: o.cycleChanges + o.tapeChanges,
-      avgDays: gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length * 10) / 10 : null };
+      avgDays: bgaps.length ? r1(bgaps.reduce((a, b) => a + b, 0) / bgaps.length) : null,
+      normalGap: r1(normal), historyChanges: mm.length, lastChange: lastT == null ? null : ymd(Math.floor(lastT)),
+      daysSince: r1(since), longestGap: r1(longest), late, days };
   });
-  return { month, label: MONTHS[M - 1] + ' ' + Y, days: ndays, firstTracked: start == null ? null : ymd(start),
-    trackedFromDay: countFrom == null ? null : countFrom - first + 1, trackedToDay: countTo - first + 1, trackedDays: tracked, machines };
+  return { month, label: MONTHS[M - 1] + ' ' + Y, days: ndays, current: isCurrent, lateFactor: LATE_X, firstTracked: start == null ? null : ymd(start),
+    trackedFromDay: fromDay == null ? null : fromDay - first + 1, trackedToDay: toDay - first + 1, trackedDays: tracked, machines };
 }
 
 // keep one summary tab per month in the sheet ("Activity October 2026"), rewritten on each save
 async function writeActivityTab(a) {
   const title = 'Activity ' + a.label;
   const props = await G.sheetProps(SHEET_ID);
-  if (!props.some((p) => p.title === title)) {
-    await G.format(SHEET_ID, [{ addSheet: { properties: { title, gridProperties: { rowCount: 20, columnCount: 8 + a.days, frozenRowCount: 2, frozenColumnCount: 1 } } } }]);
+  const ex = props.find((p) => p.title === title), need = 12 + a.days;
+  if (ex && ex.gridProperties && ex.gridProperties.columnCount < need) {
+    await G.format(SHEET_ID, [{ appendDimension: { sheetId: ex.sheetId, dimension: 'COLUMNS', length: need - ex.gridProperties.columnCount } }]);
   }
-  const head = ['Machine', 'Active days', 'Idle days', 'Cycle changes', 'Tape changes', 'Total changeovers', 'Avg days per changeover'];
+  if (!ex) {
+    await G.format(SHEET_ID, [{ addSheet: { properties: { title, gridProperties: { rowCount: 20, columnCount: 12 + a.days, frozenRowCount: 2, frozenColumnCount: 1 } } } }]);
+  }
+  const head = ['Machine', 'Changes this month', 'Cycle changes', 'Tape changes', 'Total changeovers', 'Beam turnaround (days)', 'Normal gap (days)', 'Last change', 'Days since last change', 'Longest gap (days)', 'Status'];
   for (let d = 1; d <= a.days; d++) head.push(String(d));
-  const body = a.machines.map((m) => {
-    const row = [m.name, m.active, m.idle, m.cycleChanges, m.tapeChanges, m.changeovers, m.avgDays == null ? '' : m.avgDays];
-    for (let d = 1; d <= a.days; d++) row.push(m.activeDays.includes(d) ? 'Active' : (a.trackedFromDay && d >= a.trackedFromDay && d <= a.trackedToDay ? 'Idle' : ''));
-    return row;
-  });
+  const word = { change: 'Change', run: '', late: 'Late', wait: '', '': '' };
+  const body = a.machines.map((m) => [m.name, m.changes, m.cycleChanges, m.tapeChanges, m.changeovers, m.avgDays == null ? '' : m.avgDays,
+    m.normalGap == null ? 'learning (' + m.historyChanges + '/3)' : m.normalGap, m.lastChange || '', m.daysSince == null ? '' : m.daysSince,
+    m.longestGap == null ? '' : m.longestGap, m.late ? 'Running late' : (a.current ? 'OK' : '')].concat(m.days.map((x) => word[x])));
   const t = nowParts();
-  await G.batchUpdate(SHEET_ID, [{ range: at(title, 'A1'), values: [['Machine Activity — ' + a.label + ' · updated ' + t.date + ' ' + t.time + ' · active = a beam\'s cycle or tape changed that day']] },
+  await G.batchUpdate(SHEET_ID, [{ range: at(title, 'A1'), values: [['Machine Activity — ' + a.label + ' · updated ' + t.date + ' ' + t.time + ' · Change = a beam\'s cycle or tape changed · Late = gap longer than ' + a.lateFactor + 'x the machine\'s normal gap']] },
     { range: at(title, 'A2'), values: [head].concat(body) }], 'RAW');
 }
 async function refreshActivity(month) {

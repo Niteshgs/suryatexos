@@ -65,7 +65,7 @@ async function append(id, range, rows, inputOption) {
   await api('POST', base(id) + '/values/' + encodeURIComponent(range) + ':append?valueInputOption=' + (inputOption || 'RAW') + '&insertDataOption=INSERT_ROWS', { values: rows });
 }
 async function sheetProps(id) {
-  const j = await api('GET', base(id) + '?fields=sheets.properties(title,sheetId,gridProperties.frozenRowCount)');
+  const j = await api('GET', base(id) + '?fields=sheets.properties(title,sheetId,gridProperties(frozenRowCount,columnCount))');
   return (j.sheets || []).map((s) => s.properties);
 }
 async function format(id, requests) {
