@@ -424,6 +424,96 @@ body.light{color-scheme:light}
 html:has(body.light){color-scheme:light}
 #v-proc input[type=date]::-webkit-calendar-picker-indicator{opacity:.8}
 
+
+/* ══ KNITTED PRODUCTION ══ */
+#v-kn{max-width:1100px;padding:16px 16px 8px}
+.kn-sub{font-size:13px;color:var(--text-muted);margin:0 0 14px}
+.kn-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kn-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center}
+.kn-stat b{display:block;font-size:26px;font-weight:800;color:var(--accent);line-height:1.15;font-variant-numeric:tabular-nums}
+.kn-stat b small{font-size:14px;color:var(--text-muted);font-weight:700}
+.kn-stat.danger{border-color:rgba(224,85,85,.4);background:var(--danger-soft)}.kn-stat.danger b{color:var(--danger)}
+.kn-stat span{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase}
+.kn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.kn-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.kn-card-h{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.kn-edit{min-height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.kn-edit:hover{color:var(--accent);border-color:var(--accent)}
+.kn-table{width:100%;border-collapse:collapse;font-size:14px}
+.kn-table th{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+.kn-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.kn-table tr:last-child td{border-bottom:none}
+.kn-table .kn-n{text-align:right;font-variant-numeric:tabular-nums}
+.kn-bn{color:var(--text-muted);font-weight:700;width:20px}
+.kn-none{color:var(--text-muted);font-style:italic}
+.kn-cyc{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:12px;font-weight:800;background:var(--surface2);color:var(--text-muted)}
+.kn-cyc.c1{background:var(--success-soft);color:var(--success)}.kn-cyc.c2{background:var(--accent-soft);color:var(--accent)}.kn-cyc.c3{background:var(--danger-soft);color:var(--danger)}
+.kn-sum{display:flex;justify-content:space-between;padding:10px 16px;font-size:12px;color:var(--text-muted);background:var(--accent-soft);border-top:1px solid rgba(196,133,58,.2)}
+.kn-sum b{color:var(--accent);font-weight:800}
+.kn-who{font-size:13px;color:var(--text-muted);margin:0 0 12px}.kn-who b{color:var(--text)}
+.kn-link{background:none;border:none;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:6px 2px;min-height:32px}
+.kn-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.kn-chips::-webkit-scrollbar{display:none}
+.kn-chip{flex:0 0 auto;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.kn-chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.kn-dot{width:8px;height:8px;border-radius:50%;background:var(--success)}.kn-dot.err{background:var(--danger)}
+.kn-beams{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+@media(min-width:760px){.kn-beams{grid-template-columns:1fr 1fr}}
+.kn-beam{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:background .2s,border-color .2s}
+.kn-beam.c1{background:var(--success-soft);border-color:rgba(76,175,130,.4)}
+.kn-beam.c2{background:var(--accent-soft);border-color:rgba(196,133,58,.4)}
+.kn-beam.c3{background:var(--danger-soft);border-color:rgba(224,85,85,.4)}
+.kn-beam-h{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.kn-f{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.kn-l{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase}
+.kn-f input{min-height:40px;background:transparent;border:none;outline:none;color:var(--text);font-size:16px;font-family:inherit;width:100%;-moz-appearance:textfield}
+.kn-f input::-webkit-outer-spin-button,.kn-f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--border)}
+.kn-3 .kn-f{border-right:1px solid var(--border)}.kn-3 .kn-f:last-child{border-right:none}
+.kn-3 .kn-f:focus-within,.kn-f:focus-within .kn-l{color:var(--accent)}
+.kn-ac{position:relative}
+.kn-tbox{display:flex;align-items:center;min-height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding-left:12px}
+.kn-tbox:focus-within,.kn-tbox.open{border-color:var(--accent)}
+.kn-tbox.invalid{border-color:var(--danger);background:var(--danger-soft)}
+.kn-tbox input{flex:1;min-width:0}
+.kn-arrow{width:46px;min-height:46px;flex:0 0 auto;background:none;border:none;border-left:1px solid var(--border);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.kn-arrow .ic{width:18px;height:18px;transition:transform .15s}
+.kn-tbox.open .kn-arrow .ic{transform:rotate(180deg);color:var(--accent)}
+.kn-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.3);max-height:260px;overflow-y:auto;z-index:60}
+.kn-list.open{display:block}
+.kn-opt{padding:14px 16px;font-size:16px;min-height:48px;cursor:pointer;color:var(--text)}
+.kn-opt:hover{background:var(--surface2)}.kn-opt.sel{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.kn-empty{padding:14px 16px;font-size:14px;color:var(--text-muted)}
+.kn-save{margin-bottom:8px}
+.kn-pin{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;max-width:460px}
+.kn-pin-row,.kn-add{display:flex;gap:8px;margin-top:8px}
+.kn-pin-row input,.kn-add input{flex:1;min-width:0;min-height:48px;padding:0 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:16px;font-family:inherit;outline:none}
+.kn-pin-row input:focus,.kn-add input:focus{border-color:var(--accent)}
+.kn-pin-row .btn-submit,.kn-add .btn-submit{width:auto;padding:0 22px;min-height:48px}
+.kn-add{margin:0 0 14px;max-width:640px}
+.kn-err{color:var(--danger);font-size:13px;margin-top:8px;min-height:18px}
+.kn-tapes{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:640px;overflow:hidden}
+.kn-tape{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;min-height:56px;border-bottom:1px solid var(--border);font-size:15px}
+.kn-tape:last-child{border-bottom:none}
+.kn-tape.editing{background:var(--accent-soft)}
+.kn-tape.editing input{flex:1;min-width:0;min-height:44px;padding:0 10px;background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--text);font-size:16px;font-family:inherit;outline:none}
+.kn-tape-a{display:flex;gap:6px;flex:0 0 auto}
+.kn-ib{width:44px;height:44px;border-radius:22px;border:none;background:var(--accent-soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.kn-ib .ic{width:18px;height:18px}
+.kn-ib.del{background:var(--danger-soft);color:var(--danger)}
+.kn-ib.del.armed{background:var(--danger);color:#fff}
+.kn-btn{min-height:44px;padding:0 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.kn-btn.acc{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}
+.kn-state{text-align:center;color:var(--text-muted);padding:32px 16px;font-size:14px}.kn-state.err{color:var(--danger)}
+.kn-foot{font-size:13px;color:var(--text-muted);text-align:center;padding:12px 16px 24px}
+.kn-modal{display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
+.kn-modal.open{display:flex}
+.kn-modal-in{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;text-align:center}
+.kn-modal-t{font-size:17px;font-weight:800;margin-bottom:6px}
+.kn-modal-s{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+.kn-modal-in input{width:100%;min-height:48px;padding:0 14px;margin-bottom:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:16px;font-family:inherit;outline:none}
+.kn-modal-in input:focus{border-color:var(--accent)}
+
 /* FOCUS */
 button:focus-visible,a:focus-visible,[onclick]:focus-visible,select:focus-visible,.custom-select-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #v-entry .field:focus-within,#v-proc .pf-field:focus-within,.lock .pf-field:focus-within{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
@@ -471,7 +561,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="sx-logo" viewBox="0 0 96 96"><circle cx="48" cy="48" r="39.2" fill="#FFF6E8"/><path fill="#C4853A" d="M50.16 87.79 C54.23 87.47 58.23 86.56 61.94 85.11 C63.40 84.54 66.68 82.94 67.99 82.15 C71.68 79.94 75.13 77.12 77.77 74.16 C83.93 67.24 87.49 58.98 88.00 50.37 C88.09 48.94 88.06 46.60 87.95 45.63 L87.90 45.24 L86.87 45.06 C84.59 44.65 82.37 44.38 79.81 44.19 C78.02 44.05 73.10 44.05 71.23 44.19 C58.26 45.12 46.39 49.14 36.73 55.88 C30.77 60.04 25.60 64.95 20.94 70.88 C19.74 72.41 18.39 74.31 18.39 74.47 C18.39 74.64 21.28 77.52 22.44 78.52 C28.95 84.11 36.47 87.19 45.09 87.82 C46.02 87.88 49.13 87.87 50.16 87.79 Z M19.02 72.27 C22.09 67.87 24.66 64.78 28.23 61.22 C31.14 58.30 34.29 55.60 36.93 53.74 C37.31 53.48 38.01 52.99 38.50 52.64 C44.74 48.25 53.04 44.59 61.14 42.64 C69.60 40.61 78.49 40.18 85.65 41.46 C86.31 41.58 87.00 41.70 87.17 41.72 L87.47 41.77 L87.41 41.44 C87.17 40.21 86.96 39.22 86.91 39.15 C86.85 39.05 84.82 38.84 82.72 38.71 C79.98 38.54 75.72 38.61 72.71 38.88 C58.65 40.13 45.48 45.37 34.78 53.96 C32.59 55.71 31.26 56.91 29.07 59.10 C26.44 61.73 24.74 63.69 22.47 66.71 C20.56 69.26 17.93 73.34 18.20 73.34 C18.24 73.34 18.61 72.86 19.02 72.27 Z M17.93 72.35 C18.15 71.94 18.69 71.00 19.14 70.26 C23.93 62.21 29.85 55.42 36.79 50.00 C46.70 42.27 58.19 37.47 70.47 35.93 C74.99 35.36 80.64 35.22 84.69 35.59 C85.31 35.64 85.83 35.67 85.85 35.65 C85.91 35.59 85.41 34.24 84.87 32.94 C83.83 30.47 81.71 26.64 81.32 26.53 C80.99 26.44 77.90 26.45 76.32 26.55 C67.86 27.06 58.69 29.55 50.66 33.52 C46.35 35.65 42.08 38.35 38.67 41.10 C35.35 43.78 31.56 47.59 28.92 50.90 C23.65 57.52 19.61 65.09 17.76 71.86 C17.34 73.39 17.35 73.43 17.93 72.35 Z M17.33 71.61 C18.02 68.24 18.97 65.48 20.70 61.84 C23.53 55.86 27.39 50.00 31.69 45.17 C32.73 44.00 35.63 41.09 36.85 39.98 C43.13 34.32 50.70 29.74 58.48 26.92 C65.04 24.53 71.89 23.16 77.24 23.16 C78.23 23.16 79.05 23.14 79.05 23.11 C79.05 22.98 76.86 20.51 76.70 20.47 C76.53 20.43 73.76 20.78 72.12 21.06 C63.47 22.50 53.74 26.22 46.27 30.93 C38.24 35.99 31.31 42.66 26.35 50.08 C23.02 55.07 21.07 59.08 19.05 65.06 C17.61 69.36 16.77 72.37 16.91 72.73 C17.00 72.98 17.10 72.72 17.33 71.61 Z M16.83 69.87 C17.60 66.10 18.28 63.70 19.49 60.45 C22.17 53.28 25.97 46.71 30.77 40.98 C34.03 37.09 38.38 33.03 42.44 30.08 C49.49 24.97 57.52 21.26 66.67 18.90 C68.17 18.51 71.24 17.90 72.65 17.70 C73.24 17.62 73.72 17.52 73.72 17.49 C73.72 17.34 71.48 15.63 70.04 14.69 C68.21 13.49 65.33 11.96 63.79 11.35 L63.35 11.18 L62.52 11.43 C59.65 12.28 55.54 14.00 52.43 15.65 C41.86 21.26 32.75 29.40 26.54 38.79 C21.24 46.80 17.96 55.48 16.79 64.60 C16.54 66.56 16.24 71.87 16.40 71.73 C16.43 71.70 16.62 70.86 16.83 69.87 Z M14.76 68.31 C14.46 65.20 14.40 63.87 14.44 61.06 C14.50 57.59 14.75 55.17 15.40 52.00 C17.32 42.51 21.76 33.24 28.26 25.17 C31.19 21.51 34.89 17.74 38.37 14.84 C40.84 12.78 44.85 9.90 46.96 8.67 C47.27 8.49 47.53 8.31 47.53 8.27 C47.54 8.12 44.33 8.42 42.26 8.77 C38.37 9.42 35.03 10.51 31.40 12.32 C23.62 16.20 17.08 22.39 12.80 29.92 C12.40 30.62 11.32 32.83 10.96 33.68 C9.61 36.85 8.74 40.10 8.24 43.82 C8.08 45.06 8.05 45.63 8.05 48.04 C8.04 50.89 8.10 51.79 8.43 53.95 C9.23 59.15 11.16 64.22 14.15 68.93 C14.54 69.55 14.88 70.04 14.90 70.02 C14.92 70.00 14.86 69.23 14.76 68.31 Z M16.33 60.25 C16.44 59.53 16.71 58.18 16.91 57.25 C19.76 44.44 26.62 32.52 36.44 23.29 C42.75 17.36 49.92 12.63 56.73 9.90 C57.39 9.63 57.91 9.39 57.87 9.37 C57.58 9.19 53.82 8.58 53.51 8.66 C53.41 8.69 52.71 9.04 51.97 9.44 C44.57 13.43 36.81 19.73 31.05 26.42 C24.57 33.93 19.72 42.88 17.51 51.38 C16.85 53.91 16.50 55.84 16.19 58.48 C16.01 60.09 15.88 63.11 16.03 62.11 C16.08 61.81 16.21 60.97 16.33 60.25 Z"/></symbol><symbol id="i-spool" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="3" rx="1"/><rect x="5" y="19" width="14" height="3" rx="1"/><path d="M7 5v14M17 5v14"/><path d="M7 9.5l10-2M7 13.5l10-2M7 17.5l10-2"/></symbol><symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></symbol><symbol id="i-dashboard" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol><symbol id="i-entry" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12.4 14.6a2 2 0 0 1-.85.5L8.7 16a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol><symbol id="i-warehouse" viewBox="0 0 24 24"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12M6 14h12"/><rect width="12" height="12" x="6" y="10"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol><symbol id="i-clearance" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6M9 9h.01M15 15h.01"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2M15 18H9M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol><symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8M10 9H8"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="sx-logo" viewBox="0 0 96 96"><circle cx="48" cy="48" r="39.2" fill="#FFF6E8"/><path fill="#C4853A" d="M50.16 87.79 C54.23 87.47 58.23 86.56 61.94 85.11 C63.40 84.54 66.68 82.94 67.99 82.15 C71.68 79.94 75.13 77.12 77.77 74.16 C83.93 67.24 87.49 58.98 88.00 50.37 C88.09 48.94 88.06 46.60 87.95 45.63 L87.90 45.24 L86.87 45.06 C84.59 44.65 82.37 44.38 79.81 44.19 C78.02 44.05 73.10 44.05 71.23 44.19 C58.26 45.12 46.39 49.14 36.73 55.88 C30.77 60.04 25.60 64.95 20.94 70.88 C19.74 72.41 18.39 74.31 18.39 74.47 C18.39 74.64 21.28 77.52 22.44 78.52 C28.95 84.11 36.47 87.19 45.09 87.82 C46.02 87.88 49.13 87.87 50.16 87.79 Z M19.02 72.27 C22.09 67.87 24.66 64.78 28.23 61.22 C31.14 58.30 34.29 55.60 36.93 53.74 C37.31 53.48 38.01 52.99 38.50 52.64 C44.74 48.25 53.04 44.59 61.14 42.64 C69.60 40.61 78.49 40.18 85.65 41.46 C86.31 41.58 87.00 41.70 87.17 41.72 L87.47 41.77 L87.41 41.44 C87.17 40.21 86.96 39.22 86.91 39.15 C86.85 39.05 84.82 38.84 82.72 38.71 C79.98 38.54 75.72 38.61 72.71 38.88 C58.65 40.13 45.48 45.37 34.78 53.96 C32.59 55.71 31.26 56.91 29.07 59.10 C26.44 61.73 24.74 63.69 22.47 66.71 C20.56 69.26 17.93 73.34 18.20 73.34 C18.24 73.34 18.61 72.86 19.02 72.27 Z M17.93 72.35 C18.15 71.94 18.69 71.00 19.14 70.26 C23.93 62.21 29.85 55.42 36.79 50.00 C46.70 42.27 58.19 37.47 70.47 35.93 C74.99 35.36 80.64 35.22 84.69 35.59 C85.31 35.64 85.83 35.67 85.85 35.65 C85.91 35.59 85.41 34.24 84.87 32.94 C83.83 30.47 81.71 26.64 81.32 26.53 C80.99 26.44 77.90 26.45 76.32 26.55 C67.86 27.06 58.69 29.55 50.66 33.52 C46.35 35.65 42.08 38.35 38.67 41.10 C35.35 43.78 31.56 47.59 28.92 50.90 C23.65 57.52 19.61 65.09 17.76 71.86 C17.34 73.39 17.35 73.43 17.93 72.35 Z M17.33 71.61 C18.02 68.24 18.97 65.48 20.70 61.84 C23.53 55.86 27.39 50.00 31.69 45.17 C32.73 44.00 35.63 41.09 36.85 39.98 C43.13 34.32 50.70 29.74 58.48 26.92 C65.04 24.53 71.89 23.16 77.24 23.16 C78.23 23.16 79.05 23.14 79.05 23.11 C79.05 22.98 76.86 20.51 76.70 20.47 C76.53 20.43 73.76 20.78 72.12 21.06 C63.47 22.50 53.74 26.22 46.27 30.93 C38.24 35.99 31.31 42.66 26.35 50.08 C23.02 55.07 21.07 59.08 19.05 65.06 C17.61 69.36 16.77 72.37 16.91 72.73 C17.00 72.98 17.10 72.72 17.33 71.61 Z M16.83 69.87 C17.60 66.10 18.28 63.70 19.49 60.45 C22.17 53.28 25.97 46.71 30.77 40.98 C34.03 37.09 38.38 33.03 42.44 30.08 C49.49 24.97 57.52 21.26 66.67 18.90 C68.17 18.51 71.24 17.90 72.65 17.70 C73.24 17.62 73.72 17.52 73.72 17.49 C73.72 17.34 71.48 15.63 70.04 14.69 C68.21 13.49 65.33 11.96 63.79 11.35 L63.35 11.18 L62.52 11.43 C59.65 12.28 55.54 14.00 52.43 15.65 C41.86 21.26 32.75 29.40 26.54 38.79 C21.24 46.80 17.96 55.48 16.79 64.60 C16.54 66.56 16.24 71.87 16.40 71.73 C16.43 71.70 16.62 70.86 16.83 69.87 Z M14.76 68.31 C14.46 65.20 14.40 63.87 14.44 61.06 C14.50 57.59 14.75 55.17 15.40 52.00 C17.32 42.51 21.76 33.24 28.26 25.17 C31.19 21.51 34.89 17.74 38.37 14.84 C40.84 12.78 44.85 9.90 46.96 8.67 C47.27 8.49 47.53 8.31 47.53 8.27 C47.54 8.12 44.33 8.42 42.26 8.77 C38.37 9.42 35.03 10.51 31.40 12.32 C23.62 16.20 17.08 22.39 12.80 29.92 C12.40 30.62 11.32 32.83 10.96 33.68 C9.61 36.85 8.74 40.10 8.24 43.82 C8.08 45.06 8.05 45.63 8.05 48.04 C8.04 50.89 8.10 51.79 8.43 53.95 C9.23 59.15 11.16 64.22 14.15 68.93 C14.54 69.55 14.88 70.04 14.90 70.02 C14.92 70.00 14.86 69.23 14.76 68.31 Z M16.33 60.25 C16.44 59.53 16.71 58.18 16.91 57.25 C19.76 44.44 26.62 32.52 36.44 23.29 C42.75 17.36 49.92 12.63 56.73 9.90 C57.39 9.63 57.91 9.39 57.87 9.37 C57.58 9.19 53.82 8.58 53.51 8.66 C53.41 8.69 52.71 9.04 51.97 9.44 C44.57 13.43 36.81 19.73 31.05 26.42 C24.57 33.93 19.72 42.88 17.51 51.38 C16.85 53.91 16.50 55.84 16.19 58.48 C16.01 60.09 15.88 63.11 16.03 62.11 C16.08 61.81 16.21 60.97 16.33 60.25 Z"/></symbol><symbol id="i-spool" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="3" rx="1"/><rect x="5" y="19" width="14" height="3" rx="1"/><path d="M7 5v14M17 5v14"/><path d="M7 9.5l10-2M7 13.5l10-2M7 17.5l10-2"/></symbol><symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></symbol><symbol id="i-dashboard" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol><symbol id="i-entry" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12.4 14.6a2 2 0 0 1-.85.5L8.7 16a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol><symbol id="i-warehouse" viewBox="0 0 24 24"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12M6 14h12"/><rect width="12" height="12" x="6" y="10"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol><symbol id="i-clearance" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6M9 9h.01M15 15h.01"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2M15 18H9M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol><symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8M10 9H8"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="i-beam" viewBox="0 0 24 24"><ellipse cx="6" cy="12" rx="2.5" ry="7"/><path d="M6 5h12a2.5 7 0 0 1 0 14H6"/><path d="M10.5 5.3v13.4M15 5.3v13.4"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><path d="M7.5 7.5h.01"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></symbol></svg>
 
 <header>
   <div class="hdr-left">
@@ -518,10 +608,27 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <div class="app-name">Finished Goods</div>
       <div class="app-sub">Snapweaves Stock</div>
     </button>
+    <button class="app-tile" onclick="openKN('kn')">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-beam"/></svg></div>
+      <div class="app-name">Knitted Production</div>
+      <div class="app-sub">Beams · Cycles · Tapes</div>
+    </button>
   </div>
   <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Install app</button></div>
   <div class="ios-hint" id="iosHint">To install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b></div>
 </div>
+
+<!-- KNITTED PRODUCTION -->
+<div class="view" id="v-kn">
+  <div id="knView"><div class="loading"><div class="spinner"></div>Loading knitted production…</div></div>
+  <div class="kn-foot" id="knFoot"></div>
+</div>
+<div class="kn-modal" id="knNameBox"><div class="kn-modal-in" role="dialog" aria-labelledby="knNameT">
+  <div class="kn-modal-t" id="knNameT">Who's entering data?</div>
+  <div class="kn-modal-s">Enter your name once on this phone. It's logged with every save.</div>
+  <input type="text" id="knName" placeholder="Your name" autocomplete="name">
+  <button class="btn-submit" id="knNameGo">Continue</button>
+</div></div>
 
 <!-- FINISHED GOODS -->
 <div class="view" id="v-fg">
@@ -651,6 +758,11 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   <button data-v="fgpo" onclick="openFG('fgpo')"><span><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg></span>PO Track</button>
   <button data-v="fgsw" onclick="openFG('fgsw')"><span><svg class="ic" aria-hidden="true"><use href="#i-clearance"/></svg></span>Sweep</button>
 </nav>
+<nav class="bnav" id="knNav" style="display:none">
+  <button data-v="kn" onclick="openKN('kn')"><span><svg class="ic" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Dashboard</button>
+  <button data-v="knentry" onclick="openKN('knentry')"><span><svg class="ic" aria-hidden="true"><use href="#i-entry"/></svg></span>Beam Entry</button>
+  <button data-v="kntapes" onclick="openKN('kntapes')"><span><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg></span>Tapes</button>
+</nav>
 
 <div class="toast" id="toast"></div>
 <div class="upd" id="updBar" onclick="location.reload()">New version available · tap to refresh</div>
@@ -680,7 +792,7 @@ function fmtD(d){if(!d)return '';var p=String(d).split('-');if(p.length!==3)retu
 function netRate(r){var m=String(r||'').replace(/[₹,\s]/g,'').match(/^([\d.]+)(?:-([\d.]+)%)?/);if(!m)return null;var g=parseFloat(m[1]);if(isNaN(g))return null;return g*(1-(m[2]?parseFloat(m[2]):0)/100);}
 
 /* ══ NAV / SHELL ══ */
-function refreshCur(){if(current.indexOf('fg')===0)FG.load(true);else loadData(true);}
+function refreshCur(){if(current.indexOf('fg')===0)FG.load(true);else if(current.indexOf('kn')===0)KN.load(true);else loadData(true);}
 var lastLoad=0;
 function readCache(){try{return JSON.parse(localStorage.getItem('sx_cache')||'null');}catch(e){return null;}}
 function renderData(d){allData=d.stock||[];allOrders=d.orders||[];updateStats();if(mainTab==='orders')renderOrderCards();else renderCards();}
@@ -689,19 +801,21 @@ function openYarn(){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],kn:['Knitted Production','Dashboard'],knentry:['Beam Entry','Knitted Production'],kntapes:['Manage Tapes','Knitted Production']};
 function goHome(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
 function go(v,fromPop){
   current=v; closeAll();
-  document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('show',x.id==='v-'+(v.indexOf('fg')===0?'fg':v));});
+  document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('show',x.id==='v-'+(v.indexOf('fg')===0?'fg':v.indexOf('kn')===0?'kn':v));});
   document.querySelectorAll('.bnav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v);});
   document.getElementById('hTitle').textContent=HEAD[v][0];
   document.getElementById('hSub').textContent=HEAD[v][1];
-  document.getElementById('refreshBtn').style.display=(v==='dash'||v.indexOf('fg')===0)?'flex':'none';
+  document.getElementById('refreshBtn').style.display=(v==='dash'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||isFG)?'none':'';
+  var isKN=v.indexOf('kn')===0;
+  document.getElementById('yarnNav').style.display=(v==='home'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
+  document.getElementById('knNav').style.display=isKN?'':'none';
   document.body.classList.toggle('nav-on',v!=='home');
   if(!fromPop&&v!=='home'){try{if(!(history.state&&history.state.s))history.pushState({s:1},'');}catch(e){}}
   window.scrollTo(0,0);
@@ -1155,19 +1269,227 @@ var FG=(function(){
 var FG_TABS={fg:'fg',fgpo:'po',fgsw:'sw'};
 function openFG(v){v=v||'fg';go(v);FG.open(FG_TABS[v]);}
 
+/* ══ KNITTED PRODUCTION (via Suryatex OS Hub — same cells and Entry Log as the team's Knitted Beams Tracker) ══ */
+var KN=(function(){
+  var MACHINES=[{id:'comez',name:'COMEZ'},{id:'mainMuller',name:'Main MULLER'},{id:'sideMuller',name:'Side MULLER'},{id:'ky',name:'KY'},
+    {id:'tch1',name:'TCH 1'},{id:'tch2',name:'TCH 2'},{id:'fastMuller1',name:'Fast MULLER 1'},{id:'fastMuller2',name:'Fast MULLER 2'},
+    {id:'victory1',name:'Victory 1'},{id:'victory2',name:'Victory 2'}];
+  var D=null, tab='dash', active='comez', lastLoad=0, loading=false, saving={}, savedDot={}, pin='', tapeBusy=false, editIdx=null, pendingSave=null;
+  function $(id){return document.getElementById(id);}
+  function val(v){return (v===null||v===undefined||v==='')?'':v;}
+  function num0(v){return (v===null||v===undefined||v==='')?0:v;}
+  function deviceId(){try{var d=localStorage.getItem('sx_device');if(!d){d=(crypto.randomUUID?crypto.randomUUID():'dev-'+Math.random().toString(36).slice(2)+Date.now());localStorage.setItem('sx_device',d);}return d;}catch(e){return 'unknown';}}
+  function userName(){try{return localStorage.getItem('sx_user_name')||'';}catch(e){return '';}}
+  function meta(extra){return Object.assign({user:userName(),device:deviceId()},extra||{});}
+  function call(fn,args,m){
+    return fetch('/api/hub',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fn:fn,args:args||{},meta:m||{},passcode:(window.S&&window.S.pass)||''})})
+      .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});
+  }
+  function cyc(v){var n=Number(v);return n===1?'c1':n===2?'c2':n===3?'c3':'';}
+
+  /* ---------- data ---------- */
+  function open(t){
+    tab=t||tab;
+    if(!D){try{var c=JSON.parse(localStorage.getItem('sx_kn')||'null');if(c&&c.d)D=c.d;}catch(e){}}
+    render();
+    if(Date.now()-lastLoad>30000)load(false);
+  }
+  function load(manual){
+    if(loading)return; loading=true;
+    var btn=$('refreshBtn'),icon=$('refreshIcon'); btn.disabled=true; icon.classList.add('spin');
+    if(!D)$('knView').innerHTML='<div class="loading"><div class="spinner"></div>Loading knitted production…</div>';
+    call('knitted.getAll').then(function(j){
+      loading=false; btn.disabled=false; icon.classList.remove('spin');
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok)throw new Error(j.error||'Could not load data');
+      D=j.data; lastLoad=Date.now();
+      try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
+      render(); if(manual)showToast('Knitted production updated','success');
+    }).catch(function(e){
+      loading=false; btn.disabled=false; icon.classList.remove('spin');
+      if(!D)$('knView').innerHTML='<div class="kn-state err">Could not load data.<br>'+esc(e&&e.message?e.message:e)+'</div>';
+      showToast(navigator.onLine===false?'Offline — showing last saved data':'Sync failed','danger');
+    });
+  }
+  function isOn(){return current&&current.indexOf('kn')===0;}
+
+  /* ---------- render ---------- */
+  function render(){
+    if(!D)return;
+    if(tab==='dash')renderDash(); else if(tab==='entry')renderEntry(); else renderTapes();
+    $('knFoot').textContent='Synced '+(D.loaded||'');
+  }
+  function renderDash(){
+    var tot=0,busy=0,c3=0;
+    MACHINES.forEach(function(m){(D.cycleData[m.id]||[]).forEach(function(b){if(b.tape)busy++;if(Number(b.cycle)===3)c3++;tot++;});});
+    var h='<p class="kn-sub">Latest saved beam data across every machine</p>'
+      +'<div class="kn-stats"><div class="kn-stat"><b>'+busy+'<small>/'+tot+'</small></b><span>Beams with tape</span></div>'
+      +'<div class="kn-stat danger"><b>'+c3+'</b><span>At cycle 3</span></div>'
+      +'<div class="kn-stat"><b>'+MACHINES.length+'</b><span>Machines</span></div></div><div class="kn-grid">';
+    MACHINES.forEach(function(m){
+      var beams=D.cycleData[m.id]||[], tc=0, tr=0;
+      var rows=beams.map(function(b,i){tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
+        return '<tr><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
+          +'<td><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td><td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td></tr>';}).join('');
+      h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span><button class="kn-edit" data-kn-edit="'+m.id+'" aria-label="Edit '+m.name+'">Edit</button></div>'
+        +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th><th>Cycle</th><th class="kn-n">Wt/Mtr</th><th class="kn-n">Wt/Roll</th></tr></thead><tbody>'+rows+'</tbody></table>'
+        +'<div class="kn-sum"><span>Total cycle <b>'+tc+'</b></span><span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+'</b></span></div></div>';
+    });
+    $('knView').innerHTML=h+'</div>';
+  }
+  function chips(){
+    return '<div class="kn-chips" role="tablist">'+MACHINES.map(function(m){
+      var d=savedDot[m.id]; return '<button class="kn-chip'+(m.id===active?' on':'')+'" data-kn-m="'+m.id+'" role="tab">'+m.name+(d?'<i class="kn-dot '+d+'"></i>':'')+'</button>';}).join('')+'</div>';
+  }
+  function renderEntry(){
+    var m=MACHINES.filter(function(x){return x.id===active;})[0], beams=D.cycleData[active]||[], who=userName();
+    var h='<div class="kn-who">'+(who?'Entering as <b>'+esc(who)+'</b> · <button class="kn-link" data-kn-name>Change</button>':'<button class="kn-link" data-kn-name>Set your name</button> — it is logged with every save')+'</div>'
+      +chips()+'<div class="kn-beams">';
+    beams.forEach(function(b,i){
+      var p=active+'_'+i;
+      h+='<div class="kn-beam '+cyc(b.cycle)+'" id="kb_'+p+'"><div class="kn-beam-h">Beam '+(i+1)+'</div>'
+        +'<div class="kn-f"><label class="kn-l" for="kt_'+p+'">Tape</label><div class="kn-ac"><div class="kn-tbox" id="ktb_'+p+'">'
+        +'<input type="text" id="kt_'+p+'" autocomplete="off" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
+        +'<button type="button" class="kn-arrow" data-kn-arrow="'+i+'" aria-label="Show all tapes"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>'
+        +'<div class="kn-list" id="ktl_'+p+'"></div></div></div>'
+        +'<div class="kn-3"><div class="kn-f"><label class="kn-l" for="kc_'+p+'">Cycle</label><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" value="'+num0(b.cycle)+'" data-kn-cyc="'+i+'"></div>'
+        +'<div class="kn-f"><label class="kn-l" for="km_'+p+'">Wt/Mtr</label><input type="number" inputmode="decimal" step="any" id="km_'+p+'" value="'+num0(b.weightMtr)+'"></div>'
+        +'<div class="kn-f"><label class="kn-l" for="kr_'+p+'">Wt/Roll</label><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" value="'+num0(b.weightRoll)+'"></div></div></div>';
+    });
+    h+='</div><button class="btn-submit kn-save" id="knSave">Save '+m.name+'</button>';
+    $('knView').innerHTML=h;
+    var on=document.querySelector('.kn-chip.on'); if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'});
+  }
+  function renderTapes(){
+    if(!pin){
+      $('knView').innerHTML='<p class="kn-sub">Add, rename or remove tapes in the Product Description list</p>'
+        +'<div class="kn-pin"><label class="kn-l" for="knPin">Admin PIN</label><div class="kn-pin-row"><input type="password" inputmode="numeric" autocomplete="off" id="knPin" placeholder="Enter admin PIN">'
+        +'<button class="btn-submit" id="knPinBtn">Unlock</button></div><div class="kn-err" id="knPinErr"></div></div>';
+      return;
+    }
+    var list=D.tapeList||[];
+    var h='<p class="kn-sub">'+list.length+' tapes · renaming also updates every beam using that tape</p>'
+      +'<div class="kn-add"><input type="text" id="knNewTape" placeholder="New tape name" autocomplete="off"><button class="btn-submit" id="knAddTape">Add</button></div><div class="kn-tapes">';
+    if(!list.length)h+='<div class="kn-state">No tapes yet. Add one above.</div>';
+    list.forEach(function(t,i){
+      if(i===editIdx)h+='<div class="kn-tape editing"><input type="text" id="knEditTape" value="'+esc(t.trim())+'"><button class="kn-btn acc" data-kn-save-edit="'+i+'">Save</button><button class="kn-btn" data-kn-cancel>Cancel</button></div>';
+      else h+='<div class="kn-tape"><span>'+esc(t)+'</span><div class="kn-tape-a"><button class="kn-ib" data-kn-rename="'+i+'" aria-label="Rename '+esc(t)+'"><svg class="ic" aria-hidden="true"><use href="#i-entry"/></svg></button>'
+        +'<button class="kn-ib del" data-kn-remove="'+i+'" aria-label="Remove '+esc(t)+'"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div></div>';
+    });
+    $('knView').innerHTML=h+'</div>';
+  }
+
+  /* ---------- tape picker ---------- */
+  function listFor(i,showAll){
+    var p=active+'_'+i, inp=$('kt_'+p), list=$('ktl_'+p), q=inp.value.trim().toLowerCase();
+    closeLists(list); $('ktb_'+p).classList.remove('invalid');
+    var tl=D.tapeList||[], m=(showAll||!q)?tl:tl.filter(function(t){return t.toLowerCase().indexOf(q)>-1;});
+    list.innerHTML=m.length?m.map(function(t){return '<div class="kn-opt'+(t.trim().toLowerCase()===q?' sel':'')+'" data-kn-pick="'+i+'" data-v="'+esc(t)+'">'+esc(t)+'</div>';}).join(''):'<div class="kn-empty">No matching tapes</div>';
+    list.classList.add('open'); $('ktb_'+p).classList.add('open');
+  }
+  function closeLists(except){document.querySelectorAll('.kn-list.open').forEach(function(l){if(l!==except){l.classList.remove('open');}});document.querySelectorAll('.kn-tbox.open').forEach(function(b){if(!except||b.parentNode!==except.parentNode)b.classList.remove('open');});}
+  function snap(i){
+    var p=active+'_'+i, inp=$('kt_'+p), box=$('ktb_'+p); if(!inp)return true;
+    var typed=inp.value.trim().toLowerCase();
+    if(!typed){inp.value='';box.classList.remove('invalid');return true;}
+    var m=(D.tapeList||[]).filter(function(t){return t.trim().toLowerCase()===typed;})[0];
+    if(m){inp.value=m;box.classList.remove('invalid');return true;}
+    box.classList.add('invalid');return false;
+  }
+
+  /* ---------- save ---------- */
+  function save(){
+    if(saving[active])return;
+    if(!userName()){pendingSave=true;return askName();}
+    var beams=[],bad=false,id=active,m=MACHINES.filter(function(x){return x.id===id;})[0];
+    for(var i=0;i<(D.cycleData[id]||[]).length;i++){
+      var p=id+'_'+i; if(!snap(i))bad=true;
+      var c=$('kc_'+p).value,t=$('kt_'+p).value,wm=$('km_'+p).value,wr=$('kr_'+p).value;
+      beams.push({cycle:c===''?'':Number(c),tape:t,weightMtr:wm===''?'':Number(wm),weightRoll:wr===''?'':Number(wr)});
+    }
+    if(bad){showToast('Pick tapes from the list (red boxes)','danger');return;}
+    saving[id]=true; var btn=$('knSave'); btn.disabled=true; btn.textContent='Saving…';
+    call('knitted.saveBeams',{machineId:id,beams:beams},meta()).then(function(j){
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok)throw new Error(j.error||'Save failed');
+      D.cycleData[id]=beams.map(function(b,k){var o=D.cycleData[id][k]||{};return {cycle:b.cycle===''?o.cycle:b.cycle,tape:b.tape===''?o.tape:b.tape,weightMtr:b.weightMtr===''?o.weightMtr:b.weightMtr,weightRoll:b.weightRoll===''?o.weightRoll:b.weightRoll};});
+      try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
+      savedDot[id]='ok'; saving[id]=false; showToast(m.name+' beams saved','success');
+      if(isOn()&&tab==='entry'&&active===id)renderEntry();
+    }).catch(function(e){
+      saving[id]=false; savedDot[id]='err'; showToast((e&&e.message)||('Error saving '+m.name),'danger');
+      if(isOn()&&tab==='entry'&&active===id){var b=$('knSave');if(b){b.disabled=false;b.textContent='Save '+m.name;}var c=document.querySelector('.kn-chip.on');if(c&&!c.querySelector('.kn-dot'))c.insertAdjacentHTML('beforeend','<i class="kn-dot err"></i>');}
+    });
+  }
+  function askName(){var i=$('knName');i.value=userName();$('knNameBox').classList.add('open');setTimeout(function(){i.focus();},50);}
+  function setName(){var v=$('knName').value.trim();if(!v)return;try{localStorage.setItem('sx_user_name',v);}catch(e){}$('knNameBox').classList.remove('open');
+    var w=document.querySelector('.kn-who'); if(w)w.innerHTML='Entering as <b>'+esc(v)+'</b> · <button class="kn-link" data-kn-name>Change</button>';
+    if(pendingSave){pendingSave=null;save();}}
+
+  /* ---------- tapes ---------- */
+  function unlock(){var v=$('knPin').value.trim();if(!v)return;var b=$('knPinBtn');b.disabled=true;
+    call('knitted.verifyPin',{pin:v}).then(function(j){b.disabled=false;if(j.ok&&j.data){pin=v;editIdx=null;renderTapes();}else{$('knPinErr').textContent=j.ok?'Incorrect PIN':(j.error||'Could not verify PIN');}})
+    .catch(function(){b.disabled=false;$('knPinErr').textContent='Could not verify PIN. Try again.';});}
+  function tapeOp(fn,args,okMsg,after){
+    if(tapeBusy)return; tapeBusy=true;
+    call(fn,args,meta({pin:pin})).then(function(j){tapeBusy=false;
+      if(!j.ok){if(/PIN/.test(j.error||''))pin='';throw new Error(j.error||'Failed');}
+      var r=j.data; D.tapeList=Array.isArray(r)?r:r.tapeList; if(after)after(r); editIdx=null; renderTapes();
+      showToast(typeof okMsg==='function'?okMsg(r):okMsg,'success');
+    }).catch(function(e){tapeBusy=false;showToast((e&&e.message)||'Failed','danger');if(!pin)renderTapes();});
+  }
+  function renameLocal(o,n){var no=o.trim().toLowerCase();Object.keys(D.cycleData).forEach(function(k){D.cycleData[k].forEach(function(b){if((b.tape||'').toString().trim().toLowerCase()===no)b.tape=n;});});}
+
+  /* ---------- events ---------- */
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.closest('#knNameBox')){if(t.id==='knNameGo')setName();else if(t.id==='knNameBox')$('knNameBox').classList.remove('open');return;}
+    if(!isOn())return;
+    var x;
+    if((x=t.closest('[data-kn-edit]'))){active=x.getAttribute('data-kn-edit');return openKN('knentry');}
+    if((x=t.closest('[data-kn-m]'))){active=x.getAttribute('data-kn-m');return renderEntry();}
+    if(t.closest('[data-kn-name]'))return askName();
+    if((x=t.closest('[data-kn-pick]'))){var i=+x.getAttribute('data-kn-pick');$('kt_'+active+'_'+i).value=x.getAttribute('data-v');closeLists();snap(i);return;}
+    if((x=t.closest('[data-kn-arrow]'))){var j=+x.getAttribute('data-kn-arrow'),l=$('ktl_'+active+'_'+j);if(l.classList.contains('open')){closeLists();snap(j);}else listFor(j,true);return;}
+    if(t.closest('#knSave'))return save();
+    if(t.closest('#knPinBtn'))return unlock();
+    if(t.closest('#knAddTape')){var n=$('knNewTape').value.trim();if(n)tapeOp('knitted.addTape',{name:n},'Tape added');return;}
+    if((x=t.closest('[data-kn-rename]'))){editIdx=+x.getAttribute('data-kn-rename');renderTapes();var ed=$('knEditTape');if(ed){ed.focus();ed.select();}return;}
+    if(t.closest('[data-kn-cancel]')){editIdx=null;return renderTapes();}
+    if((x=t.closest('[data-kn-save-edit]'))){var k=+x.getAttribute('data-kn-save-edit'),o=D.tapeList[k],nn=$('knEditTape').value.trim();
+      if(!nn)return; if(nn===o.trim()){editIdx=null;return renderTapes();}
+      return tapeOp('knitted.renameTape',{oldName:o,newName:nn},function(r){return r.updatedBeams?'Tape renamed · '+r.updatedBeams+' beams updated':'Tape renamed';},function(){renameLocal(o,nn);});}
+    if((x=t.closest('[data-kn-remove]'))){var rm=D.tapeList[+x.getAttribute('data-kn-remove')];
+      if(confirmRemove(x,rm))tapeOp('knitted.removeTape',{name:rm},'Tape removed');return;}
+    if(!t.closest('.kn-ac')){var openL=document.querySelector('.kn-list.open');if(openL){var idx=+openL.id.split('_').pop();closeLists();snap(idx);}}
+  });
+  // two-tap remove: first tap arms the button, second tap within 3s removes (no browser dialogs)
+  function confirmRemove(btn,name){if(btn.classList.contains('armed'))return true;btn.classList.add('armed');btn.setAttribute('aria-label','Tap again to remove '+name);showToast('Tap ✕ again to remove "'+name.trim()+'"','');setTimeout(function(){btn.classList.remove('armed');},3000);return false;}
+  document.addEventListener('focusin',function(e){var a=e.target.getAttribute&&e.target.getAttribute('data-kn-tape');if(a!==null&&a!==undefined&&isOn()){e.target.select();listFor(+a,true);}});
+  document.addEventListener('input',function(e){if(!isOn())return;var t=e.target,a=t.getAttribute('data-kn-tape');
+    if(a!==null)return listFor(+a,false);
+    var c=t.getAttribute('data-kn-cyc'); if(c!==null){var v=t.value.replace(/[^0-9]/g,'');if(v.length>1)v=v.slice(-1);t.value=v;var card=$('kb_'+active+'_'+c);card.classList.remove('c1','c2','c3');var k=cyc(v);if(k)card.classList.add(k);}});
+  document.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var id=e.target.id;
+    if(id==='knName')setName(); else if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
+  return {open:open,load:load,loaded:function(){return !!D;},since:function(){return lastLoad;}};
+})();
+var KN_TABS={kn:'dash',knentry:'entry',kntapes:'tapes'};
+function openKN(v){v=v||'kn';go(v);KN.open(KN_TABS[v]);}
+
 /* ══ PWA ══ */
 if('serviceWorker' in navigator){
   var hadCtl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadCtl)document.getElementById('updBar').classList.add('show');});
   window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
 }
-document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(current==='dash'&&loaded&&Date.now()-lastLoad>60000)loadData();if(current.indexOf('fg')===0&&FG.loaded()&&Date.now()-FG.since()>60000)FG.load(false);});
+document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(current==='dash'&&loaded&&Date.now()-lastLoad>60000)loadData();if(current.indexOf('fg')===0&&FG.loaded()&&Date.now()-FG.since()>60000)FG.load(false);if(current.indexOf('kn')===0&&KN.loaded()&&Date.now()-KN.since()>60000)KN.load(false);});
 var deferredInstall=null;
 function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(!isStandalone())document.getElementById('installBtn').style.display='inline-flex';});
 function doInstall(){if(!deferredInstall)return;deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;document.getElementById('installBtn').style.display='none';});}
 window.addEventListener('appinstalled',function(){document.getElementById('installBtn').style.display='none';});
-window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData();if(current.indexOf('fg')===0)FG.load(false);});
+window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData();if(current.indexOf('fg')===0)FG.load(false);if(current.indexOf('kn')===0)KN.load(false);});
 (function(){if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!isStandalone()){var h=document.getElementById('iosHint');if(h)h.style.display='block';}})();
 
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();go('home');});
