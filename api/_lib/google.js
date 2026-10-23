@@ -69,4 +69,22 @@ async function sheetTitles(id) {
   return (j.sheets || []).map((s) => s.properties.title);
 }
 
-module.exports = { enabled, token, batchGet, batchUpdate, append, sheetTitles, q, serviceEmail: () => (serviceKey() || {}).client_email };
+// read-only: can the service account edit this file, and which ranges are protected?
+async function accessReport(id) {
+  const out = {};
+  try {
+    const d = await api('GET', 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id) + '?fields=name,capabilities(canEdit),owners(emailAddress)&supportsAllDrives=true');
+    out.file = d.name; out.canEdit = d.capabilities && d.capabilities.canEdit;
+  } catch (e) { out.driveError = e.message; }
+  try {
+    const j = await api('GET', base(id) + '?fields=sheets(properties(title,sheetId),protectedRanges(range,warningOnly,description,editors(users)))');
+    out.protected = [];
+    (j.sheets || []).forEach((sh) => (sh.protectedRanges || []).forEach((pr) => out.protected.push({
+      tab: sh.properties.title, wholeTab: !pr.range || (pr.range.startRowIndex === undefined && pr.range.startColumnIndex === undefined),
+      range: pr.range, warningOnly: !!pr.warningOnly, editors: pr.editors && pr.editors.users ? pr.editors.users.length : 0,
+      appIsEditor: !!(pr.editors && pr.editors.users && pr.editors.users.includes((serviceKey() || {}).client_email)) })));
+  } catch (e) { out.sheetsError = e.message; }
+  return out;
+}
+
+module.exports = { accessReport, enabled, token, batchGet, batchUpdate, append, sheetTitles, q, serviceEmail: () => (serviceKey() || {}).client_email };

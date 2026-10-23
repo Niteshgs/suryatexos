@@ -37,6 +37,7 @@ module.exports = async (req, res) => {
   if (req.method === 'GET' && process.env.VERCEL_ENV === 'preview') {
     try {
       const t0 = Date.now();
+      if ((req.query || {}).access) return res.status(200).json(await G.accessReport(KN.SHEET_ID));
       const r = await run('knitted.getAll');
       const d = r.json.data;
       return res.status(200).json({ ok: r.json.ok, source: direct('knitted.getAll') ? 'google-sheets-direct' : 'hub-script', serviceAccount: G.serviceEmail() || null, error: r.json.error || '', debug: r.json.ok ? undefined : { httpStatus: r.json.httpStatus, finalUrl: r.json.finalUrl, snippet: r.json.snippet }, ms: Date.now() - t0,
