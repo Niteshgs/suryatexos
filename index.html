@@ -510,11 +510,6 @@ html:has(body.light){color-scheme:light}
 body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
 .kn-shell{display:flex;align-items:flex-start;gap:0;min-height:calc(100vh - 60px)}
 .kn-side{width:240px;flex:0 0 240px;align-self:stretch;background:var(--surface);border-right:1px solid var(--border);margin-left:-16px;position:sticky;top:calc(60px + env(safe-area-inset-top));max-height:calc(100vh - 60px - env(safe-area-inset-top));overflow-y:auto}
-.kn-user{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
-.kn-av{width:32px;height:32px;border-radius:50%;background:var(--accent-strong);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:0 0 auto}
-.kn-user-i{min-width:0;flex:1}
-.kn-user-n{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kn-user-r{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
 .kn-side-l{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;padding:16px 16px 8px}
 .kn-mi{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:52px;padding:0 16px;border:none;border-left:3px solid transparent;background:none;color:var(--text-dim);font-family:inherit;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
 .kn-mi:hover{background:var(--surface2)}
@@ -655,12 +650,6 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   <div id="knView"><div class="loading"><div class="spinner"></div>Loading knitted production…</div></div>
   <div class="kn-foot" id="knFoot"></div>
 </div>
-<div class="kn-modal" id="knNameBox"><div class="kn-modal-in" role="dialog" aria-labelledby="knNameT">
-  <div class="kn-modal-t" id="knNameT">Who's entering data?</div>
-  <div class="kn-modal-s">Enter your name once on this phone. It's logged with every save.</div>
-  <input type="text" id="knName" placeholder="Your name" autocomplete="name">
-  <button class="btn-submit" id="knNameGo">Continue</button>
-</div></div>
 
 <div class="kn-modal" id="knPinBox"><div class="kn-modal-in" role="dialog" aria-labelledby="knPinT">
   <div class="kn-modal-t" id="knPinT">Admin PIN</div>
@@ -1375,10 +1364,7 @@ var KN=(function(){
     $('knView').innerHTML=h;
   }
   function sideMenu(){
-    var who=userName(), initial=(who.trim().charAt(0)||'?').toUpperCase();
     return '<aside class="kn-side" id="knSide" aria-label="Machines">'
-      +'<div class="kn-user">'+(who?'<div class="kn-av">'+esc(initial)+'</div><div class="kn-user-i"><div class="kn-user-n">'+esc(who)+'</div><div class="kn-user-r">Entering data</div></div><button class="kn-link" data-kn-name>Change</button>'
-        :'<div class="kn-av">?</div><div class="kn-user-i"><div class="kn-user-n">No name set</div><div class="kn-user-r">Logged with every save</div></div><button class="kn-link" data-kn-name>Set</button>')+'</div>'
       +'<div class="kn-side-l">Select machine</div>'
       +MACHINES.map(function(m){var d=savedDot[m.id];return '<button class="kn-mi'+(m.id===active?' on':'')+'" data-kn-m="'+m.id+'"><span>'+m.name+'</span>'+(d?'<i class="kn-dot '+d+'"></i>':'')+'</button>';}).join('')
       +'</aside><div class="kn-backdrop" id="knBackdrop" data-kn-close-side></div>';
@@ -1439,7 +1425,6 @@ var KN=(function(){
   /* ---------- save ---------- */
   function save(){
     if(saving[active])return;
-    if(!userName()){pendingSave=true;return askName();}
     var beams=[],bad=false,id=active,m=MACHINES.filter(function(x){return x.id===id;})[0];
     for(var i=0;i<(D.cycleData[id]||[]).length;i++){
       var p=id+'_'+i; if(!snap(i))bad=true;
@@ -1460,10 +1445,6 @@ var KN=(function(){
       if(isOn()&&tab==='entry'&&active===id){var b=$('knSave');if(b){b.disabled=false;b.textContent='Save '+m.name;}var c=document.querySelector('.kn-mi.on');if(c&&!c.querySelector('.kn-dot'))c.insertAdjacentHTML('beforeend','<i class="kn-dot err"></i>');}
     });
   }
-  function askName(){var i=$('knName');i.value=userName();$('knNameBox').classList.add('open');setTimeout(function(){i.focus();},50);}
-  function setName(){var v=$('knName').value.trim();if(!v)return;try{localStorage.setItem('sx_user_name',v);}catch(e){}$('knNameBox').classList.remove('open');
-    var u=document.querySelector('.kn-user'); if(u)u.innerHTML='<div class="kn-av">'+esc(v.charAt(0).toUpperCase())+'</div><div class="kn-user-i"><div class="kn-user-n">'+esc(v)+'</div><div class="kn-user-r">Entering data</div></div><button class="kn-link" data-kn-name>Change</button>';
-    if(pendingSave){pendingSave=null;save();}}
 
   /* ---------- tapes ---------- */
   function unlock(){var v=$('knPin').value.trim();if(!v)return;var b=$('knPinBtn');b.disabled=true;
@@ -1482,7 +1463,6 @@ var KN=(function(){
   /* ---------- events ---------- */
   document.addEventListener('click',function(e){
     var t=e.target;
-    if(t.closest('#knNameBox')){if(t.id==='knNameGo')setName();else if(t.id==='knNameBox')$('knNameBox').classList.remove('open');return;}
     if(t.closest('#knPinBox')){if(t.closest('#knPinBtn'))unlock();else if(t.id==='knPinBox'||t.closest('[data-kn-pin-close]'))$('knPinBox').classList.remove('open');return;}
     if(!isOn())return;
     var x;
@@ -1492,7 +1472,6 @@ var KN=(function(){
     if(t.closest('[data-kn-close-side]'))return closeSide();
     if(t.closest('[data-kn-manage]')){if(pin)return openKN('kntapes');return askPin();}
     if(t.closest('[data-kn-dash]'))return openKN('kn');
-    if(t.closest('[data-kn-name]'))return askName();
     if((x=t.closest('[data-kn-pick]'))){var i=+x.getAttribute('data-kn-pick');$('kt_'+active+'_'+i).value=x.getAttribute('data-v');closeLists();snap(i);return;}
     if((x=t.closest('[data-kn-arrow]'))){var j=+x.getAttribute('data-kn-arrow'),l=$('ktl_'+active+'_'+j);if(l.classList.contains('open')){closeLists();snap(j);}else listFor(j,true);return;}
     if(t.closest('#knSave'))return save();
@@ -1513,7 +1492,7 @@ var KN=(function(){
     if(a!==null)return listFor(+a,false);
     var c=t.getAttribute('data-kn-cyc'); if(c!==null){var v=t.value.replace(/[^0-9]/g,'');if(v.length>1)v=v.slice(-1);t.value=v;var card=$('kb_'+active+'_'+c);card.classList.remove('c1','c2','c3');var k=cyc(v);if(k)card.classList.add(k);}});
   document.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var id=e.target.id;
-    if(id==='knName')setName(); else if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
+    if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
   return {open:open,load:load,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
 var KN_TABS={kn:'dash',knentry:'entry',kntapes:'tapes'};
