@@ -517,6 +517,9 @@ html:has(body.light){color-scheme:light}
 .kn-list.open{display:block}
 .kn-opt{padding:14px 16px;font-size:16px;min-height:48px;cursor:pointer;color:var(--text)}
 .kn-opt:hover{background:var(--surface2)}.kn-opt.sel{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.kn-lsearch{position:sticky;top:0;z-index:1;padding:8px;background:var(--surface);border-bottom:1px solid var(--border)}
+#v-kn .kn-lsearch input{width:100%;min-height:42px;padding:0 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-size:16px;-webkit-appearance:none;appearance:none;outline:none}
+#v-kn .kn-lsearch input:focus{border-color:var(--accent)}
 .kn-empty{padding:14px 16px;font-size:14px;color:var(--text-muted)}
 .kn-save{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;margin-bottom:8px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .kn-add{display:flex;gap:8px}
@@ -690,7 +693,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v66</span>
+    <span class="app-ver" id="appVer" title="App version">v67</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1686,9 +1689,15 @@ var KN=(function(){
   function listFor(i,showAll){
     var p=active+'_'+i, inp=$('kt_'+p), list=$('ktl_'+p), q=inp.value.trim().toLowerCase();
     closeLists(list); $('ktb_'+p).classList.remove('invalid');
-    var tl=D.tapeList||[], m=(showAll||!q)?tl:tl.filter(function(t){return t.toLowerCase().indexOf(q)>-1;});
-    list.innerHTML=m.length?m.map(function(t){return '<div class="kn-opt'+(t.trim().toLowerCase()===q?' sel':'')+'" data-kn-pick="'+i+'" data-v="'+esc(t)+'">'+esc(t)+'</div>';}).join(''):'<div class="kn-empty">No matching tapes</div>';
+    // phones: a search box at the top of the list (tap it to type); desktop: type straight into the tape field
+    list.innerHTML=KN_TOUCH?'<div class="kn-lsearch"><input type="search" id="ktq_'+p+'" data-kn-lq="'+i+'" placeholder="Type to search tapes…" autocomplete="off" spellcheck="false" enterkeyhint="done" aria-label="Search tapes"></div><div id="kto_'+p+'">'+tapeOpts(i,'',q)+'</div>'
+      :tapeOpts(i,showAll?'':q,q);
     list.classList.add('open'); $('ktb_'+p).classList.add('open');
+  }
+  function tapeOpts(i,filter,cur){
+    var f=String(filter||'').trim().toLowerCase(),tl=D.tapeList||[];
+    var m=f?tl.filter(function(t){return t.toLowerCase().indexOf(f)>-1;}):tl;
+    return m.length?m.map(function(t){return '<div class="kn-opt'+(t.trim().toLowerCase()===cur?' sel':'')+'" data-kn-pick="'+i+'" data-v="'+esc(t)+'">'+esc(t)+'</div>';}).join(''):'<div class="kn-empty">No matching tapes</div>';
   }
   function closeLists(except){document.querySelectorAll('.kn-list.open').forEach(function(l){if(l!==except){l.classList.remove('open');}});document.querySelectorAll('.kn-tbox.open').forEach(function(b){if(!except||b.parentNode!==except.parentNode)b.classList.remove('open');});}
   var clearTimer=null;
@@ -1807,6 +1816,7 @@ var KN=(function(){
     if((x=t.closest('[data-kn-clear]'))){closeLists();clearBeams(x);return;}
     if((x=t.closest('[data-kn-view]'))){dview=x.getAttribute('data-kn-view');try{localStorage.setItem('sx_kn_view',dview);}catch(e){}renderDash();return;}
     if((x=t.closest('[data-kn-ditto]'))){closeLists();dittoBeam(+x.getAttribute('data-kn-ditto'));return;}
+    if(t.closest('[data-kn-lq]'))return;
     if((x=t.closest('[data-kn-pick]'))){var i=+x.getAttribute('data-kn-pick');var ti=$('kt_'+active+'_'+i);ti.value=x.getAttribute('data-v');knMark(ti);closeLists();snap(i);return;}
     if(KN_TOUCH&&(x=t.closest('[data-kn-tape]'))){var q=+x.getAttribute('data-kn-tape');if(!$('ktl_'+active+'_'+q).classList.contains('open'))listFor(q,true);return;}
     if((x=t.closest('[data-kn-arrow]'))){var j=+x.getAttribute('data-kn-arrow'),l=$('ktl_'+active+'_'+j);if(l.classList.contains('open')){closeLists();snap(j);}else listFor(j,true);return;}
@@ -1826,8 +1836,11 @@ var KN=(function(){
   document.addEventListener('focusin',function(e){var a=e.target.getAttribute&&e.target.getAttribute('data-kn-tape');if(a!==null&&a!==undefined&&isOn()){if(!KN_TOUCH)e.target.select();listFor(+a,true);}});
   document.addEventListener('input',function(e){if(!isOn())return;var t=e.target,a=t.getAttribute('data-kn-tape');
     if(a!==null){knMark(t);return listFor(+a,false);}
+    var lq=t.getAttribute('data-kn-lq'); if(lq!==null){var bx=$('kto_'+active+'_'+lq);if(bx)bx.innerHTML=tapeOpts(+lq,t.value,($('kt_'+active+'_'+lq).value||'').trim().toLowerCase());return;}
     var c=t.getAttribute('data-kn-cyc'); if(c!==null){var v=t.value.replace(/[^0-9]/g,'');if(v.length>1)v=v.slice(-1);t.value=v;}
     knMark(t);});
+  document.addEventListener('keydown',function(e){var t=e.target,lq=t.getAttribute&&t.getAttribute('data-kn-lq');if(lq===null||lq===undefined||e.key!=='Enter')return;
+    e.preventDefault();var first=document.querySelector('#kto_'+active+'_'+lq+' [data-kn-pick]');if(first)first.click();});
   function knMark(t){if(!t||!t.closest)return;if(t.closest('#v-kn .kn-beams'))dirty=true;if(t.closest('.kn-f'))t.classList.toggle('zero',!Number(t.value));
     var bx=t.closest('.kn-tbox');if(bx)bx.classList.toggle('empty',!t.value.trim());}
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('knUnsaved').classList.contains('open')){closeUnsaved();pendingNav=null;return;}if(e.key!=='Enter')return;var id=e.target.id;
