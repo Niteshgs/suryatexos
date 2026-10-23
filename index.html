@@ -82,6 +82,7 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .bnav button.on{color:var(--accent);background:var(--accent-soft)}
 
 /* TOAST */
+.toast.has-act{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 20px}.toast-act{font:inherit;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:20px;padding:6px 14px;min-height:36px;cursor:pointer}
 .toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .3s ease;z-index:1000;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:var(--success);color:var(--success)}
@@ -599,6 +600,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   body.nav-on .bnav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:48px;padding:0 14px;border-radius:var(--radius-sm);font-size:13px}
   body.nav-on .bnav button span{font-size:20px}
   .toast{bottom:28px}
+  .toast.has-act{padding-right:8px}
   #v-dash{max-width:1200px;padding:28px 28px 48px}
   #v-entry{max-width:640px;padding:36px 24px 48px}
   #v-proc{max-width:720px;padding:32px 24px 48px}
@@ -642,7 +644,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v56</span>
+    <span class="app-ver" id="appVer" title="App version">v57</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -897,8 +899,11 @@ var ICON_OK='<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>',IC
 var ICON_SUN='<svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>',ICON_MOON='<svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg>';
 function toggleTheme(){var l=document.body.classList.toggle('light');document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
 try{if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').innerHTML=ICON_SUN;}}catch(e){}
-function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');if(type){clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},3000);}}
+function showToast(msg,type){var t=document.getElementById('toast');t.onclick=null;t.textContent=msg;t.className='toast show '+(type||'');if(type){clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},3000);}}
 
+function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast');t.innerHTML='';var s=document.createElement('span');s.textContent=msg;var b=document.createElement('button');b.type='button';b.className='toast-act';b.textContent=label;
+  b.onclick=function(e){e.stopPropagation();clearTimeout(showToast._t);t.classList.remove('show');fn();};t.appendChild(s);t.appendChild(b);t.className='toast show success has-act';
+  clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},ms||6000);}
 function showLock(msg){
   document.querySelectorAll('.view').forEach(function(x){x.classList.remove('show');});
   document.getElementById('v-lock').classList.add('show');
@@ -1494,7 +1499,20 @@ var KN=(function(){
     for(var i=0;i<n;i++){var p=active+'_'+i;
       var tt=$('kt_'+p);if(tt){tt.value='';knMark(tt);}var bx=$('ktb_'+p);if(bx)bx.classList.remove('invalid');
       ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value='';knMark(e);}});}
-    showToast('All beams cleared · Tap Save','');
+    var id=active, snap=JSON.parse(JSON.stringify(D.cycleData[id]||[]));   // last saved state, for Undo
+    save(null,{msg:'Beams cleared',undo:function(){undoClear(id,snap);}});
+  }
+  function undoClear(id,snap){
+    var m=MACHINES.filter(function(x){return x.id===id;})[0];
+    saving[id]=true;
+    call('knitted.saveBeams',{machineId:id,beams:snap},meta()).then(function(j){
+      saving[id]=false;
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok)throw new Error(j.error||'Undo failed');
+      D.cycleData[id]=snap; try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
+      dirty=false; showToast(m.name+' beams restored','success');
+      if(isOn()&&tab==='entry'&&active===id)renderEntry();
+    }).catch(function(e){saving[id]=false;showToast((e&&e.message)||'Undo failed','danger');});
   }
   function dittoBeam(i){
     var f=active+'_'+(i-1), to=active+'_'+i;
@@ -1523,7 +1541,7 @@ var KN=(function(){
   function closeUnsaved(){$('knUnsaved').classList.remove('open');}
 
   /* ---------- save ---------- */
-  function save(done){
+  function save(done,opt){
     if(saving[active])return;
     var beams=[],bad=false,id=active,m=MACHINES.filter(function(x){return x.id===id;})[0];
     for(var i=0;i<(D.cycleData[id]||[]).length;i++){
@@ -1538,7 +1556,8 @@ var KN=(function(){
       if(!j.ok)throw new Error(j.error||'Save failed');
       D.cycleData[id]=beams.map(function(b,k){var o=D.cycleData[id][k]||{};return {cycle:b.cycle===''?o.cycle:b.cycle,tape:b.tape,weightMtr:b.weightMtr===''?o.weightMtr:b.weightMtr,weightRoll:b.weightRoll===''?o.weightRoll:b.weightRoll};});
       try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
-      savedDot[id]='ok'; saving[id]=false; dirty=false; showToast(m.name+' beams saved','success');
+      savedDot[id]='ok'; saving[id]=false; dirty=false;
+      if(opt&&opt.undo)showToastAction(m.name+' · '+opt.msg,'Undo',opt.undo,6000); else showToast(m.name+' beams saved','success');
       if(typeof done==='function'){done();return;}
       if(isOn()&&tab==='entry'&&active===id)renderEntry();
     }).catch(function(e){
