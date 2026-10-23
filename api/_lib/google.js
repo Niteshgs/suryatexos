@@ -64,6 +64,13 @@ async function batchUpdate(id, data, inputOption) {
 async function append(id, range, rows, inputOption) {
   await api('POST', base(id) + '/values/' + encodeURIComponent(range) + ':append?valueInputOption=' + (inputOption || 'RAW') + '&insertDataOption=INSERT_ROWS', { values: rows });
 }
+async function sheetProps(id) {
+  const j = await api('GET', base(id) + '?fields=sheets.properties(title,sheetId,gridProperties.frozenRowCount)');
+  return (j.sheets || []).map((s) => s.properties);
+}
+async function format(id, requests) {
+  if (requests.length) await api('POST', base(id) + ':batchUpdate', { requests });
+}
 async function sheetTitles(id) {
   const j = await api('GET', base(id) + '?fields=sheets.properties.title');
   return (j.sheets || []).map((s) => s.properties.title);
@@ -87,4 +94,4 @@ async function accessReport(id) {
   return out;
 }
 
-module.exports = { accessReport, enabled, token, batchGet, batchUpdate, append, sheetTitles, q, serviceEmail: () => (serviceKey() || {}).client_email };
+module.exports = { accessReport, enabled, token, batchGet, batchUpdate, append, sheetTitles, sheetProps, format, q, serviceEmail: () => (serviceKey() || {}).client_email };
