@@ -118,6 +118,7 @@ async function saveBeams(machineId, beams, meta) {
     else if (String(cell(before[L.rows[i] - 1], col(L.cols.tape))).trim()) rows.push({ machine: name, beam: i + 1, action: 'Cleared' });
   });
   await log(meta, rows);
+  await refreshActivity(nowParts().date.slice(0, 7));
   return true;
 }
 
@@ -176,6 +177,97 @@ async function renameTape(oldName, newName, meta) {
   return { tapeList: await tapeList(), updatedBeams: updated };
 }
 
+/* ---------- Machine activity & changeovers (read from Entry Log) ---------- */
+// A machine is ACTIVE on a day when any beam's cycle or tape changed from its last saved value
+// (or a beam was cleared). Changeover = one beam's cycle or tape changing. First sighting of a beam = baseline.
+const NAME_TO_ID = Object.fromEntries(Object.entries(MACHINE_NAMES).map(([k, v]) => [v.toLowerCase(), k]));
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const DAY0 = Date.UTC(1899, 11, 30);
+function serialDay(v) {                       // sheet date cell -> whole day number
+  if (typeof v === 'number') return Math.floor(v);
+  const s = String(v || '').trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return Math.round((Date.UTC(+m[1], m[2] - 1, +m[3]) - DAY0) / 864e5);
+  if ((m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/))) return Math.round((Date.UTC(+m[3], m[2] - 1, +m[1]) - DAY0) / 864e5);
+  return null;
+}
+function dayFrac(v) {
+  if (typeof v === 'number') return v % 1;
+  const m = String(v || '').match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  return m ? (+m[1] * 3600 + +m[2] * 60 + +(m[3] || 0)) / 86400 : 0;
+}
+const ymd = (day) => new Date(DAY0 + day * 864e5).toISOString().slice(0, 10);
+const cnum = (v) => { const n = Number(v); return v === '' || v == null || isNaN(n) || n === 0 ? null : n; };
+
+async function computeActivity(month) {      // month = 'YYYY-MM'
+  const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:J')], 'serial');
+  const events = [];
+  for (const r of rows) {
+    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], beam = Number(cell(r, 4)), day = serialDay(cell(r, 0));
+    if (!id || !(beam >= 1 && beam <= 4) || day == null) continue;             // skips old-format / team-site rows
+    events.push({ id, beam, day, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), action: String(cell(r, 9) || '') });
+  }
+  events.sort((a, b) => a.t - b.t);
+  const [Y, M] = month.split('-').map(Number);
+  const first = Math.round((Date.UTC(Y, M - 1, 1) - DAY0) / 864e5), ndays = new Date(Date.UTC(Y, M, 0)).getUTCDate(), last = first + ndays - 1;
+  const today = serialDay(nowParts().date), start = events.length ? events[0].day : null;
+  const out = {}; Object.keys(MACHINE_NAMES).forEach((id) => { out[id] = { id, name: MACHINE_NAMES[id], days: {}, cycleChanges: 0, tapeChanges: 0, stamps: {} }; });
+  const lastSeen = {};
+  for (const e of events) {
+    const k = e.id + ':' + e.beam, prev = lastSeen[k], inMonth = e.day >= first && e.day <= last, o = out[e.id];
+    let changed = false;
+    if (/clear/i.test(e.action)) changed = !!prev;
+    else if (prev) {
+      if (e.cycle != null && prev.cycle != null && e.cycle !== prev.cycle) { changed = true; if (inMonth) o.cycleChanges++; }
+      if (e.tape && prev.tape && e.tape.toLowerCase() !== prev.tape.toLowerCase()) { changed = true; if (inMonth) o.tapeChanges++; }
+    }
+    if (changed && inMonth) { o.days[e.day - first + 1] = 1; (o.stamps[e.beam] = o.stamps[e.beam] || []).push(e.t); }
+    lastSeen[k] = { cycle: e.cycle != null ? e.cycle : (prev && prev.cycle), tape: e.tape || (prev && prev.tape) || '' };
+  }
+  const countFrom = start == null ? null : Math.max(first, start), countTo = Math.min(last, today);
+  const tracked = countFrom == null || countTo < countFrom ? 0 : countTo - countFrom + 1;
+  const machines = Object.values(out).map((o) => {
+    const gaps = [];
+    Object.values(o.stamps).forEach((ts) => { for (let i = 1; i < ts.length; i++) gaps.push(ts[i] - ts[i - 1]); });
+    const active = Object.keys(o.days).length;
+    return { id: o.id, name: o.name, activeDays: Object.keys(o.days).map(Number), active, idle: Math.max(0, tracked - active),
+      cycleChanges: o.cycleChanges, tapeChanges: o.tapeChanges, changeovers: o.cycleChanges + o.tapeChanges,
+      avgDays: gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length * 10) / 10 : null };
+  });
+  return { month, label: MONTHS[M - 1] + ' ' + Y, days: ndays, firstTracked: start == null ? null : ymd(start),
+    trackedFromDay: countFrom == null ? null : countFrom - first + 1, trackedToDay: countTo - first + 1, trackedDays: tracked, machines };
+}
+
+// keep one summary tab per month in the sheet ("Activity October 2026"), rewritten on each save
+async function writeActivityTab(a) {
+  const title = 'Activity ' + a.label;
+  const props = await G.sheetProps(SHEET_ID);
+  if (!props.some((p) => p.title === title)) {
+    await G.format(SHEET_ID, [{ addSheet: { properties: { title, gridProperties: { rowCount: 20, columnCount: 8 + a.days, frozenRowCount: 2, frozenColumnCount: 1 } } } }]);
+  }
+  const head = ['Machine', 'Active days', 'Idle days', 'Cycle changes', 'Tape changes', 'Total changeovers', 'Avg days per changeover'];
+  for (let d = 1; d <= a.days; d++) head.push(String(d));
+  const body = a.machines.map((m) => {
+    const row = [m.name, m.active, m.idle, m.cycleChanges, m.tapeChanges, m.changeovers, m.avgDays == null ? '' : m.avgDays];
+    for (let d = 1; d <= a.days; d++) row.push(m.activeDays.includes(d) ? 'Active' : (a.trackedFromDay && d >= a.trackedFromDay && d <= a.trackedToDay ? 'Idle' : ''));
+    return row;
+  });
+  const t = nowParts();
+  await G.batchUpdate(SHEET_ID, [{ range: at(title, 'A1'), values: [['Machine Activity — ' + a.label + ' · updated ' + t.date + ' ' + t.time + ' · active = a beam\'s cycle or tape changed that day']] },
+    { range: at(title, 'A2'), values: [head].concat(body) }], 'RAW');
+}
+async function refreshActivity(month) {
+  try { const a = await computeActivity(month); await writeActivityTab(a); return a; }
+  catch (e) { console.error('activity tab failed: ' + e.message); return null; }
+}
+async function activity(month, meta) {
+  requireAdmin(meta);
+  const cur = nowParts().date.slice(0, 7);
+  month = /^\d{4}-\d{2}$/.test(String(month || '')) ? month : cur;
+  const a = await computeActivity(month);
+  if (month <= cur) { try { await writeActivityTab(a); } catch (e) { console.error('activity tab failed: ' + e.message); } }
+  return a;
+}
+
 const ROUTES = {
   'knitted.getAll': () => getAll(),
   'knitted.saveBeams': (a, m) => saveBeams(a.machineId, a.beams, m),
@@ -183,6 +275,7 @@ const ROUTES = {
   'knitted.addTape': (a, m) => addTape(a.name, m),
   'knitted.removeTape': (a, m) => removeTape(a.name, m),
   'knitted.renameTape': (a, m) => renameTape(a.oldName, a.newName, m),
+  'knitted.activity': (a, m) => activity(a.month, m),
 };
 
 module.exports = { ROUTES, SHEET_ID };

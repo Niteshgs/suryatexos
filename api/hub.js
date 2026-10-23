@@ -14,7 +14,7 @@ async function run(fn, args, meta) {
 }
 const FUNCTIONS = [
   'knitted.getAll', 'knitted.saveBeams', 'knitted.verifyPin',
-  'knitted.addTape', 'knitted.removeTape', 'knitted.renameTape',
+  'knitted.addTape', 'knitted.removeTape', 'knitted.renameTape', 'knitted.activity',
 ];
 
 async function callHub(fn, args, meta) {

@@ -52,9 +52,9 @@ const base = (id) => 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeUR
 const q = (s) => "'" + String(s).replace(/'/g, "''") + "'";   // quote a tab name for A1 ranges
 
 // values like Apps Script getValues(): numbers stay numbers, empty cells are ''
-async function batchGet(id, ranges) {
+async function batchGet(id, ranges, dates) {
   const p = ranges.map((r) => 'ranges=' + encodeURIComponent(r)).join('&');
-  const j = await api('GET', base(id) + '/values:batchGet?' + p + '&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING&majorDimension=ROWS');
+  const j = await api('GET', base(id) + '/values:batchGet?' + p + '&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=' + (dates === 'serial' ? 'SERIAL_NUMBER' : 'FORMATTED_STRING') + '&majorDimension=ROWS');
   return (j.valueRanges || []).map((v) => v.values || []);
 }
 async function batchUpdate(id, data, inputOption) {
