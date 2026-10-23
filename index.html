@@ -456,7 +456,7 @@ html:has(body.light){color-scheme:light}
 .kn-ehead .kn-title{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kn-row1{display:flex;align-items:center;gap:8px}
 .kn-row1 .kn-ac{flex:1;min-width:0}
-.kn-bno{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--accent);background:var(--surface2);border:1px solid var(--border);font-variant-numeric:tabular-nums}
+.kn-bno{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;line-height:1;color:var(--text);background:var(--surface2);border:1px solid var(--border);font-variant-numeric:tabular-nums}
 .kn-beam.c1 .kn-bno{color:var(--success)}.kn-beam.c3 .kn-bno{color:var(--danger)}
 .kn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
@@ -1386,7 +1386,7 @@ var KN=(function(){
     beams.forEach(function(b,i){
       var p=active+'_'+i;
       h+='<div class="kn-beam '+cyc(b.cycle)+'" id="kb_'+p+'">'
-        +'<div class="kn-row1"><span class="kn-bno" aria-hidden="true">B'+(i+1)+'</span>'
+        +'<div class="kn-row1"><span class="kn-bno" aria-hidden="true">'+(i+1)+'</span>'
         +'<div class="kn-ac"><label class="sr-only kn-sr" for="kt_'+p+'">Beam '+(i+1)+' tape</label><div class="kn-tbox" id="ktb_'+p+'">'
         +'<input type="text" id="kt_'+p+'" name="tape'+(i+1)+'" autocomplete="off" spellcheck="false" placeholder="Select tape…" value="'+esc(val(b.tape))+'" data-kn-tape="'+i+'">'
         +'<button type="button" class="kn-arrow" data-kn-arrow="'+i+'" aria-label="Show all tapes">'+ICON_CHEV+'</button></div>'
