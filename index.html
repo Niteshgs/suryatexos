@@ -452,12 +452,13 @@ html:has(body.light){color-scheme:light}
 .kn-beam.c1{background:var(--success-soft);border-color:rgba(76,175,130,.35);border-left-color:var(--success)}
 .kn-beam.c2{background:var(--accent-soft);border-color:rgba(196,133,58,.35);border-left-color:var(--accent)}
 .kn-beam.c3{background:var(--danger-soft);border-color:rgba(224,85,85,.35);border-left-color:var(--danger)}
-.kn-ehead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.kn-ehead .kn-title{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kn-ehead{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:12px}
+.kn-ehead .kn-mbtn{justify-self:start}
+.kn-ehead .kn-title{margin:0;min-width:0;max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 .kn-row1{display:flex;align-items:center;gap:8px}
 .kn-row1 .kn-ac{flex:1;min-width:0}
 .kn-bno{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;line-height:1;color:var(--text);background:var(--surface2);border:1px solid var(--border);font-variant-numeric:tabular-nums}
-.kn-beam.c1 .kn-bno{color:var(--success)}.kn-beam.c3 .kn-bno{color:var(--danger)}
+.kn-beam.c1 .kn-bno{color:var(--success);border-color:var(--success)}.kn-beam.c2 .kn-bno{color:var(--accent);border-color:var(--accent)}.kn-beam.c3 .kn-bno{color:var(--danger);border-color:var(--danger)}
 .kn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .kn-f{display:flex;flex-direction:column;gap:1px;padding:5px 10px 3px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:text;min-width:0}
@@ -1380,8 +1381,8 @@ var KN=(function(){
   function renderEntry(){
     var m=MACHINES.filter(function(x){return x.id===active;})[0], beams=D.cycleData[active]||[];
     var h='<div class="kn-shell">'+sideMenu()+'<div class="kn-main">'
-      +'<div class="kn-ehead"><h2 class="kn-title">'+m.name+'</h2>'
-      +'<button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button></div>'
+      +'<div class="kn-ehead"><button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button>'
+      +'<h2 class="kn-title">'+m.name+'</h2><span class="kn-espace" aria-hidden="true"></span></div>'
       +'<div class="kn-beams">';
     beams.forEach(function(b,i){
       var p=active+'_'+i;
