@@ -569,6 +569,10 @@ body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
 }
 @media(prefers-reduced-motion:reduce){.kn-side{transition:none}}
 
+.kn-fresh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px 10px 14px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent-soft);font-size:14px;color:var(--text)}
+.kn-fresh button{min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:none;background:var(--accent-strong);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.kn-wide{display:block;width:100%;margin-top:10px;min-height:48px}
+
 /* FOCUS */
 button:focus-visible,a:focus-visible,[onclick]:focus-visible,select:focus-visible,.custom-select-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #v-entry .field:focus-within,#v-proc .pf-field:focus-within,.lock .pf-field:focus-within{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
@@ -687,6 +691,14 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   <div class="kn-err" id="knPinErr"></div>
   <button class="btn-submit" id="knPinBtn">Unlock</button>
   <button class="kn-link kn-modal-x" data-kn-pin-close>Cancel</button>
+</div></div>
+
+<div class="kn-modal" id="knUnsaved"><div class="kn-modal-in" role="alertdialog" aria-labelledby="knUnsavedT" aria-describedby="knUnsavedS">
+  <div class="kn-modal-t" id="knUnsavedT">Unsaved changes</div>
+  <div class="kn-modal-s" id="knUnsavedS">Save before leaving, or discard what you typed?</div>
+  <button class="btn-submit" id="knUnsavedSave">Save</button>
+  <button class="kn-btn kn-wide" id="knUnsavedDiscard">Discard changes</button>
+  <button class="kn-link kn-modal-x" id="knUnsavedKeep">Keep editing</button>
 </div></div>
 
 <!-- FINISHED GOODS -->
@@ -856,7 +868,8 @@ function openYarn(){
   if(Date.now()-lastLoad>30000)loadData();
 }
 var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker','']};
-function goHome(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
+function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
+function goHomeNow(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
 function go(v,fromPop){
   current=v; closeAll();
   document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('show',x.id==='v-'+(v.indexOf('fg')===0?'fg':v.indexOf('kn')===0?'kn':v));});
@@ -876,7 +889,7 @@ function go(v,fromPop){
   if(!fromPop&&v!=='home'){try{if(!(history.state&&history.state.s))history.pushState({s:1},'');}catch(e){}}
   window.scrollTo(0,0);
 }
-window.addEventListener('popstate',function(){go('home',true);});
+window.addEventListener('popstate',function(){if(window.KN&&KN.isDirty()){try{history.pushState({s:1},'');}catch(e){}KN.guard(function(){go('home',true);});return;}go('home',true);});
 var ICON_OK='<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>',ICON_RE='<svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>',ICON_CLOCK='<svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>';
 var ICON_SUN='<svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>',ICON_MOON='<svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg>';
 function toggleTheme(){var l=document.body.classList.toggle('light');document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
@@ -1331,7 +1344,7 @@ var KN=(function(){
     {id:'tch1',name:'TCH 1'},{id:'tch2',name:'TCH 2'},{id:'fastMuller1',name:'Fast MULLER 1'},{id:'fastMuller2',name:'Fast MULLER 2'},
     {id:'victory1',name:'Victory 1'},{id:'victory2',name:'Victory 2'}];
   var ICON_TAG='<svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg>',ICON_MENU='<svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>',ICON_CHEV='<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg>',ICON_BACK='<svg class="ic" aria-hidden="true"><use href="#i-back"/></svg>',ICON_PEN='<svg class="ic" aria-hidden="true"><use href="#i-entry"/></svg>',ICON_X='<svg class="ic" aria-hidden="true"><use href="#i-x"/></svg>';
-  var D=null, tab='entry', active='comez', lastLoad=0, loading=false, saving={}, savedDot={}, pin='', tapeBusy=false, editIdx=null, pendingSave=null;
+  var D=null, tab='entry', active='comez', lastLoad=0, loading=false, saving={}, savedDot={}, pin='', tapeBusy=false, editIdx=null, dirty=false, pendingNav=null, freshWaiting=false;
   function $(id){return document.getElementById(id);}
   function val(v){return (v===null||v===undefined||v==='')?'':v;}
   function num0(v){return (v===null||v===undefined||v==='')?0:v;}
@@ -1360,9 +1373,12 @@ var KN=(function(){
       loading=false; btn.disabled=false; icon.classList.remove('spin');
       if(j._status===401)return showLock(j.error);
       if(!j.ok)throw new Error(j.error||'Could not load data');
+      var before=D&&D.cycleData?JSON.stringify(D.cycleData[active]):null;
       D=j.data; lastLoad=Date.now();
       try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
-      render(); if(manual)showToast('Knitted production updated','success');
+      if(isOn()&&tab==='entry'&&dirty){if(before!==JSON.stringify(D.cycleData[active]))showFresh();$('knFoot').textContent='Synced '+(D.loaded||'');}
+      else render();
+      if(manual&&!freshWaiting)showToast('Knitted production updated','success');
     }).catch(function(e){
       loading=false; btn.disabled=false; icon.classList.remove('spin');
       if(!D)$('knView').innerHTML='<div class="kn-state err">Could not load data.<br>'+esc(e&&e.message?e.message:e)+'</div>';
@@ -1408,6 +1424,7 @@ var KN=(function(){
       +'</aside><div class="kn-backdrop" id="knBackdrop" data-kn-close-side></div>';
   }
   function renderEntry(){
+    dirty=false; freshWaiting=false;
     var m=MACHINES.filter(function(x){return x.id===active;})[0], beams=D.cycleData[active]||[];
     var h='<div class="kn-shell">'+sideMenu()+'<div class="kn-main">'
       +'<div class="kn-ehead"><button class="kn-mbtn" data-kn-open-side aria-label="Choose machine">'+ICON_MENU+'<span>Machines</span></button>'
@@ -1444,6 +1461,12 @@ var KN=(function(){
         +'<button class="kn-ib del" data-kn-remove="'+i+'" aria-label="Remove '+esc(t)+'">'+ICON_X+'</button></div></div>';
     });
     $('knView').innerHTML=h+'</div>';
+  }
+  function showFresh(){
+    freshWaiting=true;
+    if($('knFresh'))return;
+    var mm=document.querySelector('#v-kn .kn-main'); if(!mm)return;
+    mm.insertAdjacentHTML('afterbegin','<div class="kn-fresh" id="knFresh" role="status"><span>This machine was updated in the sheet. Loading replaces what you typed.</span><button type="button" data-kn-fresh>Load latest</button></div>');
   }
   function openSide(){var s=$('knSide'),b=$('knBackdrop');if(s){s.classList.add('open');b.classList.add('show');}}
   function closeSide(){var s=$('knSide'),b=$('knBackdrop');if(s){s.classList.remove('open');b.classList.remove('show');}}
@@ -1485,8 +1508,18 @@ var KN=(function(){
     box.classList.add('invalid');return false;
   }
 
+  /* ---------- unsaved changes guard ---------- */
+  function guard(next){
+    if(!(isOn()&&tab==='entry'&&dirty)){next();return;}
+    pendingNav=next;
+    var m=MACHINES.filter(function(x){return x.id===active;})[0];
+    $('knUnsavedT').textContent=m.name+' has unsaved changes';
+    $('knUnsaved').classList.add('open'); setTimeout(function(){$('knUnsavedSave').focus();},50);
+  }
+  function closeUnsaved(){$('knUnsaved').classList.remove('open');}
+
   /* ---------- save ---------- */
-  function save(){
+  function save(done){
     if(saving[active])return;
     var beams=[],bad=false,id=active,m=MACHINES.filter(function(x){return x.id===id;})[0];
     for(var i=0;i<(D.cycleData[id]||[]).length;i++){
@@ -1494,14 +1527,15 @@ var KN=(function(){
       var c=$('kc_'+p).value,t=$('kt_'+p).value,wm=$('km_'+p).value,wr=$('kr_'+p).value;
       beams.push({cycle:c===''?'':Number(c),tape:t,weightMtr:wm===''?'':Number(wm),weightRoll:wr===''?'':Number(wr)});
     }
-    if(bad){showToast('Pick tapes from the list (red boxes)','danger');return;}
+    if(bad){showToast('Pick tapes from the list (red boxes)','danger');pendingNav=null;return;}
     saving[id]=true; var btn=$('knSave'); btn.disabled=true; btn.textContent='Saving…';
     call('knitted.saveBeams',{machineId:id,beams:beams},meta()).then(function(j){
       if(j._status===401)return showLock(j.error);
       if(!j.ok)throw new Error(j.error||'Save failed');
       D.cycleData[id]=beams.map(function(b,k){var o=D.cycleData[id][k]||{};return {cycle:b.cycle===''?o.cycle:b.cycle,tape:b.tape,weightMtr:b.weightMtr===''?o.weightMtr:b.weightMtr,weightRoll:b.weightRoll===''?o.weightRoll:b.weightRoll};});
       try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
-      savedDot[id]='ok'; saving[id]=false; showToast(m.name+' beams saved','success');
+      savedDot[id]='ok'; saving[id]=false; dirty=false; showToast(m.name+' beams saved','success');
+      if(typeof done==='function'){done();return;}
       if(isOn()&&tab==='entry'&&active===id)renderEntry();
     }).catch(function(e){
       saving[id]=false; savedDot[id]='err'; showToast((e&&e.message)||('Error saving '+m.name),'danger');
@@ -1526,11 +1560,18 @@ var KN=(function(){
   /* ---------- events ---------- */
   document.addEventListener('click',function(e){
     var t=e.target;
+    if(t.closest('#knUnsaved')){
+      if(t.closest('#knUnsavedSave')){closeUnsaved();var nx=pendingNav;pendingNav=null;save(nx);}
+      else if(t.closest('#knUnsavedDiscard')){closeUnsaved();dirty=false;var nd=pendingNav;pendingNav=null;if(nd)nd();}
+      else if(t.id==='knUnsaved'||t.closest('#knUnsavedKeep')){closeUnsaved();pendingNav=null;}
+      return;}
     if(t.closest('#knPinBox')){if(t.closest('#knPinBtn'))unlock();else if(t.id==='knPinBox'||t.closest('[data-kn-pin-close]'))$('knPinBox').classList.remove('open');return;}
     if(!isOn())return;
     var x;
     if((x=t.closest('[data-kn-edit]'))){active=x.getAttribute('data-kn-edit');return openKN('knentry');}
-    if((x=t.closest('[data-kn-m]'))){active=x.getAttribute('data-kn-m');renderEntry();window.scrollTo(0,0);return;}
+    if((x=t.closest('[data-kn-m]'))){var mid=x.getAttribute('data-kn-m');if(mid===active){closeSide();return;}
+      closeSide();guard(function(){active=mid;renderEntry();window.scrollTo(0,0);});return;}
+    if(t.closest('[data-kn-fresh]')){renderEntry();showToast('Latest values loaded','success');return;}
     if(t.closest('[data-kn-open-side]'))return openSide();
     if(t.closest('[data-kn-close-side]'))return closeSide();
     if(t.closest('[data-kn-manage]')){if(pin)return openKN('kntapes');return askPin();}
@@ -1559,14 +1600,15 @@ var KN=(function(){
     if(a!==null){knMark(t);return listFor(+a,false);}
     var c=t.getAttribute('data-kn-cyc'); if(c!==null){var v=t.value.replace(/[^0-9]/g,'');if(v.length>1)v=v.slice(-1);t.value=v;}
     knMark(t);});
-  function knMark(t){if(!t||!t.closest)return;if(t.closest('.kn-f'))t.classList.toggle('zero',!Number(t.value));
+  function knMark(t){if(!t||!t.closest)return;if(t.closest('#v-kn .kn-beams'))dirty=true;if(t.closest('.kn-f'))t.classList.toggle('zero',!Number(t.value));
     var bx=t.closest('.kn-tbox');if(bx)bx.classList.toggle('empty',!t.value.trim());}
-  document.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var id=e.target.id;
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('knUnsaved').classList.contains('open')){closeUnsaved();pendingNav=null;return;}if(e.key!=='Enter')return;var id=e.target.id;
     if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
-  return {open:open,load:load,loaded:function(){return !!D;},since:function(){return lastLoad;}};
+  window.addEventListener('beforeunload',function(e){if(isOn()&&tab==='entry'&&dirty){e.preventDefault();e.returnValue='';}});
+  return {open:open,load:load,guard:guard,isDirty:function(){return isOn()&&tab==='entry'&&dirty;},loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
 var KN_TABS={kn:'dash',knentry:'entry',kntapes:'tapes'};
-function openKN(v){v=v||'knentry';go(v);KN.open(KN_TABS[v]);}
+function openKN(v){v=v||'knentry';var run=function(){go(v);KN.open(KN_TABS[v]);};if(current==='knentry'&&v!=='knentry')KN.guard(run);else run();}
 
 /* ══ PWA ══ */
 if('serviceWorker' in navigator){
