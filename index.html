@@ -97,6 +97,24 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 /* ═════════ ENTRY ═════════ */
 #v-entry{max-width:480px;padding:28px 16px 40px}
 #v-entry .page-title{margin-bottom:24px}
+[hidden]{display:none!important}
+.e-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.e-mode{flex:0 0 auto;min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font:inherit;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.e-mode[aria-pressed="true"]{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}
+.e-mode:focus-visible,.b-shade:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.b-shades{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px}
+.b-shade{min-height:44px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.b-shade.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.b-rows{display:flex;flex-direction:column}
+.b-row{display:grid;grid-template-columns:minmax(78px,1fr) 1fr 1fr 52px;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
+.b-row:last-child{border-bottom:none}
+.b-row.hdr{padding:8px 14px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px}
+.b-den{font-size:15px;font-weight:700;color:var(--text)}
+.b-den small{display:block;font-size:11.5px;font-weight:500;color:var(--text-muted);margin-top:2px}
+#v-entry .b-row input{width:100%;min-height:44px;padding:0 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-size:16px;-moz-appearance:textfield;appearance:none}
+#v-entry .b-row input:focus{border-color:var(--accent);outline:none}
+.b-tot{text-align:right;font-size:17px;font-weight:800;color:var(--accent)}
+.b-tot.zero{color:var(--text-dim);font-weight:600}
 #v-entry .page-title h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 #v-entry .page-title p{font-size:13px;color:var(--text-muted);margin-top:4px}
 #v-entry .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px}
@@ -645,7 +663,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v58</span>
+    <span class="app-ver" id="appVer" title="App version">v59</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -742,7 +760,9 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
 
 <!-- ENTRY -->
 <div class="view" id="v-entry">
-  <div class="page-title"><h1>Log Raw Material</h1><p>Select shade and denier, then enter stock quantities.</p></div>
+  <div class="page-title e-head"><div><h1>Log Raw Material</h1><p id="e_sub">Select shade and denier, then enter stock quantities.</p></div>
+    <button type="button" class="e-mode" id="e_modeBtn" onclick="eMode()" aria-pressed="false">Bulk Entry</button></div>
+  <div id="e_single">
   <div class="card">
     <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg>Material</div>
     <div class="field">
@@ -770,6 +790,19 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   </div>
   <div class="e-sum" id="e_sum" aria-live="polite"></div>
   <button type="button" class="btn-submit" id="e_submit" onclick="eSubmit()">Save Entry</button>
+  </div>
+  <div id="e_bulk" hidden>
+    <div class="card">
+      <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg>Shade</div>
+      <div class="b-shades" id="b_shades" role="radiogroup" aria-label="Shade"></div>
+    </div>
+    <div class="card" id="b_qty" hidden>
+      <div class="card-header"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Quantity · <span id="b_shadeName"></span></div>
+      <div class="b-rows" id="b_rows"></div>
+    </div>
+    <div class="e-sum" id="b_sum" aria-live="polite"></div>
+    <button type="button" class="btn-submit" id="b_submit" onclick="bSubmit()" disabled>Save All</button>
+  </div>
 </div>
 
 <!-- PROCUREMENT -->
@@ -1044,6 +1077,65 @@ function eSubmit(){
     var t=document.getElementById('e_denierTrigger');t.style.opacity='.6';t.style.cursor='not-allowed';document.getElementById('e_denierDropdown').innerHTML='';
     btn.disabled=false;btn.textContent='Save Entry';eSummary();loadData();
   }).catch(function(e){showToast('Error: '+(e.message||'failed'),'danger');btn.disabled=false;btn.textContent='Save Entry';});
+}
+
+/* ══ BULK ENTRY (one shade, all its deniers) ══ */
+var bShade='',bBusy=false;
+(function(){var box=document.getElementById('b_shades');Object.keys(combinations).forEach(function(sh){var b=document.createElement('button');b.type='button';b.className='b-shade';b.textContent=sh;b.setAttribute('role','radio');b.setAttribute('aria-checked','false');b.onclick=function(){bPick(sh);};box.appendChild(b);});})();
+function eMode(force){
+  var bulk=typeof force==='boolean'?force:document.getElementById('e_bulk').hidden;
+  document.getElementById('e_bulk').hidden=!bulk;document.getElementById('e_single').hidden=bulk;
+  var btn=document.getElementById('e_modeBtn');btn.textContent=bulk?'Single Entry':'Bulk Entry';btn.setAttribute('aria-pressed',bulk?'true':'false');
+  document.getElementById('e_sub').textContent=bulk?'Pick a shade, then enter Full and Open for each denier.':'Select shade and denier, then enter stock quantities.';
+  eCloseAll();
+}
+function bCurrent(sh,d){var r=allData.filter(function(x){return x.shade===sh&&x.denier===d;})[0];return r?r.total:null;}
+function bPick(sh){
+  if(bBusy)return;
+  if(bShade&&bShade!==sh&&bHasInput()&&!confirm('Discard the numbers entered for '+bShade+'?'))return;
+  bShade=sh;
+  document.querySelectorAll('#b_shades .b-shade').forEach(function(b){var on=b.textContent===sh;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');});
+  document.getElementById('b_shadeName').textContent=sh;
+  document.getElementById('b_rows').innerHTML='<div class="b-row hdr"><span>Denier</span><span>Full</span><span>Open</span><span style="text-align:right">Total</span></div>'
+    +(combinations[sh]||[]).map(function(d,i){var cur=bCurrent(sh,d);
+      return '<div class="b-row" data-den="'+esc(d)+'"><div class="b-den">'+esc(d)+(cur!==null?'<small>Now '+cur+'</small>':'')+'</div>'
+        +'<input type="number" min="0" inputmode="numeric" placeholder="0" aria-label="'+esc(d)+' full boxes" id="b_f'+i+'" oninput="bTotals()">'
+        +'<input type="number" min="0" inputmode="numeric" placeholder="0" aria-label="'+esc(d)+' open boxes" id="b_o'+i+'" oninput="bTotals()">'
+        +'<div class="b-tot zero" id="b_t'+i+'">0</div></div>';}).join('');
+  document.getElementById('b_qty').hidden=false;bTotals();
+  var f=document.getElementById('b_f0');if(f)f.focus();
+}
+function bHasInput(){return Array.prototype.some.call(document.querySelectorAll('#b_rows input'),function(i){return i.value!=='';});}
+function bRows(){return (combinations[bShade]||[]).map(function(d,i){var fv=document.getElementById('b_f'+i).value,ov=document.getElementById('b_o'+i).value;
+  return {i:i,denier:d,full:parseInt(fv,10)||0,open:parseInt(ov,10)||0};});}
+function bTotals(){
+  var rows=bShade?bRows():[],go=rows.filter(function(r){return r.full||r.open;}),el=document.getElementById('b_sum');
+  rows.forEach(function(r){var t=document.getElementById('b_t'+r.i);t.textContent=r.full+r.open;t.classList.toggle('zero',!(r.full+r.open));});
+  var btn=document.getElementById('b_submit');btn.disabled=!go.length||bBusy;
+  btn.textContent=go.length?'Save '+bShade+' · '+go.length+' denier'+(go.length>1?'s':''):'Save All';
+  if(!go.length){el.classList.remove('show');el.innerHTML='';return;}
+  el.innerHTML='<span class="e-sum-k">You are saving</span>'+go.map(function(r){return esc(bShade)+' · '+esc(r.denier)+' → <b>'+r.full+'</b> full + <b>'+r.open+'</b> open = <b>'+(r.full+r.open)+'</b>';}).join('<br>');
+  el.classList.add('show','ready');
+}
+function bSubmit(){
+  if(bBusy||!bShade)return;
+  var go=bRows().filter(function(r){return r.full||r.open;});if(!go.length)return;
+  bBusy=true;var btn=document.getElementById('b_submit');btn.disabled=true;btn.textContent='Saving 1 of '+go.length+'…';
+  var done=[],k=0;
+  (function next(){
+    if(k>=go.length){bBusy=false;showToast(bShade+': '+done.length+' denier'+(done.length>1?'s':'')+' saved','success');
+      var sh=bShade;bShade='';document.getElementById('b_qty').hidden=true;document.getElementById('b_rows').innerHTML='';
+      document.querySelectorAll('#b_shades .b-shade').forEach(function(b){b.classList.remove('on');b.setAttribute('aria-checked','false');});bTotals();loadData();return;}
+    var r=go[k];btn.textContent='Saving '+(k+1)+' of '+go.length+'…';
+    api('saveStock',{shade:bShade,denier:r.denier,full:r.full,open:r.open}).then(function(j){
+      if(!j.ok)throw new Error(j.error||'Failed');
+      done.push(r.denier);document.getElementById('b_f'+r.i).value='';document.getElementById('b_o'+r.i).value='';k++;next();
+    }).catch(function(e){
+      bBusy=false;bTotals();
+      showToast((done.length?'Saved '+done.join(', ')+'. ':'')+r.denier+' not saved: '+(e.message||'failed')+' · tap Save to retry','danger');
+      if(done.length)loadData();
+    });
+  })();
 }
 
 /* ══ PROCUREMENT FORM ══ */
