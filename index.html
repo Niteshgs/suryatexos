@@ -504,9 +504,12 @@ html:has(body.light){color-scheme:light}
 
 
 /* knitted: side menu + header toggle */
-.kn-toggle{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px;flex:0 0 auto}
-.kn-toggle button{border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:700;padding:0 14px;min-height:36px;border-radius:16px;cursor:pointer}
-.kn-toggle button.on{background:var(--accent-strong);color:#fff}
+.kn-toggle{display:flex;gap:8px;flex:0 0 auto}
+.kn-toggle button{border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:700;padding:0 16px;min-height:40px;border-radius:var(--radius-sm);cursor:pointer}
+.kn-toggle button:hover{color:var(--accent);border-color:var(--accent)}
+.kn-toggle button.on{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}
+body.kn-on .logo-mark,body.kn-on #hSub{display:none}
+@media(max-width:420px){.kn-toggle{gap:5px}.kn-toggle button{padding:0 9px;font-size:12.5px}body.kn-on .hdr-left{gap:8px}body.kn-on .header-right{gap:5px}body.kn-on .theme-btn{padding:5px 9px}}
 body.kn-on #v-kn{max-width:1180px;padding:0 16px 8px}
 .kn-shell{display:flex;align-items:flex-start;gap:0;min-height:calc(100vh - 60px)}
 .kn-side{width:240px;flex:0 0 240px;align-self:stretch;background:var(--surface);border-right:1px solid var(--border);margin-left:-16px;position:sticky;top:calc(60px + env(safe-area-inset-top));max-height:calc(100vh - 60px - env(safe-area-inset-top));overflow-y:auto}
@@ -826,7 +829,7 @@ function openYarn(){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],kn:['Knitted Production','Dashboard'],knentry:['Knitted Production','Beam Entry'],kntapes:['Knitted Production','Manage Tapes']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Snapweaves Stock'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker','']};
 function goHome(){try{if(history.state&&history.state.s){history.back();return;}}catch(e){}go('home',true);}
 function go(v,fromPop){
   current=v; closeAll();
