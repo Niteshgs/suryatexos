@@ -1467,7 +1467,7 @@ var KN=(function(){
     for(var i=0;i<n;i++){var p=active+'_'+i;
       var tt=$('kt_'+p);if(tt){tt.value='';knMark(tt);}var bx=$('ktb_'+p);if(bx)bx.classList.remove('invalid');
       ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value='0';knMark(e);}});}
-    showToast('All beams cleared. Tap Save to keep this','');
+    showToast('All beams cleared · Tap Save','');
   }
   function dittoBeam(i){
     var f=active+'_'+(i-1), to=active+'_'+i;
@@ -1499,7 +1499,7 @@ var KN=(function(){
     call('knitted.saveBeams',{machineId:id,beams:beams},meta()).then(function(j){
       if(j._status===401)return showLock(j.error);
       if(!j.ok)throw new Error(j.error||'Save failed');
-      D.cycleData[id]=beams.map(function(b,k){var o=D.cycleData[id][k]||{};return {cycle:b.cycle===''?o.cycle:b.cycle,tape:b.tape===''?o.tape:b.tape,weightMtr:b.weightMtr===''?o.weightMtr:b.weightMtr,weightRoll:b.weightRoll===''?o.weightRoll:b.weightRoll};});
+      D.cycleData[id]=beams.map(function(b,k){var o=D.cycleData[id][k]||{};return {cycle:b.cycle===''?o.cycle:b.cycle,tape:b.tape,weightMtr:b.weightMtr===''?o.weightMtr:b.weightMtr,weightRoll:b.weightRoll===''?o.weightRoll:b.weightRoll};});
       try{localStorage.setItem('sx_kn',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
       savedDot[id]='ok'; saving[id]=false; showToast(m.name+' beams saved','success');
       if(isOn()&&tab==='entry'&&active===id)renderEntry();

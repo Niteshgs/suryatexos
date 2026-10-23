@@ -148,7 +148,7 @@ function kn_saveBeams_(machineId, beams, meta) {
     L.rows.forEach(function (row, i) {
       var b = beams[i] || {};
       kn_write_(sheet, L.cols.cycle + row, b.cycle);
-      kn_write_(sheet, L.cols.tape + row, tapes[i]);
+      sheet.getRange(L.cols.tape + row).setValue(tapes[i]);   // always write: a blank tape clears the cell (Clear button)
       kn_write_(sheet, L.cols.weightMtr + row, b.weightMtr);
       kn_write_(sheet, L.cols.weightRoll + row, b.weightRoll);
     });
