@@ -896,7 +896,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v75</span>
+    <span class="app-ver" id="appVer" title="App version">v76</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2467,7 +2467,7 @@ function openExp(fromPop){if(!canAny('expenses.')){go('home');return;}go('exp',f
 
 /* ══ CALCULATORS (run entirely in the browser; nothing is saved) ══ */
 var CL=(function(){
-  var tab='gross';
+  var tab='pay';
   function $(id){return document.getElementById(id);}
   function n(id){var e=$(id);var x=e?parseFloat(e.value):0;return isNaN(x)?0:x;}
   function f2(x){return Number(x).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -2480,14 +2480,14 @@ var CL=(function(){
   }
   function open(){
     if(!canAny('calc.')){go('home');return;}
-    if(!can('calc.gross')&&tab==='gross')tab='pay';
     if(!can('calc.payment')&&tab==='pay')tab='gross';
+    if(!can('calc.gross')&&tab==='gross')tab='pay';
     shell();
   }
   function shell(){
     $('clView').innerHTML='<div class="sp-head"><div><h2>Calculators</h2><p>Quick sums for the office. Nothing is saved.</p></div></div><div class="sp-tabs">'
-      +(can('calc.gross')?'<button class="sp-tab'+(tab==='gross'?' on':'')+'" data-cl-tab="gross">Gross Value</button>':'')
       +(can('calc.payment')?'<button class="sp-tab'+(tab==='pay'?' on':'')+'" data-cl-tab="pay">Payment</button>':'')
+      +(can('calc.gross')?'<button class="sp-tab'+(tab==='gross'?' on':'')+'" data-cl-tab="gross">Gross Value</button>':'')
       +'</div><div id="clBody"></div>';
     tab==='gross'?drawGross():drawPay();
   }

@@ -26,7 +26,7 @@ const CATALOG = [
   { id: 'expenses', name: 'Cash Expenses', items: [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
   { id: 'calc', name: 'Calculators', items: [
-    { id: 'calc.gross', name: 'Gross Value Calculator' }, { id: 'calc.payment', name: 'Payment Calculator' } ] },
+    { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
 const ALL_KEYS = CATALOG.flatMap((g) => g.items.map((i) => i.id));
 
