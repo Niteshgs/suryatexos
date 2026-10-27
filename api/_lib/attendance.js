@@ -197,6 +197,20 @@ async function monthSave(a, op) {
   const n = daysIn(year, month);
   const rows = (await G.batchGet(SHEET_ID(), [q(T.att) + '!A2:E30000'], 'serial'))[0] || [];
   const index = {}; rows.forEach((r, i) => { if (str(r[0]) === worker) index[dateKey(r[1])] = i + 2; });
+  // Conflict check: refuse if someone else changed a day since this person opened the month (unless they chose "save anyway").
+  if (a.base && typeof a.base === 'object' && !a.force) {
+    const cur = {}; rows.forEach((r) => { if (str(r[0]) === worker) cur[dateKey(r[1])] = { status: normStatus(r[2]), ot: Number(r[3]) || 0, remarks: str(r[4]).trim() }; });
+    const same = (x, y) => str(x.status) === str(y.status) && (x.status !== 'present' || (Number(x.ot) || 0) === (Number(y.ot) || 0)) && str(x.remarks).trim() === str(y.remarks).trim();
+    const bad = [];
+    a.entries.forEach((e) => {
+      const day = Math.round(Number(e.day)); if (!(day >= 1 && day <= n) || !a.base[day]) return;
+      const c = cur[year + '-' + pad(month + 1) + '-' + pad(day)] || { status: '', ot: 0, remarks: '' };
+      const st = normStatus(e.status || ''), mine = { status: st, ot: st === 'present' ? Number(e.ot) || 0 : 0, remarks: str(e.remarks).trim().slice(0, 200) };
+      const b = { status: normStatus(a.base[day].status || ''), ot: Number(a.base[day].ot) || 0, remarks: str(a.base[day].remarks).trim() };
+      if (!same(b, c) && !same(mine, c)) bad.push(day);
+    });
+    if (bad.length) throw new Error('CONFLICT:' + bad.join(','));
+  }
   const upd = [], add = [], del = []; let changed = 0, cleared = 0;
   const rowVals = new Array(n).fill('');
   a.entries.forEach((e) => {

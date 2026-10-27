@@ -1055,6 +1055,31 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 #v-leave .sumrows span{color:var(--text-muted);flex:none}#v-leave .sumrows b{text-align:right;word-break:break-word}
 #v-leave .sumnote{border:1px dashed var(--border);border-radius:10px;padding:10px 12px;color:var(--text-muted);font-size:14px;margin-bottom:14px}
 #v-leave .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
+/* attendance v85: sync, conflict, accessibility, profiles, settings */
+.at-upd{font-size:12px;color:var(--text-muted);text-align:right;margin:-4px 2px 8px;min-height:16px}.at-upd.old{color:var(--warn)}
+.at-sync{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--warn-soft);border:1px solid var(--warn);color:var(--text);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:13px}
+.at-sync button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--warn);background:transparent;color:var(--warn);font:inherit;font-weight:800;cursor:pointer}
+.at-s.wait{color:var(--warn)}
+.at-conf{display:grid;gap:8px;margin-top:10px}.at-conf .at-ghost{width:100%}
+.us-err .at-conf button[data-me-force]{border-color:var(--danger);color:var(--danger)}
+.at-tools-d{margin:0 0 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.at-tools-d>summary{min-height:48px;display:flex;align-items:center;padding:0 14px;font-weight:700;cursor:pointer;list-style:none}
+.at-tools-d>summary::-webkit-details-marker{display:none}.at-tools-d>summary::after{content:'▾';margin-left:auto;color:var(--text-muted)}.at-tools-d[open]>summary::after{content:'▴'}
+.at-tool{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid var(--border)}
+.at-tool b{display:block;font-size:14px}.at-tool span{display:block;font-size:12px;color:var(--text-muted);margin-top:2px;line-height:1.4}
+.at-tool .at-ghost{flex:none;min-width:92px}.at-ghost.warn{border-color:var(--warn);color:var(--warn)}
+/* 44px touch targets + keyboard focus */
+#v-att .at-nb{width:44px;height:44px}#v-att .at-di,#v-att .at-sel,.at-today,.at-pill,.at-opt-go,.at-mi,.at-x,#v-att .sp-chip{min-height:44px}
+.at-x{width:44px;height:44px}#v-att .sp-chip{display:inline-flex;align-items:center}
+.at-row{grid-template-columns:minmax(78px,1fr) 44px 44px 58px minmax(70px,1.3fr)}
+.at-row .at-b{width:44px;height:44px}.at-row .at-ot{height:44px;width:58px}.at-row .at-rmk{min-height:44px}
+.at-me .at-b{width:44px;height:44px;font-size:15px}.at-me .at-ot{height:44px;min-width:44px}.at-me .at-rmk.wide{min-height:44px}
+.at-dot{position:relative}.at-dot::after{content:'';position:absolute;inset:-10px}
+.at-md{width:26px}
+@media(max-width:560px){.at-mg{grid-template-columns:minmax(0,1fr)}}
+#v-att :focus-visible,#atModal :focus-visible,#atOt :focus-visible,#atNav :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.at-pc[data-at-prof]:focus-visible{outline-offset:-2px}
 </style>
 </head>
 <body>
@@ -1079,7 +1104,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v84</span>
+    <span class="app-ver" id="appVer" title="App version">v85</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1546,6 +1571,7 @@ function enterApp(me,offline){
   if(prev&&prev!==me.email){clearPrivate();}                      // a different person on this phone: forget the last person's saved data
   try{localStorage.setItem('sx_me',JSON.stringify(me));localStorage.setItem('sx_me_email',me.email);localStorage.setItem('sx_user_name',me.name);}catch(e){}
   ME=me;applyAccess();
+  try{setTimeout(AT.flush,1500);}catch(e){}
   var deep='';try{deep=location.hash;}catch(e){}
   NAV=[];try{history.replaceState(null,'');}catch(e){}
   go('home');
@@ -2801,8 +2827,8 @@ var AT=(function(){
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var MONF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  var OTA=null,D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,busyKey='',errRow={};
-  var now=new Date(),S={ds:ymd(now),rM:now.getMonth(),rY:now.getFullYear(),pM:now.getMonth(),pY:now.getFullYear()};
+  var OTA=null,D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,busyKey='',errRow={},OUT_KEY='sx_att_out',inflight={},flushing=false,syncT=0,autoT=0,updT=0,lastFocus=null,toastT=0;
+  var now=new Date(),S={ds:ymd(now),rM:now.getMonth(),rY:now.getFullYear(),pM:now.getMonth(),pY:now.getFullYear(),psort:'name'};
   function $(id){return document.getElementById(id);}
   function pad(n){return String(n).padStart(2,'0');}
   function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -2814,7 +2840,21 @@ var AT=(function(){
   function call(fn,args){return fetch('/api/attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   // resolves with data, rejects with Error (401 also shows the lock screen)
-  function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
+  function api(fn,args){return call(fn,args).then(function(j){
+    if(j._status===401){showLock(j.error);var e1=new Error(j.error||'Signed out');e1.transient=true;throw e1;}
+    if(!j.ok){var e2=new Error(j.error||'Something went wrong');if(j._status>=500||j._status===429)e2.transient=true;throw e2;}
+    return j.data;
+  },function(){var e3=new Error('No connection');e3.transient=true;throw e3;});}
+  /* ---- unsaved marks live on the phone until the server confirms them ---- */
+  function who(){try{return (ME&&ME.email)||'';}catch(e){return '';}}
+  function outGet(){try{var o=JSON.parse(localStorage.getItem(OUT_KEY)||'[]');return Array.isArray(o)?o:[];}catch(e){return [];}}
+  function outSet(a){try{localStorage.setItem(OUT_KEY,JSON.stringify(a));}catch(e){}}
+  function outMine(){var me=who();return outGet().filter(function(x){return x.u===me;}).sort(function(x,y){return x.ts-y.ts;});}
+  function outAdd(w,ds,st,ot,rm){var me=who(),a=outGet().filter(function(x){return !(x.u===me&&x.w===w&&x.ds===ds);}),ts=Date.now()+Math.random();a.push({u:me,w:w,ds:ds,st:st,ot:ot,rm:rm,ts:ts});outSet(a);return ts;}
+  function outDone(w,ds,ts){var me=who();outSet(outGet().filter(function(x){return !(x.u===me&&x.w===w&&x.ds===ds&&x.ts===ts);}));}
+  function isPending(w,ds){var me=who();return outGet().some(function(x){return x.u===me&&x.w===w&&x.ds===ds;});}
+  function overlayOut(){if(!D)return;outMine().forEach(function(x){D.attendance[x.w+'|'+x.ds]={status:x.st,ot:x.ot,remarks:x.rm};});}
+  function toastOnce(msg,type){if(toastT)return;showToast(msg,type);toastT=setTimeout(function(){toastT=0;},3500);}
   function rec(w,ds){return (D&&D.attendance[w+'|'+ds])||{status:'',ot:0,remarks:''};}
   function tabs(){
     var t=[];
@@ -2827,21 +2867,39 @@ var AT=(function(){
   function open(){
     var t=tabs();if(!t.length){go('home');return;}
     if(!t.some(function(x){return x[0]===tab;}))tab=t[0][0];
-    if(!D&&needsData()){try{var c=JSON.parse(localStorage.getItem('sx_att')||'null');if(c&&c.d)D=c.d;}catch(e){}}
+    if(!D&&needsData()){try{var c=JSON.parse(localStorage.getItem('sx_att')||'null');if(c&&c.d)D=c.d;}catch(e){}overlayOut();}
     shell();
+    startTimers();flush();
     if(needsData()&&Date.now()-lastLoad>30000)load(false);
   }
-  function load(manual){
+  /* ---- keep the screen fresh when several people use it ---- */
+  function startTimers(){clearInterval(autoT);clearInterval(updT);autoT=setInterval(autoTick,60000);updT=setInterval(updLabel,15000);}
+  function autoTick(){
+    if(current!=='att'||document.hidden)return;
+    if(outMine().length){flush();return;}
+    if(!D||loading||busyKey||!tabs().length)return;
+    if($('atModal').classList.contains('open')||$('atOt').classList.contains('open'))return;
+    var ae=document.activeElement;if(ae&&ae.closest&&ae.closest('#atBody')&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))return;   // never interrupt typing
+    if(Object.keys(errRow).length)return;
+    load(false,true);
+  }
+  function updLabel(){
+    var el=$('atUpd');if(!el)return;var off=navigator.onLine===false,s=Math.round((Date.now()-lastLoad)/1000),t;
+    if(!lastLoad)t=off?'Showing saved data':'Updating…';else t=s<10?'Updated just now':s<60?'Updated '+s+'s ago':'Updated '+Math.round(s/60)+' min ago';
+    if(off)t='Offline · '+t;el.textContent=t;el.classList.toggle('old',off||(lastLoad&&s>300));
+  }
+  function load(manual,quiet){
     if(loading||!tabs().length)return;loading=true;
     var btn=$('refreshBtn'),icon=$('refreshIcon');btn.disabled=true;icon.classList.add('spin');
     api('att.getAll').then(function(d){
-      loading=false;btn.disabled=false;icon.classList.remove('spin');D=d;lastLoad=Date.now();
+      loading=false;btn.disabled=false;icon.classList.remove('spin');D=d;overlayOut();lastLoad=Date.now();
       try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}
-      render();if(manual)showToast('Attendance updated','success');
+      if(!quiet||!($('atModal').classList.contains('open')||$('atOt').classList.contains('open')))render();if(manual)showToast('Attendance updated','success');
     }).catch(function(e){
       loading=false;btn.disabled=false;icon.classList.remove('spin');
       if(!D&&$('atBody'))$('atBody').innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message||'Could not load')+'<br><br><button class="sp-chip on" data-at-retry>Try again</button></div>';
-      else showToast(navigator.onLine===false?'Offline — showing last saved data':'Sync failed','danger');
+      else if(!quiet)showToast(navigator.onLine===false?'Offline — showing last saved data':'Sync failed','danger');
+      updLabel();
     });
   }
   function refresh(){load(true);}
@@ -2849,19 +2907,21 @@ var AT=(function(){
   function nav(){
     var t=tabs(),n=$('atNav');
     n.style.gridTemplateColumns='repeat('+t.length+',1fr)';
-    n.innerHTML=t.map(function(x){return '<button class="'+(tab===x[0]?'on':'')+'" data-at-tab="'+x[0]+'"><span><svg class="ic" aria-hidden="true"><use href="#'+ICON[x[0]]+'"/></svg></span>'+LBL[x[0]]+'</button>';}).join('');
+    n.innerHTML=t.map(function(x){return '<button class="'+(tab===x[0]?'on':'')+'"'+(tab===x[0]?' aria-current="page"':'')+' data-at-tab="'+x[0]+'"><span><svg class="ic" aria-hidden="true"><use href="#'+ICON[x[0]]+'"/></svg></span>'+LBL[x[0]]+'</button>';}).join('');
   }
   function shell(){nav();$('atView').innerHTML='<div id="atBody"></div>';render();}
   function render(){
     var el=$('atBody');if(!el)return;
     if(needsData()&&!D){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading attendance…</div>';return;}
-    el.innerHTML=tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():bStaff();
+    el.innerHTML='<div class="at-upd" id="atUpd"></div>'+(tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():bStaff());
+    updLabel();
     if(tab==='register')scrollToday();
   }
   function stat(l,v){return '<div class="sp-stat"><div class="sp-num">'+v+'</div><div class="sp-lab">'+l+'</div></div>';}
-  function msel(id,v){return '<select class="at-sel" data-at-sel="'+id+'">'+MONF.map(function(m,i){return '<option value="'+i+'"'+(i===v?' selected':'')+'>'+m+'</option>';}).join('')+'</select>';}
-  function ysel(id,v){var ys=[];for(var y=2024;y<=2030;y++)ys.push(y);return '<select class="at-sel" data-at-sel="'+id+'">'+ys.map(function(y){return '<option value="'+y+'"'+(y===v?' selected':'')+'>'+y+'</option>';}).join('')+'</select>';}
-  function search(){return '<div class="at-search"><input id="atQ" class="at-q" type="text" placeholder="Search staff…" autocomplete="off" value="'+esc(q)+'"></div>';}
+  var SELLBL={rM:'Register month',rY:'Register year',pM:'Profiles month',pY:'Profiles year'};
+  function msel(id,v){return '<select class="at-sel" aria-label="'+SELLBL[id]+'" data-at-sel="'+id+'">'+MONF.map(function(m,i){return '<option value="'+i+'"'+(i===v?' selected':'')+'>'+m+'</option>';}).join('')+'</select>';}
+  function ysel(id,v){var ys=[];for(var y=2024;y<=2030;y++)ys.push(y);return '<select class="at-sel" aria-label="'+SELLBL[id]+'" data-at-sel="'+id+'">'+ys.map(function(y){return '<option value="'+y+'"'+(y===v?' selected':'')+'>'+y+'</option>';}).join('')+'</select>';}
+  function search(){return '<div class="at-search"><input id="atQ" class="at-q" type="text" aria-label="Search staff" placeholder="Search staff…" autocomplete="off" value="'+esc(q)+'"></div>';}
   function filt(list){var s=q.trim().toLowerCase();return s?list.filter(function(w){return w.toLowerCase().indexOf(s)>-1;}):list;}
 
   /* ---------- Mark ---------- */
@@ -2873,42 +2933,63 @@ var AT=(function(){
     return '<div class="at-date'+(sun?' sun':'')+'"><div class="at-dl">'+pad(p.d)+' '+MON[p.m]+' '+p.y+(sun?' <span class="at-sunb">SUNDAY</span>':'')+'</div>'
       +'<div class="at-dc">'+(S.ds!==today()?'<button class="at-today" data-at-today>Today</button>':'')+'<button class="at-nb" data-at-shift="-1" aria-label="Previous day">‹</button><input type="date" id="atDate" class="at-di" aria-label="Attendance date" value="'+S.ds+'"><button class="at-nb" data-at-shift="1" aria-label="Next day">›</button></div></div>'
       +'<div class="at-strip" aria-live="polite"><span class="p"><b>'+c.present+'</b> Present</span><span class="a"><b>'+c.absent+'</b> Absent</span><span class="n"><b>'+nm+'</b> Not marked</span><span class="t">of '+D.workers.length+'</span></div>'
+      +'<div id="atSyncBox">'+syncBanner()+'</div>'
       +(vis>0?'<button class="at-all" data-at-allp>✓ Mark all present'+(q.trim()?' (shown)':'')+' · '+vis+'</button>':'')
       +search()+'<div id="atList">'+listMark()+'</div><div class="at-btns">'
       +(can('attendance.staff')?'<button class="btn-submit" data-at-addstaff>+ Add Staff</button>':'')
       +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>';
   }
+  function syncBanner(){var n=outMine().length;if(!n)return '';return '<div class="at-sync" role="status"><span>⏳ <b>'+n+'</b> change'+(n===1?'':'s')+' saved on this phone, waiting to sync'+(navigator.onLine===false?' (offline)':'')+'</span><button data-at-sync>Sync now</button></div>';}
+  function updBanner(){var e=$('atSyncBox');if(e)e.innerHTML=syncBanner();}
   function listMark(){
     var v=filt(D.workers);if(!v.length)return '<div class="sp-empty">'+(q?'No staff match “'+esc(q)+'”':'No staff yet')+'</div>';
     return v.map(function(w){
-      var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
+      var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],wait=!bad&&isPending(w,S.ds),lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
       return '<div class="at-row'+(bad?' bad':'')+'"><div class="at-nm"><div class="at-n">'+esc(w)+'</div>'
-        +(bad?'<div class="at-s err"><button class="at-rr" data-at-rr="'+esc(w)+'" aria-label="Not saved. Retry for '+esc(w)+'">⚠ Not saved · Retry</button></div>':'<div class="at-s '+k+'">'+lbl+'</div>')+'</div><div class="at-ctl">'
-        +'<button class="at-b'+(r.status==='present'?' p':'')+'" data-at-mark="'+esc(w)+'|present" aria-label="Present">P</button>'
-        +'<button class="at-b'+(r.status==='absent'?' a':'')+'" data-at-mark="'+esc(w)+'|absent" aria-label="Absent">A</button>'
-        +'<button class="at-ot'+(r.ot>0&&r.status==='present'?' set':'')+'" data-at-ot="'+esc(w)+'"'+(r.status==='absent'?' disabled title="Mark present to add OT"':' title="Overtime (marks present)"')+'>'+(r.ot>0&&r.status==='present'?r.ot+'h':'OT')+' ▾</button>'
+        +(bad?'<div class="at-s err"><button class="at-rr" data-at-rr="'+esc(w)+'" aria-label="Not saved. Retry for '+esc(w)+'">⚠ Not saved · Retry</button></div>':wait?'<div class="at-s wait">⏳ Waiting to sync</div>':'<div class="at-s '+k+'">'+lbl+'</div>')+'</div><div class="at-ctl">'
+        +'<button class="at-b'+(r.status==='present'?' p':'')+'" data-at-mark="'+esc(w)+'|present" aria-label="Mark '+esc(w)+' present" aria-pressed="'+(r.status==='present')+'">P</button>'
+        +'<button class="at-b'+(r.status==='absent'?' a':'')+'" data-at-mark="'+esc(w)+'|absent" aria-label="Mark '+esc(w)+' absent" aria-pressed="'+(r.status==='absent')+'">A</button>'
+        +'<button class="at-ot'+(r.ot>0&&r.status==='present'?' set':'')+'" data-at-ot="'+esc(w)+'" aria-haspopup="menu" aria-label="Overtime for '+esc(w)+(r.ot>0&&r.status==='present'?', '+r.ot+' hours':'')+'"'+(r.status==='absent'?' disabled title="Mark present to add OT"':' title="Overtime (marks present)"')+'>'+(r.ot>0&&r.status==='present'?r.ot+'h':'OT')+' ▾</button>'
         +'<input class="at-rmk" type="text" placeholder="Remarks" aria-label="Remarks for '+esc(w)+'" data-at-rmk="'+esc(w)+'" value="'+esc(r.remarks||'')+'"></div></div>';
     }).join('');
   }
   function redrawMark(){if(tab!=='mark'||!$('atBody'))return;var l=$('atList');if(l)l.innerHTML=listMark();}
   function persist(w,ds,st,ot,rm){
-    var key=w+'|'+ds;
-    queue[key]=(queue[key]||Promise.resolve()).then(function(){return api('att.save',{worker:w,date:ds,status:st,ot:ot,remarks:rm});})
-      .then(function(){var had=errRow[key];delete errRow[key];try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}if(had)redrawMark();})
-      .catch(function(e){errRow[key]=true;if(!persist._t){showToast('Some changes were not saved — tap Retry on the row','danger');persist._t=setTimeout(function(){persist._t=0;},3500);}redrawMark();});
+    var ts=outAdd(w,ds,st,ot,rm);delete errRow[w+'|'+ds];sendOne(w,ds,st,ot,rm,ts);
+  }
+  function sendOne(w,ds,st,ot,rm,ts){
+    var key=w+'|'+ds;if(inflight[ts])return;inflight[ts]=1;
+    queue[key]=(queue[key]||Promise.resolve()).then(function(){
+      var cur=outMine().filter(function(x){return x.w===w&&x.ds===ds;})[0];
+      if(!cur||cur.ts!==ts)return;                       // a newer edit of the same row replaced this one
+      return api('att.save',{worker:w,date:ds,status:st,ot:ot,remarks:rm}).then(function(){
+        outDone(w,ds,ts);if(D){try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}}
+        if(errRow[key]){delete errRow[key];}
+      },function(e){
+        if(e&&e.transient){syncSoon();toastOnce('Saved on this phone — it will sync when the signal is back','danger');}
+        else{outDone(w,ds,ts);errRow[key]=true;toastOnce('Some changes were not saved — tap Retry on the row','danger');}
+      });
+    }).then(function(){delete inflight[ts];redrawMark();updBanner();},function(){delete inflight[ts];});
+  }
+  function syncSoon(){if(syncT)return;syncT=setTimeout(function(){syncT=0;flush();},15000);}
+  function flush(manual){
+    var items=outMine();if(!items.length){updBanner();return Promise.resolve();}
+    if(navigator.onLine===false){if(manual)showToast('Still offline — your changes are safe on this phone','danger');updBanner();return Promise.resolve();}
+    if(flushing)return Promise.resolve();flushing=true;
+    items.forEach(function(x){sendOne(x.w,x.ds,x.st,x.ot,x.rm,x.ts);});
+    var all=Object.keys(queue).map(function(k){return queue[k];});
+    return Promise.all(all).then(function(){flushing=false;var left=outMine().length;redrawMark();updBanner();if(!left)showToast('All changes synced','success');else syncSoon();},function(){flushing=false;});
   }
   function setRec(w,st,ot,rm,ds){
     ds=ds||S.ds;D.attendance[w+'|'+ds]={status:st,ot:ot,remarks:rm};
     persist(w,ds,st,ot,rm);
   }
   function mark(w,status){
-    if(navigator.onLine===false){showToast("You're offline — not saved",'danger');return;}
     var p=parts(S.ds),r=rec(w,S.ds),next=r.status===status?'':status;
     var ot=next==='present'?(r.ot>0?r.ot:defOT(p.y,p.m,p.d)):0;
-    setRec(w,next,ot,r.remarks||'');render();
+    setRec(w,next,ot,r.remarks||'');render();focusBy('data-at-mark',w+'|'+status);
   }
   function markAll(){
-    if(navigator.onLine===false){showToast("You're offline — not saved",'danger');return;}
     var ds=S.ds,p=parts(ds),ot=defOT(p.y,p.m,p.d),todo=filt(D.workers).filter(function(w){return !rec(w,ds).status;});
     if(!todo.length)return;
     todo.forEach(function(w){setRec(w,'present',ot,rec(w,ds).remarks||'',ds);});render();
@@ -2922,6 +3003,19 @@ var AT=(function(){
       +(custom?'<div class="at-cust"><input id="atOtC" type="number" min="0" max="24" inputmode="numeric" aria-label="Custom overtime hours" placeholder="Hours" value="'+(cur>0&&cur!==2&&cur!==4&&cur!==7?cur:'')+'"><button class="at-opt-go" data-at-otc>Set</button></div>'
         :'<button class="at-mi'+(cur>0&&cur!==2&&cur!==4&&cur!==7?' sel':'')+'" role="menuitem" data-at-otcm>Custom…'+(cur>0&&cur!==2&&cur!==4&&cur!==7?' ('+cur+'h) ✓':'')+'</button>');
   }
+  function focusBy(attr,val){var l=document.querySelectorAll('['+attr+']');for(var i=0;i<l.length;i++){if(l[i].getAttribute(attr)===val){try{l[i].focus();}catch(e){}return;}}}
+  function setInert(on){['v-att','atNav'].forEach(function(id){var e=$(id);if(e)e.inert=!!on;});}
+  function labelDlg(){var d=$('atForm'),h=d.querySelector('h3');d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('tabindex','-1');if(h){h.id='atTitle';d.setAttribute('aria-labelledby','atTitle');}else d.removeAttribute('aria-labelledby');}
+  function openModal(){var md=$('atModal');if(!md.classList.contains('open'))lastFocus=document.activeElement;md.classList.add('open');setInert(true);labelDlg();setTimeout(function(){var d=$('atForm'),f=d.querySelector('input:not([type=hidden]),select,textarea,button:not([disabled])');(f||d).focus();},30);}
+  function trapTab(ev){
+    var d=$('atForm');if(!d||!$('atModal').classList.contains('open'))return;
+    var f=[].filter.call(d.querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])'),function(e){return e.offsetParent!==null;});
+    if(!f.length){ev.preventDefault();d.focus();return;}
+    var first=f[0],last=f[f.length-1],ae=document.activeElement;
+    if(!d.contains(ae)){ev.preventDefault();first.focus();}
+    else if(ev.shiftKey&&ae===first){ev.preventDefault();last.focus();}
+    else if(!ev.shiftKey&&ae===last){ev.preventDefault();first.focus();}
+  }
   function pickOT(cb,cur,title,anchor){
     OTCB=cb;OTA={cur:cur,anchor:anchor,title:title};drawOT(false);
     $('atOt').classList.add('open');
@@ -2934,7 +3028,7 @@ var AT=(function(){
     mn.style.width=w+'px';mn.style.left=left+'px';mn.style.top=top+'px';
     var f=custom?$('atOtC'):mn.querySelector('.at-mi.sel')||mn.querySelector('.at-mi');if(f)f.focus();
   }
-  function closeOT(){$('atOt').classList.remove('open');OTCB=null;}
+  function closeOT(){var an=OTA&&OTA.anchor;$('atOt').classList.remove('open');OTCB=null;if(an&&an.isConnected&&an.focus)an.focus();}
 
   /* ---------- Register ---------- */
   function bReg(){
@@ -2976,67 +3070,81 @@ var AT=(function(){
 
   /* ---------- Profiles & month edit ---------- */
   function bProf(){
+    var tp=0,ta=0,to=0;D.workers.forEach(function(w){var s=statsFor(w,S.pM,S.pY);tp+=s.present;ta+=s.absent;to+=s.ot;});
+    var chips=[['name','A–Z'],['absent','Most absent'],['ot','Most OT']].map(function(c){return '<button class="sp-chip'+(S.psort===c[0]?' on':'')+'" data-at-psort="'+c[0]+'" aria-pressed="'+(S.psort===c[0])+'">'+c[1]+'</button>';}).join('');
     return '<div class="at-bar"><div class="at-bt">Profiles</div><div class="at-sels">'+msel('pM',S.pM)+ysel('pY',S.pY)+'</div></div>'
+      +'<div class="at-strip" aria-label="Team total for '+MONF[S.pM]+' '+S.pY+'"><span class="p"><b>'+tp+'</b> Present days</span><span class="a"><b>'+ta+'</b> Absent days</span><span class="n"><b>'+to+'</b> OT hrs</span><span class="t">'+D.workers.length+' staff</span></div>'
       +(can('attendance.edit')?'<div style="margin-bottom:12px"><button class="at-ghost" style="width:100%" data-at-bulk>Bulk Mark (several days at once)</button></div>':'')
-      +search()+'<div id="atList">'+listProf()+'</div>';
+      +search()+'<div class="sp-chips" role="group" aria-label="Sort profiles">'+chips+'</div><div id="atList">'+listProf()+'</div>';
   }
   function listProf(){
     var v=filt(D.workers);if(!v.length)return '<div class="sp-empty">No staff match</div>';
-    return '<div class="at-pg">'+v.map(function(w){var s=statsFor(w,S.pM,S.pY);
-      return '<div class="at-pc" data-at-prof="'+esc(w)+'"><div class="at-pt"><b>'+esc(w)+'</b><span>'+MON[S.pM]+' '+S.pY+'</span></div><div class="at-mini">'
+    var st={};v.forEach(function(w){st[w]=statsFor(w,S.pM,S.pY);});
+    var by={name:function(a,b){return a.localeCompare(b);},absent:function(a,b){return st[b].absent-st[a].absent||a.localeCompare(b);},ot:function(a,b){return st[b].ot-st[a].ot||a.localeCompare(b);}};
+    v=v.slice().sort(by[S.psort]||by.name);
+    return '<div class="at-pg">'+v.map(function(w){var s=st[w];
+      return '<div class="at-pc" data-at-prof="'+esc(w)+'" tabindex="0" role="button" aria-label="'+esc(w)+', '+s.present+' present, '+s.absent+' absent, '+s.ot+' overtime hours"><div class="at-pt"><b>'+esc(w)+'</b><span>'+MON[S.pM]+' '+S.pY+'</span></div><div class="at-mini">'
         +'<div class="p"><b>'+s.present+'</b><i>Present</i></div><div class="o"><b>'+s.ot+'</b><i>OT Hrs</i></div><div class="a"><b>'+s.absent+'</b><i>Absent</i></div></div></div>';}).join('')+'</div>';
   }
   function openMonthEdit(w,m,y){
     var days={},n=dim(y,m);
     for(var d=1;d<=n;d++){var r=rec(w,dsOf(y,m,d));days[d]={status:r.status||'',ot:r.status==='present'?(+r.ot||0):defOT(y,m,d),remarks:r.remarks||''};}
-    MEd={w:w,m:m,y:y,days:days,exp:false,open:{}};drawME();$('atModal').classList.add('open');
+    var base={};for(var d2=1;d2<=n;d2++){var r2=rec(w,dsOf(y,m,d2));base[d2]={status:r2.status||'',ot:r2.status==='present'?(+r2.ot||0):0,remarks:r2.remarks||''};}
+    MEd={w:w,m:m,y:y,days:days,exp:false,open:{},base:base,force:false};drawME();openModal();
   }
   function meRow(d){
     var r=MEd.days[d],sun=isSun(MEd.y,MEd.m,d),t=new Date(),td=MEd.y===t.getFullYear()&&MEd.m===t.getMonth()&&d===t.getDate(),showR=MEd.exp||MEd.open[d];
     return '<div class="at-me'+(sun?' sun':'')+(td?' today':'')+'"><div class="at-md">'+d+'</div>'
-      +'<button class="at-b'+(r.status==='present'?' p':'')+'" data-me-st="'+d+'|present">P</button><button class="at-b'+(r.status==='absent'?' a':'')+'" data-me-st="'+d+'|absent">A</button>'
-      +(r.status==='present'?'<button class="at-ot set" data-me-ot="'+d+'">'+(r.ot>0?r.ot+'h':'OT')+'</button>':'')
+      +'<button class="at-b'+(r.status==='present'?' p':'')+'" data-me-st="'+d+'|present" aria-label="Day '+d+' present" aria-pressed="'+(r.status==='present')+'">P</button><button class="at-b'+(r.status==='absent'?' a':'')+'" data-me-st="'+d+'|absent" aria-label="Day '+d+' absent" aria-pressed="'+(r.status==='absent')+'">A</button>'
+      +(r.status==='present'?'<button class="at-ot set" data-me-ot="'+d+'" aria-haspopup="menu" aria-label="Day '+d+' overtime, '+(r.ot||0)+' hours">'+(r.ot>0?r.ot+'h':'OT')+'</button>':'')
       +'<button class="at-dot'+(r.remarks?' has':'')+'" data-me-dot="'+d+'" aria-label="Remark for day '+d+'"></button>'
-      +(showR?'<input class="at-rmk wide" type="text" placeholder="Remarks" data-me-rmk="'+d+'" value="'+esc(r.remarks)+'">':'')+'</div>';
+      +(showR?'<input class="at-rmk wide" type="text" placeholder="Remarks" aria-label="Remarks for day '+d+'" data-me-rmk="'+d+'" value="'+esc(r.remarks)+'">':'')+'</div>';
   }
   function drawME(){
     var n=dim(MEd.y,MEd.m),half=Math.min(15,n),L='',R='';
     for(var d=1;d<=n;d++){if(d<=half)L+=meRow(d);else R+=meRow(d);}
-    var keep=$('atMg')?$('atMg').scrollTop:0;
+    var keep=$('atMg')?$('atMg').scrollTop:0,fa=document.activeElement,sig=null;
+    if(fa&&fa.closest&&fa.closest('#atForm')){['data-me-st','data-me-ot','data-me-dot','data-me-exp','data-me-save'].forEach(function(at){if(fa.hasAttribute(at))sig=[at,fa.getAttribute(at)];});}
     $('atForm').innerHTML='<div class="at-wide"><div class="at-mh"><div><div style="text-transform:uppercase;letter-spacing:1px;font-weight:800;font-size:12px;color:var(--accent);margin-bottom:4px">Edit full month</div><h3 style="margin:0">'+esc(MEd.w)+'</h3></div><button class="at-x" data-at-cancel aria-label="Close">✕</button></div>'
       +'<div class="us-note" style="border:none;padding:6px 0 8px">'+MONF[MEd.m]+' '+MEd.y+' — P / A / OT per day. Tap the small dot to add a remark. Tap a set P or A again to clear that day.</div>'
       +'<div class="at-mg'+(MEd.exp?' one':'')+'" id="atMg"><div>'+L+'</div><div>'+R+'</div></div>'
       +'<button class="at-ghost" style="width:100%;margin-bottom:10px" data-me-exp>'+(MEd.exp?'Compact view':'Expand view (full width, all remarks visible)')+'</button>'
       +'<div class="us-err" id="atErr" role="alert"></div><div class="us-act"><button class="btn-submit" id="atGo" data-me-save>Save whole month</button></div></div>';
     if($('atMg'))$('atMg').scrollTop=keep;
+    labelDlg();if(sig)focusBy(sig[0],sig[1]);
   }
   function saveME(){
     if(busyKey)return;var m=MEd,n=dim(m.y,m.m),entries=[];
     for(var d=1;d<=n;d++){var r=m.days[d];entries.push({day:d,status:r.status,ot:r.status==='present'?r.ot:0,remarks:r.remarks});}
     if(navigator.onLine===false){$('atErr').textContent="You're offline — not saved";return;}
     busyKey='me';$('atGo').disabled=true;$('atGo').textContent='Saving…';
-    api('att.monthSave',{worker:m.w,year:m.y,month:m.m,entries:entries}).then(function(r){
+    api('att.monthSave',{worker:m.w,year:m.y,month:m.m,entries:entries,base:m.base,force:!!m.force}).then(function(r){
       busyKey='';entries.forEach(function(e){var k=m.w+'|'+dsOf(m.y,m.m,e.day);if(!e.status&&!e.remarks)delete D.attendance[k];else D.attendance[k]={status:e.status,ot:e.ot,remarks:e.remarks};});
       closeForm();render();showToast('Saved '+m.w+"'s month — "+r.changed+' set, '+r.cleared+' cleared','success');
-    }).catch(function(e){busyKey='';$('atGo').disabled=false;$('atGo').textContent='Save whole month';$('atErr').textContent=e.message||'Could not save';});
+    }).catch(function(e){busyKey='';$('atGo').disabled=false;$('atGo').textContent='Save whole month';
+      var cm=/^CONFLICT:(.*)$/.exec(e.message||'');
+      if(cm){var dl=cm[1].split(',').map(function(x){return +x;});$('atErr').innerHTML='Someone else changed '+(dl.length===1?'day ':'days ')+dl.join(', ')+' for '+esc(m.w)+' since you opened this month.<div class="at-conf"><button class="at-ghost" data-me-reload>Load their changes (my edits are discarded)</button><button class="at-ghost" data-me-force>Save mine anyway</button></div>';}
+      else $('atErr').textContent=e.message||'Could not save';});
   }
 
   /* ---------- Staff ---------- */
   function bStaff(){
-    var act=D.roster.filter(function(r){return r.status!=='Archived';}),arc=D.roster.filter(function(r){return r.status==='Archived';}),s=q.trim().toLowerCase();
-    function f(l){return s?l.filter(function(r){return r.name.toLowerCase().indexOf(s)>-1;}):l;}
-    var h='<div class="at-bar"><div class="at-bt">Settings</div><button class="btn-submit at-sm" data-at-addstaff>+ Add Staff</button></div>'
-      +'<div class="sp-notes" style="margin:0 0 12px;font-style:normal">Active: <b>'+act.length+'</b>'+(arc.length?' · Archived: <b>'+arc.length+'</b>':'')+'</div>'+search()+'<div id="atList">'+listStaff()+'</div>'
-      +'<div class="at-tools"><button class="at-ghost" data-at-export>Export all data (CSV)</button><button class="at-ghost" data-at-rebuild>Rebuild Register sheet ('+MONF[parts(S.ds).m]+')</button></div>';
-    return h;
+    var act=D.roster.filter(function(r){return r.status!=='Archived';}),arc=D.roster.filter(function(r){return r.status==='Archived';});
+    return '<div class="at-bar"><div class="at-bt">Settings</div><button class="btn-submit at-sm" data-at-addstaff>+ Add Staff</button></div>'
+      +'<div class="sp-notes" style="margin:0 0 12px;font-style:normal">Active: <b>'+act.length+'</b>'+(arc.length?' · Archived: <b>'+arc.length+'</b>':'')+'</div>'
+      +'<details class="at-tools-d"><summary>Data &amp; sheet tools</summary>'
+      +'<div class="at-tool"><div><b>Export all data (CSV)</b><span>Download every attendance record as a spreadsheet file.</span></div><button class="at-ghost" data-at-export>Export</button></div>'
+      +'<div class="at-tool"><div><b>Rebuild Register sheet</b><span>Rewrites the Register tab in Google Sheets for <b>'+MONF[parts(S.ds).m]+' '+parts(S.ds).y+'</b> (the month of the date chosen in Mark). Use only if the sheet looks wrong.</span></div><button class="at-ghost warn" data-at-rebuild>Rebuild</button></div>'
+      +'</details>'
+      +search()+'<div id="atList">'+listStaff()+'</div>';
   }
   function listStaff(){
     var act=D.roster.filter(function(r){return r.status!=='Archived';}),arc=D.roster.filter(function(r){return r.status==='Archived';}),s=q.trim().toLowerCase();
     function f(l){return s?l.filter(function(r){return r.name.toLowerCase().indexOf(s)>-1;}):l;}
     var a=f(act),b=f(arc),h='';
-    a.forEach(function(r){h+='<div class="at-row"><div class="at-nm"><div class="at-n">'+esc(r.name)+'</div></div><button class="at-pill" data-at-arch="'+esc(r.name)+'">Archive</button></div>';});
+    a.forEach(function(r){h+='<div class="at-row"><div class="at-nm"><div class="at-n">'+esc(r.name)+'</div></div><button class="at-pill" data-at-arch="'+esc(r.name)+'" aria-label="Archive '+esc(r.name)+'">Archive</button></div>';});
     if(b.length){h+='<div class="sp-notes" style="margin:16px 0 8px;font-style:normal">Archived — history is kept; they are just off the daily list</div>';
-      b.forEach(function(r){h+='<div class="at-row off"><div class="at-nm"><div class="at-n">'+esc(r.name)+'</div></div><button class="at-pill on" data-at-react="'+esc(r.name)+'">Reactivate</button></div>';});}
+      b.forEach(function(r){h+='<div class="at-row off"><div class="at-nm"><div class="at-n">'+esc(r.name)+'</div></div><button class="at-pill on" data-at-react="'+esc(r.name)+'" aria-label="Reactivate '+esc(r.name)+'">Reactivate</button></div>';});}
     return h||'<div class="sp-empty">No staff match</div>';
   }
   function exportCSV(){
@@ -3046,8 +3154,8 @@ var AT=(function(){
   }
 
   /* ---------- modals ---------- */
-  function form(html){$('atForm').innerHTML=html;$('atModal').classList.add('open');}
-  function closeForm(){$('atModal').classList.remove('open');MEd=null;BK=null;busyKey='';}
+  function form(html){$('atForm').innerHTML=html;openModal();}
+  function closeForm(){$('atModal').classList.remove('open');setInert(false);MEd=null;BK=null;busyKey='';var lf=lastFocus;lastFocus=null;if(lf&&lf.isConnected&&lf.focus)lf.focus();}
   function addStaffForm(){form('<div class="at-narrow"><h3>Add new staff</h3><div class="ex-f"><label for="atNew">Name</label><input type="text" id="atNew" autocomplete="off" placeholder="Enter staff name"></div><div class="us-err" id="atErr" role="alert"></div><div class="us-act"><button class="us-cancel" data-at-cancel>Cancel</button><button class="btn-submit" id="atGo" data-at-addgo>Add staff</button></div></div>');setTimeout(function(){var e=$('atNew');if(e)e.focus();},60);}
   function bulkForm(){
     var opts=D.workers.map(function(w){return '<option value="'+esc(w)+'">'+esc(w)+'</option>';}).join('');
@@ -3075,8 +3183,10 @@ var AT=(function(){
     if((x=t.closest('[data-at-tab]'))){tab=x.getAttribute('data-at-tab');q='';shell();if(!D||Date.now()-lastLoad>30000)load(false);return;}
     if((x=t.closest('[data-at-shift]'))){var p=parts(S.ds),d=new Date(p.y,p.m,p.d+ +x.getAttribute('data-at-shift'));S.ds=ymd(d);render();return;}
     if((x=t.closest('[data-at-mark]'))){var a=x.getAttribute('data-at-mark'),i=a.lastIndexOf('|');mark(a.slice(0,i),a.slice(i+1));return;}
-    if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');render();},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
+    if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');render();focusBy('data-at-ot',w);},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
     if(t.closest('[data-at-allp]')){markAll();return;}
+    if(t.closest('[data-at-sync]')){flush(true);return;}
+    if((x=t.closest('[data-at-psort]'))){S.psort=x.getAttribute('data-at-psort');render();focusBy('data-at-psort',S.psort);return;}
     if(t.closest('[data-at-today]')){S.ds=today();render();return;}
     if((x=t.closest('[data-at-rr]'))){var rw=x.getAttribute('data-at-rr'),rr=rec(rw,S.ds);persist(rw,S.ds,rr.status,rr.ot,rr.remarks||'');delete errRow[rw+'|'+S.ds];redrawMark();return;}
     if((x=t.closest('[data-at-otv]'))){var v=+x.getAttribute('data-at-otv'),cb=OTCB;closeOT();if(cb)cb(v);return;}
@@ -3090,6 +3200,8 @@ var AT=(function(){
     if(t.closest('[data-me-exp]')){MEd.exp=!MEd.exp;drawME();return;}
     if((x=t.closest('[data-me-ot]'))){var dn=x.getAttribute('data-me-ot');pickOT(function(v){MEd.days[dn].ot=v;drawME();},MEd.days[dn].ot,'OT — Day '+dn,x);return;}
     if(t.closest('[data-me-save]')){saveME();return;}
+    if(t.closest('[data-me-force]')){if(MEd){MEd.force=true;saveME();}return;}
+    if(t.closest('[data-me-reload]')){if(!MEd)return;var rw0=MEd.w,rm0=MEd.m,ry0=MEd.y;busyKey='';api('att.getAll').then(function(d){D=d;overlayOut();lastLoad=Date.now();try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}render();openMonthEdit(rw0,rm0,ry0);showToast('Loaded the latest — your edits were discarded','success');}).catch(function(){showToast('Could not reload','danger');});return;}
     if(t.closest('[data-at-addstaff]')){addStaffForm();return;}
     if(t.closest('[data-at-addgo]')){var nm=$('atNew').value.trim();if(!nm){$('atErr').textContent='Please enter a name';return;}
       if(D.roster.some(function(r){return r.name.toLowerCase()===nm.toLowerCase();})){$('atErr').textContent='That name is already on the list';return;}
@@ -3121,8 +3233,8 @@ var AT=(function(){
     var sel=t.getAttribute&&t.getAttribute('data-at-sel');if(sel){S[sel]=+t.value;render();return;}
     var rw=t.getAttribute&&t.getAttribute('data-at-rmk');if(rw!=null&&rw!==''){var r=rec(rw,S.ds),v=t.value;if((r.remarks||'')!==v)setRec(rw,r.status,r.ot,v);}
   });
-  document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Escape'){if($('atOt')&&$('atOt').classList.contains('open')){closeOT();return;}if($('atModal')&&$('atModal').classList.contains('open')){closeForm();return;}}if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute('data-at-sw')!=null&&t.tagName==='TR'){ev.preventDefault();t.click();return;}if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
-  return {open:open,load:load,refresh:refresh,loaded:function(){return !!D;},since:function(){return lastLoad;}};
+  document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Tab'&&$('atModal')&&$('atModal').classList.contains('open')){trapTab(ev);return;}if((ev.key==='ArrowDown'||ev.key==='ArrowUp')&&$('atOt')&&$('atOt').classList.contains('open')){var mi=[].slice.call($('atOt').querySelectorAll('.at-mi')),ix=mi.indexOf(document.activeElement);if(mi.length){ev.preventDefault();mi[(ix+(ev.key==='ArrowDown'?1:-1)+mi.length)%mi.length].focus();}return;}if(ev.key==='Escape'){if($('atOt')&&$('atOt').classList.contains('open')){closeOT();return;}if($('atModal')&&$('atModal').classList.contains('open')){closeForm();return;}}if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute&&(t.getAttribute('data-at-sw')!=null&&t.tagName==='TR'||t.getAttribute('data-at-prof')!=null)){ev.preventDefault();t.click();return;}if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
+  return {open:open,load:load,refresh:refresh,flush:flush,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
 function openAtt(fromPop){if(!attAny())return go('home');go('att',fromPop);AT.open();}
 
@@ -3204,13 +3316,13 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadCtl)document.getElementById('updBar').classList.add('show');});
   window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
 }
-document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(current==='dash'&&loaded&&Date.now()-lastLoad>60000)loadData();if(current.indexOf('fg')===0&&FG.loaded()&&Date.now()-FG.since()>60000)FG.load(false);if(current.indexOf('kn')===0&&KN.loaded()&&Date.now()-KN.since()>60000)KN.load(false);if(current==='sales'&&SP.loaded()&&Date.now()-SP.since()>60000)SP.load(false);if(current==='att'&&AT.loaded()&&Date.now()-AT.since()>60000)AT.load(false);});
+document.addEventListener('visibilitychange',function(){if(document.hidden)return;try{AT.flush();}catch(e){}if(current==='dash'&&loaded&&Date.now()-lastLoad>60000)loadData();if(current.indexOf('fg')===0&&FG.loaded()&&Date.now()-FG.since()>60000)FG.load(false);if(current.indexOf('kn')===0&&KN.loaded()&&Date.now()-KN.since()>60000)KN.load(false);if(current==='sales'&&SP.loaded()&&Date.now()-SP.since()>60000)SP.load(false);if(current==='att'&&AT.loaded()&&Date.now()-AT.since()>60000)AT.load(false);});
 var deferredInstall=null;
 function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(!isStandalone())document.getElementById('installBtn').style.display='inline-flex';});
 function doInstall(){if(!deferredInstall)return;deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;document.getElementById('installBtn').style.display='none';});}
 window.addEventListener('appinstalled',function(){document.getElementById('installBtn').style.display='none';});
-window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData();if(current.indexOf('fg')===0)FG.load(false);if(current.indexOf('kn')===0)KN.load(false);if(current==='sales')SP.load(false);if(current==='att'&&AT.loaded())AT.load(false);});
+window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData();if(current.indexOf('fg')===0)FG.load(false);if(current.indexOf('kn')===0)KN.load(false);if(current==='sales')SP.load(false);AT.flush();if(current==='att'&&AT.loaded())AT.load(false);});
 (function(){if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!isStandalone()){var h=document.getElementById('iosHint');if(h)h.style.display='block';}})();
 
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
