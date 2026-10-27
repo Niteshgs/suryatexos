@@ -34,7 +34,7 @@ function nowIST() {   // wall-clock "now" in India as a spreadsheet date-time st
 function todayIST() { const p = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date()); return p; }  // yyyy-mm-dd
 
 async function logRow(op, action, worker, date, oldV, newV) {
-  try { await ensureTimeFmt(T.log); await G.append(SHEET_ID(), q(T.log) + '!A1', [[nowIST(), safe(op || 'unidentified'), action, safe(worker), text(date || ''), safe(oldV), safe(newV)]], 'USER_ENTERED'); } catch (e) { /* logging must never block a save */ }
+  try { await ensureTimeFmt(T.log); const ur = await G.append(SHEET_ID(), q(T.log) + '!A1', [[nowIST(), safe(op || 'unidentified'), action, safe(worker), text(date || ''), safe(oldV), safe(newV)]], 'USER_ENTERED'); await fmtAppended(T.log, ur); } catch (e) { /* logging must never block a save */ }
 }
 
 async function readAll() {
@@ -80,6 +80,15 @@ async function ensureTimeFmt(tab) {
     if (sid == null) { timeFmtDone[tab] = false; return; }
     await G.format(SHEET_ID(), [{ repeatCell: { range: { sheetId: sid, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: 1 }, cell: { userEnteredFormat: { numberFormat: { type: 'DATE_TIME', pattern: 'yyyy-mm-dd hh:mm:ss' } } }, fields: 'userEnteredFormat.numberFormat' } }]);
   } catch (e) { timeFmtDone[tab] = false; /* cosmetic only */ }
+}
+// Format exactly the row that was just appended (newly added grid rows do not inherit the column format).
+async function fmtAppended(tab, updatedRange) {
+  try {
+    const m = /!A(\d+)(?::|$)/.exec(str(updatedRange)); if (!m) return;
+    const sid = (await sheetIds())[tab]; if (sid == null) return;
+    const r = +m[1] - 1;
+    await G.format(SHEET_ID(), [{ repeatCell: { range: { sheetId: sid, startRowIndex: r, endRowIndex: r + 1, startColumnIndex: 0, endColumnIndex: 1 }, cell: { userEnteredFormat: { numberFormat: { type: 'DATE_TIME', pattern: 'yyyy-mm-dd hh:mm:ss' } } }, fields: 'userEnteredFormat.numberFormat' } }]);
+  } catch (e) { /* cosmetic only */ }
 }
 async function sheetIds() { const o = {}; (await G.sheetProps(SHEET_ID())).forEach((p) => { o[p.title] = p.sheetId; }); return o; }
 
@@ -240,7 +249,8 @@ async function leaveSubmit(a) {
   const day = (s) => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
   const daysNotice = Math.round((day(start) - day(todayIST())) / 86400000), prior = daysNotice >= 90 ? 'Yes' : 'No';
   await ensureTimeFmt(T.leave);
-  await G.append(SHEET_ID(), q(T.leave) + '!A1', [[nowIST(), safe(name), text(start), text(end), safe(reason), daysNotice, prior, 'Pending']], 'USER_ENTERED');
+  const ur = await G.append(SHEET_ID(), q(T.leave) + '!A1', [[nowIST(), safe(name), text(start), text(end), safe(reason), daysNotice, prior, 'Pending']], 'USER_ENTERED');
+  await fmtAppended(T.leave, ur);
   const alert = await notifyLeave({ name, start, end, reason, daysNotice, appliedPrior: prior });
   return { ok: true, daysNotice, appliedPrior: prior, alert };
 }
