@@ -25,6 +25,8 @@ const CATALOG = [
     { id: 'sales.touch', name: 'Customer Touch Points (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers' } ] },
   { id: 'expenses', name: 'Cash Expenses', items: [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
+  { id: 'calc', name: 'Calculators', items: [
+    { id: 'calc.gross', name: 'Gross Value Calculator' }, { id: 'calc.payment', name: 'Payment Calculator' } ] },
 ];
 const ALL_KEYS = CATALOG.flatMap((g) => g.items.map((i) => i.id));
 
