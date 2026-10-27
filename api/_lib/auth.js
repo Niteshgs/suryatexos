@@ -21,6 +21,8 @@ const CATALOG = [
     { id: 'fg.status', name: 'Stock status' }, { id: 'fg.po', name: 'PO Track' }, { id: 'fg.sweep', name: 'Stock Sweep' } ] },
   { id: 'knitted', name: 'Knitted Production', items: [
     { id: 'knitted.entry', name: 'Entry' }, { id: 'knitted.dash', name: 'Dashboard' }, { id: 'knitted.admin', name: 'Admin (tapes & machine activity)' } ] },
+  { id: 'sales', name: 'Sales', items: [
+    { id: 'sales.touch', name: 'Customer Touch Points (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers' } ] },
 ];
 const ALL_KEYS = CATALOG.flatMap((g) => g.items.map((i) => i.id));
 
@@ -37,6 +39,10 @@ const ROUTE_PERMS = {
     'knitted.saveBeams': ['knitted.entry'],
     'knitted.verifyPin': ['knitted.admin'], 'knitted.addTape': ['knitted.admin'], 'knitted.removeTape': ['knitted.admin'],
     'knitted.renameTape': ['knitted.admin'], 'knitted.activity': ['knitted.admin'],
+  },
+  sales: {
+    'touch.getAll': ['sales.touch'], 'touch.toggle': ['sales.touch'],
+    'touch.addClient': ['sales.touchmanage'], 'touch.updateClient': ['sales.touchmanage'], 'touch.archiveClient': ['sales.touchmanage'],
   },
 };
 
