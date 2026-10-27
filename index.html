@@ -631,6 +631,30 @@ a.app-tile{display:block;text-decoration:none}
 .at-mini b{font-size:24px}
 .at-pc .at-lr{padding:6px 14px}
 @media(min-width:900px){#atView{padding-bottom:40px}}
+/* attendance v80: speed + trust */
+.at-strip{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:2px 4px 10px;font-size:13px;color:var(--text-muted)}
+.at-strip b{font-size:20px;font-weight:800;margin-right:3px}.at-strip .p b{color:var(--success)}.at-strip .a b{color:var(--danger)}.at-strip .n b{color:var(--accent)}.at-strip .t{margin-left:auto}
+.at-all{width:100%;min-height:48px;margin-bottom:12px;border-radius:var(--radius);border:1px solid var(--success);background:rgba(76,175,130,.12);color:var(--success);font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.at-today{min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:inherit;font-weight:700;cursor:pointer}
+.at-date{padding:10px 12px}
+.at-row.bad{border-color:var(--danger);background:rgba(224,85,85,.08)}
+.at-s.err{color:var(--danger);margin-top:0}.at-rr{border:none;background:none;color:var(--danger);font:inherit;font-size:12px;font-weight:800;line-height:1.25;text-align:left;cursor:pointer;padding:4px 0;min-height:32px;max-width:100%}
+.at-row.bad .at-nm{min-width:0}
+.at-ot:disabled{opacity:.35;cursor:not-allowed}
+.at-reg td.p{background:rgba(76,175,130,.10)}.at-reg td.a{background:rgba(224,85,85,.10)}
+.at-reg td.sun,.at-reg th.sun{background:var(--accent-soft)}
+.at-reg th.today,.at-reg td.today{box-shadow:inset 2px 0 0 var(--accent),inset -2px 0 0 var(--accent)}
+.at-reg th.today{color:var(--accent)}
+.at-reg .tot{position:sticky;background:var(--surface2);font-weight:800;min-width:44px;z-index:1}.at-reg .tot.t1{right:0;box-shadow:-1px 0 0 var(--border)}.at-reg .tot.t2{right:44px}
+.at-reg thead .tot{z-index:3}
+.at-reg tr:focus-visible,.at-reg:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.at-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--text-muted);margin-top:10px}.at-legend .p{color:var(--success)}.at-legend .a{color:var(--danger)}
+.at-pop{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.25)}.at-pop.open{display:block}
+.at-menu{position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45);overflow:hidden}
+.at-mi{display:block;width:100%;min-height:52px;padding:0 18px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-size:16px;text-align:left;cursor:pointer}
+.at-mi:last-child{border-bottom:none}.at-mi.sel{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.at-mi:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.at-cust{display:flex;gap:8px;padding:10px}.at-cust input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;min-height:44px}
 /* CASH EXPENSES */
 .ex-f{margin-bottom:14px}
 .ex-f label{display:block;font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px}
@@ -995,7 +1019,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v79</span>
+    <span class="app-ver" id="appVer" title="App version">v80</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1080,7 +1104,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
   <div class="sp-wrap" id="atView"></div>
 </div>
 <div class="us-modal" id="atModal"><div class="us-in" id="atForm" role="dialog"></div></div>
-<div class="us-modal" id="atOt"></div>
+<div class="at-pop" id="atOt"></div>
 
 <!-- CALCULATORS -->
 <div class="view" id="v-calc">
@@ -2667,7 +2691,7 @@ var AT=(function(){
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var MONF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  var D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,leaveSub='apply',leaveRows=null,busyKey='';
+  var OTA=null,D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,leaveSub='apply',leaveRows=null,busyKey='',errRow={};
   var now=new Date(),S={ds:ymd(now),rM:now.getMonth(),rY:now.getFullYear(),pM:now.getMonth(),pY:now.getFullYear()};
   function $(id){return document.getElementById(id);}
   function pad(n){return String(n).padStart(2,'0');}
@@ -2725,6 +2749,7 @@ var AT=(function(){
     if(needsData()&&!D){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading attendance…</div>';return;}
     el.innerHTML=tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():tab==='staff'?bStaff():bLeave();
     if(tab==='leave')drawLeave();
+    if(tab==='register')scrollToday();
   }
   function stat(l,v){return '<div class="sp-stat"><div class="sp-num">'+v+'</div><div class="sp-lab">'+l+'</div></div>';}
   function msel(id,v){return '<select class="at-sel" data-at-sel="'+id+'">'+MONF.map(function(m,i){return '<option value="'+i+'"'+(i===v?' selected':'')+'>'+m+'</option>';}).join('')+'</select>';}
@@ -2733,37 +2758,41 @@ var AT=(function(){
   function filt(list){var s=q.trim().toLowerCase();return s?list.filter(function(w){return w.toLowerCase().indexOf(s)>-1;}):list;}
 
   /* ---------- Mark ---------- */
+  function today(){return ymd(new Date());}
   function bMark(){
     var p=parts(S.ds),sun=new Date(p.y,p.m,p.d).getDay()===0,c={present:0,absent:0};
     D.workers.forEach(function(w){var r=rec(w,S.ds);if(c[r.status]!==undefined)c[r.status]++;});
-    var h='<div class="at-date'+(sun?' sun':'')+'"><div class="at-dl">'+pad(p.d)+' '+MON[p.m]+' '+p.y+(sun?' <span class="at-sunb">SUNDAY</span>':'')+'</div>'
-      +'<div class="at-dc"><button class="at-nb" data-at-shift="-1" aria-label="Previous day">‹</button><input type="date" id="atDate" class="at-di" value="'+S.ds+'"><button class="at-nb" data-at-shift="1" aria-label="Next day">›</button></div></div>'
-      +'<div class="sp-stats">'+stat('Present',c.present)+stat('Absent',c.absent)+stat('Not Marked',D.workers.length-c.present-c.absent)+stat('Total Staff',D.workers.length)+'</div>'
+    var nm=D.workers.length-c.present-c.absent,vis=filt(D.workers).filter(function(w){return !rec(w,S.ds).status;}).length;
+    return '<div class="at-date'+(sun?' sun':'')+'"><div class="at-dl">'+pad(p.d)+' '+MON[p.m]+' '+p.y+(sun?' <span class="at-sunb">SUNDAY</span>':'')+'</div>'
+      +'<div class="at-dc">'+(S.ds!==today()?'<button class="at-today" data-at-today>Today</button>':'')+'<button class="at-nb" data-at-shift="-1" aria-label="Previous day">‹</button><input type="date" id="atDate" class="at-di" aria-label="Attendance date" value="'+S.ds+'"><button class="at-nb" data-at-shift="1" aria-label="Next day">›</button></div></div>'
+      +'<div class="at-strip" aria-live="polite"><span class="p"><b>'+c.present+'</b> Present</span><span class="a"><b>'+c.absent+'</b> Absent</span><span class="n"><b>'+nm+'</b> Not marked</span><span class="t">of '+D.workers.length+'</span></div>'
+      +(vis>0?'<button class="at-all" data-at-allp>✓ Mark all present'+(q.trim()?' (shown)':'')+' · '+vis+'</button>':'')
       +search()+'<div id="atList">'+listMark()+'</div><div class="at-btns">'
       +(can('attendance.staff')?'<button class="btn-submit" data-at-addstaff>+ Add Staff</button>':'')
       +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>';
-    return h;
   }
   function listMark(){
-    var v=filt(D.workers);if(!v.length)return '<div class="sp-empty">'+(q?'No staff match "'+esc(q)+'"':'No staff yet')+'</div>';
+    var v=filt(D.workers);if(!v.length)return '<div class="sp-empty">'+(q?'No staff match “'+esc(q)+'”':'No staff yet')+'</div>';
     return v.map(function(w){
-      var r=rec(w,S.ds),lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not Marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
-      return '<div class="at-row"><div class="at-nm"><div class="at-n">'+esc(w)+'</div><div class="at-s '+k+'">'+lbl+'</div></div><div class="at-ctl">'
+      var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
+      return '<div class="at-row'+(bad?' bad':'')+'"><div class="at-nm"><div class="at-n">'+esc(w)+'</div>'
+        +(bad?'<div class="at-s err"><button class="at-rr" data-at-rr="'+esc(w)+'" aria-label="Not saved. Retry for '+esc(w)+'">⚠ Not saved · Retry</button></div>':'<div class="at-s '+k+'">'+lbl+'</div>')+'</div><div class="at-ctl">'
         +'<button class="at-b'+(r.status==='present'?' p':'')+'" data-at-mark="'+esc(w)+'|present" aria-label="Present">P</button>'
         +'<button class="at-b'+(r.status==='absent'?' a':'')+'" data-at-mark="'+esc(w)+'|absent" aria-label="Absent">A</button>'
-        +'<button class="at-ot'+(r.ot>0?' set':'')+'" data-at-ot="'+esc(w)+'">'+(r.ot>0?r.ot+'h':'OT')+' ▾</button>'
-        +'<input class="at-rmk" type="text" placeholder="Remarks" data-at-rmk="'+esc(w)+'" value="'+esc(r.remarks||'')+'"></div></div>';
+        +'<button class="at-ot'+(r.ot>0&&r.status==='present'?' set':'')+'" data-at-ot="'+esc(w)+'"'+(r.status==='absent'?' disabled title="Mark present to add OT"':' title="Overtime (marks present)"')+'>'+(r.ot>0&&r.status==='present'?r.ot+'h':'OT')+' ▾</button>'
+        +'<input class="at-rmk" type="text" placeholder="Remarks" aria-label="Remarks for '+esc(w)+'" data-at-rmk="'+esc(w)+'" value="'+esc(r.remarks||'')+'"></div></div>';
     }).join('');
   }
+  function redrawMark(){if(tab!=='mark'||!$('atBody'))return;var l=$('atList');if(l)l.innerHTML=listMark();}
   function persist(w,ds,st,ot,rm){
     var key=w+'|'+ds;
     queue[key]=(queue[key]||Promise.resolve()).then(function(){return api('att.save',{worker:w,date:ds,status:st,ot:ot,remarks:rm});})
-      .then(function(){try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}})
-      .catch(function(e){showToast('Not saved — '+(e&&e.message?e.message:'try again'),'danger');load(false);});
+      .then(function(){var had=errRow[key];delete errRow[key];try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}if(had)redrawMark();})
+      .catch(function(e){errRow[key]=true;if(!persist._t){showToast('Some changes were not saved — tap Retry on the row','danger');persist._t=setTimeout(function(){persist._t=0;},3500);}redrawMark();});
   }
-  function setRec(w,st,ot,rm){
-    D.attendance[w+'|'+S.ds]={status:st,ot:ot,remarks:rm};
-    persist(w,S.ds,st,ot,rm);
+  function setRec(w,st,ot,rm,ds){
+    ds=ds||S.ds;D.attendance[w+'|'+ds]={status:st,ot:ot,remarks:rm};
+    persist(w,ds,st,ot,rm);
   }
   function mark(w,status){
     if(navigator.onLine===false){showToast("You're offline — not saved",'danger');return;}
@@ -2771,34 +2800,57 @@ var AT=(function(){
     var ot=next==='present'?(r.ot>0?r.ot:defOT(p.y,p.m,p.d)):0;
     setRec(w,next,ot,r.remarks||'');render();
   }
-  function pickOT(cb,cur,title){
-    OTCB=cb;var opts=[[0,'No OT'],[4,'4 hours'],[7,'7 hours']],custom=cur!==0&&cur!==4&&cur!==7;
-    $('atOt').innerHTML='<div class="us-in at-narrow"><h3>'+esc(title||'Overtime')+'</h3>'
-      +opts.map(function(o){return '<button class="at-opt'+(cur===o[0]?' sel':'')+'" data-at-otv="'+o[0]+'">'+o[1]+(cur===o[0]?' ✓':'')+'</button>';}).join('')
-      +'<div class="at-opt'+(custom?' sel':'')+'" style="cursor:default"><span>Custom hours</span><input id="atOtC" type="number" min="0" max="24" inputmode="numeric" value="'+(custom?cur:'')+'" placeholder="e.g. 2"><button class="at-opt-go" data-at-otc>Set</button></div>'
-      +'<div class="us-act"><button class="us-cancel" data-at-otx>Cancel</button></div></div>';
+  function markAll(){
+    if(navigator.onLine===false){showToast("You're offline — not saved",'danger');return;}
+    var ds=S.ds,p=parts(ds),ot=defOT(p.y,p.m,p.d),todo=filt(D.workers).filter(function(w){return !rec(w,ds).status;});
+    if(!todo.length)return;
+    todo.forEach(function(w){setRec(w,'present',ot,rec(w,ds).remarks||'',ds);});render();
+    showToastAction('Marked '+todo.length+' present','Undo',function(){
+      todo.forEach(function(w){var r=rec(w,ds);if(r.status==='present')setRec(w,'',0,r.remarks||'',ds);});if(tab==='mark')render();showToast('Undone','success');
+    },8000);
+  }
+  function menuHTML(cur,custom){
+    var opts=[[0,'No OT'],[4,'4 hours'],[7,'7 hours']];
+    return opts.map(function(o){return '<button class="at-mi'+(cur===o[0]?' sel':'')+'" role="menuitem" data-at-otv="'+o[0]+'">'+o[1]+(cur===o[0]?' ✓':'')+'</button>';}).join('')
+      +(custom?'<div class="at-cust"><input id="atOtC" type="number" min="0" max="24" inputmode="numeric" aria-label="Custom overtime hours" placeholder="Hours" value="'+(cur>0&&cur!==4&&cur!==7?cur:'')+'"><button class="at-opt-go" data-at-otc>Set</button></div>'
+        :'<button class="at-mi'+(cur>0&&cur!==4&&cur!==7?' sel':'')+'" role="menuitem" data-at-otcm>Custom…'+(cur>0&&cur!==4&&cur!==7?' ('+cur+'h) ✓':'')+'</button>');
+  }
+  function pickOT(cb,cur,title,anchor){
+    OTCB=cb;OTA={cur:cur,anchor:anchor,title:title};drawOT(false);
     $('atOt').classList.add('open');
+  }
+  function drawOT(custom){
+    var el=$('atOt'),r=OTA.anchor&&OTA.anchor.getBoundingClientRect?OTA.anchor.getBoundingClientRect():{left:20,right:220,top:120,bottom:160};
+    el.innerHTML='<div class="at-menu" role="menu" aria-label="'+esc(OTA.title||'Overtime')+'" id="atMenu">'+menuHTML(OTA.cur,custom)+'</div>';
+    var mn=$('atMenu'),w=Math.min(210,innerWidth-16),h=mn.offsetHeight,left=Math.max(8,Math.min(r.right-w,innerWidth-w-8)),top=r.bottom+4;
+    if(top+h>innerHeight-8)top=Math.max(8,r.top-h-4);
+    mn.style.width=w+'px';mn.style.left=left+'px';mn.style.top=top+'px';
+    var f=custom?$('atOtC'):mn.querySelector('.at-mi.sel')||mn.querySelector('.at-mi');if(f)f.focus();
   }
   function closeOT(){$('atOt').classList.remove('open');OTCB=null;}
 
   /* ---------- Register ---------- */
   function bReg(){
-    var n=dim(S.rY,S.rM),h='<div class="at-bar"><div class="at-bt">Register</div><div class="at-sels">'+msel('rM',S.rM)+ysel('rY',S.rY)+'</div></div>'+search()+'<div id="atList">'+listReg()+'</div>'
-      +'<div class="sp-notes">Tap a row for that person\'s swatch. Numbers = OT hrs · A = Absent · Sundays highlighted.</div>';
-    return h;
+    return '<div class="at-bar"><div class="at-bt">Register</div><div class="at-sels">'+msel('rM',S.rM)+ysel('rY',S.rY)+'</div></div>'+search()+'<div id="atList">'+listReg()+'</div>'
+      +'<div class="at-legend"><span class="p">12 = OT hrs</span><span class="p">P = present, no OT</span><span class="a">A = absent</span><span class="s">Sundays shaded · today outlined</span></div><div class="sp-notes">Tap a row for that person’s swatch.</div>';
   }
   function listReg(){
-    var n=dim(S.rY,S.rM),v=filt(D.workers),h='<div class="at-reg"><table><thead><tr><th class="st">Employee</th>';
-    for(var d=1;d<=n;d++)h+='<th'+(isSun(S.rY,S.rM,d)?' class="sun"':'')+'>'+d+'</th>';
-    h+='</tr></thead><tbody>';
-    if(!v.length)h+='<tr><td class="st" colspan="'+(n+1)+'" style="text-align:center">No staff match</td></tr>';
+    var n=dim(S.rY,S.rM),v=filt(D.workers),t=new Date(),isCur=t.getFullYear()===S.rY&&t.getMonth()===S.rM,td=isCur?t.getDate():0,h='<div class="at-reg" tabindex="0" aria-label="Attendance register"><table><thead><tr><th class="st">Employee</th>';
+    for(var d=1;d<=n;d++)h+='<th class="'+(isSun(S.rY,S.rM,d)?'sun ':'')+(d===td?'today':'')+'">'+d+'</th>';
+    h+='<th class="tot t2">P</th><th class="tot t1">OT</th></tr></thead><tbody>';
+    if(!v.length)h+='<tr><td class="st" colspan="'+(n+3)+'" style="text-align:center">No staff match</td></tr>';
     v.forEach(function(w){
-      h+='<tr data-at-sw="'+esc(w)+'"><td class="st">'+esc(w)+'</td>';
-      for(var d=1;d<=n;d++){var r=rec(w,dsOf(S.rY,S.rM,d)),t='',c='';if(r.status==='present'){t=r.ot;c='p';}else if(r.status==='absent'){t='A';c='a';}
-        h+='<td class="'+c+(isSun(S.rY,S.rM,d)?' sun':'')+'">'+t+'</td>';}
-      h+='</tr>';
+      var st=statsFor(w,S.rM,S.rY);
+      h+='<tr data-at-sw="'+esc(w)+'" tabindex="0" role="button" aria-label="'+esc(w)+' swatch"><td class="st">'+esc(w)+'</td>';
+      for(var d=1;d<=n;d++){var r=rec(w,dsOf(S.rY,S.rM,d)),t2='',c='';if(r.status==='present'){t2=r.ot>0?r.ot:'P';c='p';}else if(r.status==='absent'){t2='A';c='a';}
+        h+='<td class="'+c+(isSun(S.rY,S.rM,d)?' sun':'')+(d===td?' today':'')+'">'+t2+'</td>';}
+      h+='<td class="tot t2">'+st.present+'</td><td class="tot t1">'+st.ot+'</td></tr>';
     });
     return h+'</tbody></table></div>';
+  }
+  function scrollToday(){
+    var box=document.querySelector('.at-reg'),th=box&&box.querySelector('th.today');
+    if(box&&th)box.scrollLeft=Math.max(0,th.offsetLeft-box.clientWidth/2+th.offsetWidth/2);
   }
   function statsFor(w,m,y){var n=dim(y,m),s={present:0,absent:0,ot:0,bd:{}};
     for(var d=1;d<=n;d++){var r=rec(w,dsOf(y,m,d));if(r.status==='present'){s.present++;s.ot+=+r.ot||0;s.bd[r.ot]=(s.bd[r.ot]||0)+1;}else if(r.status==='absent')s.absent++;}return s;}
@@ -2954,16 +3006,20 @@ var AT=(function(){
     if((x=t.closest('[data-at-tab]'))){tab=x.getAttribute('data-at-tab');q='';shell();if(tab==='leave')loadLeave();else if(!D||Date.now()-lastLoad>30000)load(false);return;}
     if((x=t.closest('[data-at-shift]'))){var p=parts(S.ds),d=new Date(p.y,p.m,p.d+ +x.getAttribute('data-at-shift'));S.ds=ymd(d);render();return;}
     if((x=t.closest('[data-at-mark]'))){var a=x.getAttribute('data-at-mark'),i=a.lastIndexOf('|');mark(a.slice(0,i),a.slice(i+1));return;}
-    if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot');pickOT(function(v){var r=rec(w,S.ds);setRec(w,r.status,v,r.remarks||'');render();},rec(w,S.ds).ot||0,'OT — '+w);return;}
+    if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');render();},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
+    if(t.closest('[data-at-allp]')){markAll();return;}
+    if(t.closest('[data-at-today]')){S.ds=today();render();return;}
+    if((x=t.closest('[data-at-rr]'))){var rw=x.getAttribute('data-at-rr'),rr=rec(rw,S.ds);persist(rw,S.ds,rr.status,rr.ot,rr.remarks||'');delete errRow[rw+'|'+S.ds];redrawMark();return;}
     if((x=t.closest('[data-at-otv]'))){var v=+x.getAttribute('data-at-otv'),cb=OTCB;closeOT();if(cb)cb(v);return;}
     if(t.closest('[data-at-otc]')){var n=parseInt($('atOtC').value,10);if(isNaN(n)||n<0||n>24){showToast('Enter hours between 0 and 24','danger');return;}var cb2=OTCB;closeOT();if(cb2)cb2(n);return;}
     if(t.closest('[data-at-otx]')){closeOT();return;}
+    if(t.closest('[data-at-otcm]')){drawOT(true);return;}
     if((x=t.closest('[data-at-sw]'))){swatch(x.getAttribute('data-at-sw'),S.rM,S.rY);return;}
     if((x=t.closest('[data-at-prof]'))){var pw=x.getAttribute('data-at-prof');if(can('attendance.edit'))openMonthEdit(pw,S.pM,S.pY);else swatch(pw,S.pM,S.pY);return;}
     if((x=t.closest('[data-me-st]'))){var a2=x.getAttribute('data-me-st').split('|'),dd=MEd.days[a2[0]];dd.status=dd.status===a2[1]?'':a2[1];drawME();return;}
     if((x=t.closest('[data-me-dot]'))){var dk=x.getAttribute('data-me-dot');MEd.open[dk]=!MEd.open[dk];drawME();var ip=document.querySelector('[data-me-rmk="'+dk+'"]');if(ip)ip.focus();return;}
     if(t.closest('[data-me-exp]')){MEd.exp=!MEd.exp;drawME();return;}
-    if((x=t.closest('[data-me-ot]'))){var dn=x.getAttribute('data-me-ot');pickOT(function(v){MEd.days[dn].ot=v;drawME();},MEd.days[dn].ot,'OT — Day '+dn);return;}
+    if((x=t.closest('[data-me-ot]'))){var dn=x.getAttribute('data-me-ot');pickOT(function(v){MEd.days[dn].ot=v;drawME();},MEd.days[dn].ot,'OT — Day '+dn,x);return;}
     if(t.closest('[data-me-save]')){saveME();return;}
     if(t.closest('[data-at-addstaff]')){addStaffForm();return;}
     if(t.closest('[data-at-addgo]')){var nm=$('atNew').value.trim();if(!nm){$('atErr').textContent='Please enter a name';return;}
@@ -2988,7 +3044,7 @@ var AT=(function(){
   });
   document.addEventListener('input',function(ev){
     var t=ev.target;if(!t||!t.closest)return;
-    if(t.id==='atQ'){q=t.value;var l=$('atList');if(l)l.innerHTML=tab==='mark'?listMark():tab==='register'?listReg():tab==='profiles'?listProf():listStaff();return;}
+    if(t.id==='atQ'){q=t.value;var l=$('atList');if(l)l.innerHTML=tab==='mark'?listMark():tab==='register'?listReg():tab==='profiles'?listProf():listStaff();if(tab==='register')scrollToday();return;}
     if(t.hasAttribute&&t.hasAttribute('data-me-rmk')&&MEd){MEd.days[t.getAttribute('data-me-rmk')].remarks=t.value;}
   });
   document.addEventListener('change',function(ev){
@@ -2998,7 +3054,7 @@ var AT=(function(){
     var sel=t.getAttribute&&t.getAttribute('data-at-sel');if(sel){S[sel]=+t.value;render();return;}
     var rw=t.getAttribute&&t.getAttribute('data-at-rmk');if(rw!=null&&rw!==''){var r=rec(rw,S.ds),v=t.value;if((r.remarks||'')!==v)setRec(rw,r.status,r.ot,v);}
   });
-  document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
+  document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Escape'){if($('atOt')&&$('atOt').classList.contains('open')){closeOT();return;}if($('atModal')&&$('atModal').classList.contains('open')){closeForm();return;}}if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute('data-at-sw')!=null&&t.tagName==='TR'){ev.preventDefault();t.click();return;}if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
   return {open:open,load:load,refresh:refresh,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
 function openAtt(fromPop){if(!canAny('attendance.'))return go('home');go('att',fromPop);AT.open();}
