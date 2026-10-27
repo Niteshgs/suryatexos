@@ -1019,7 +1019,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v82</span>
+    <span class="app-ver" id="appVer" title="App version">v83</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1449,8 +1449,10 @@ function enterApp(me,offline){
   if(prev&&prev!==me.email){clearPrivate();}                      // a different person on this phone: forget the last person's saved data
   try{localStorage.setItem('sx_me',JSON.stringify(me));localStorage.setItem('sx_me_email',me.email);localStorage.setItem('sx_user_name',me.name);}catch(e){}
   ME=me;applyAccess();
+  var deep='';try{deep=location.hash;}catch(e){}
   NAV=[];try{history.replaceState(null,'');}catch(e){}
   go('home');
+  if(deep==='#leave'&&can('attendance.leave')){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}openLeave();}   // link from the team site
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
