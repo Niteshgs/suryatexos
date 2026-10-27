@@ -413,6 +413,15 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .app-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 14px 18px;text-align:center;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .15s,transform .1s}
 a.app-tile{display:block;text-decoration:none}
 .app-tile:hover{border-color:var(--accent)}
+.home-bar{display:flex;justify-content:flex-end;margin:0 0 10px}
+.home-tg{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.home-tg .ic{width:22px;height:22px}
+#homeGrid.as-list{display:flex;flex-direction:column;gap:10px;grid-template-columns:none}
+#homeGrid.as-list .app-tile{display:flex;align-items:center;gap:14px;text-align:left;padding:12px 16px;min-height:64px;width:100%}
+#homeGrid.as-list .app-ico{width:44px;height:44px;margin:0;border-radius:12px;flex:none}
+#homeGrid.as-list .app-ico .ic{width:24px;height:24px}
+#homeGrid.as-list .app-sub{margin-top:2px}
+#homeGrid.as-list .app-tile::after{content:"\203A";margin-left:auto;font-size:26px;color:var(--text-muted)}
 .app-tile:active{transform:scale(.97)}
 .app-ico{width:64px;height:64px;margin:0 auto 12px;border-radius:18px;background:var(--accent-soft);border:1px solid rgba(196,133,58,.35);display:flex;align-items:center;justify-content:center;font-size:30px}
 .app-name{font-size:16px;font-weight:800}
@@ -1104,7 +1113,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v85</span>
+    <span class="app-ver" id="appVer" title="App version">v86</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1125,6 +1134,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <!-- HOME -->
 <div class="view" id="v-home">
+  <div class="home-bar"><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button></div>
   <div class="app-grid" id="homeGrid">
     <button class="app-tile" id="tileYarn" onclick="openYarn()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
@@ -3326,6 +3336,11 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 (function(){if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!isStandalone()){var h=document.getElementById('iosHint');if(h)h.style.display='block';}})();
 
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
+</script>
+<script>
+function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg');if(!g||!b)return;var l=m==='list';g.classList.toggle('as-list',l);b.setAttribute('aria-label',l?'Switch to icon view':'Switch to list view');b.title=l?'Icon view':'List view';document.getElementById('tgList').style.display=l?'none':'';document.getElementById('tgGrid').style.display=l?'':'none';}
+function toggleHomeView(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}m=m==='list'?'icons':'list';try{localStorage.setItem('homeView',m);}catch(e){}applyHomeView(m);}
+(function(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}applyHomeView(m);})();
 </script>
 </body>
 </html>
