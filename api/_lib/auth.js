@@ -23,6 +23,8 @@ const CATALOG = [
     { id: 'knitted.entry', name: 'Entry' }, { id: 'knitted.dash', name: 'Dashboard' }, { id: 'knitted.admin', name: 'Admin (tapes & machine activity)' } ] },
   { id: 'sales', name: 'Sales', items: [
     { id: 'sales.touch', name: 'Customer Touch Points (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers' } ] },
+  { id: 'expenses', name: 'Cash Expenses', items: [
+    { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
 ];
 const ALL_KEYS = CATALOG.flatMap((g) => g.items.map((i) => i.id));
 
@@ -44,6 +46,7 @@ const ROUTE_PERMS = {
     'touch.getAll': ['sales.touch'], 'touch.toggle': ['sales.touch'],
     'touch.addClient': ['sales.touchmanage'], 'touch.updateClient': ['sales.touchmanage'], 'touch.archiveClient': ['sales.touchmanage'],
   },
+  expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
 };
 
 /* ---------- small helpers ---------- */
