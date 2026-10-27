@@ -995,6 +995,66 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .upd.show{display:block}
 @media(min-width:900px){.upd{bottom:24px}}
 @media(prefers-reduced-motion:reduce){.view.show{animation:none}}
+#v-leave .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px}
+#v-leave .seg button{border:0;background:none;color:var(--text-muted);font:inherit;font-size:16px;font-weight:700;min-height:48px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+#v-leave .seg button.on{background:var(--accent);color:#fff}
+#v-leave .lede{color:var(--text-muted);font-size:15px;margin:18px 0 16px;line-height:1.45}
+#v-leave .fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+#v-leave .fhead{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;letter-spacing:1.2px;color:var(--accent)}
+#v-leave .field{display:block;padding:14px 16px}
+#v-leave .field>span{display:block;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px}
+#v-leave .field input,#v-leave .field textarea{width:100%;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:17px;min-height:30px}
+#v-leave .field textarea{resize:vertical;min-height:96px;line-height:1.45}
+#v-leave .field input::placeholder,#v-leave .field textarea::placeholder{color:var(--text-muted)}
+#v-leave .fcard:focus-within{border-color:var(--accent)}
+#v-leave .field input[type=date]{color-scheme:dark;cursor:pointer}
+.light #v-leave .field input[type=date]{color-scheme:light}
+#v-leave .field input[type=date]::-webkit-calendar-picker-indicator{opacity:.75;cursor:pointer}
+#v-leave .dates{display:grid;grid-template-columns:1fr 1fr}
+#v-leave .dates .field+.field{border-left:1px solid var(--border)}
+#v-leave .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+#v-leave .ferr{color:#e05555;font-size:14px;font-weight:600;min-height:0;margin:2px 2px 10px}
+#v-leave .ferr:empty{display:none}
+#v-leave .submit{width:100%;min-height:56px;border:0;border-radius:var(--radius);background:var(--accent);color:#fff;font:inherit;font-size:18px;font-weight:800;cursor:pointer;transition:background .15s,transform .1s}
+#v-leave .submit:hover{background:var(--accent-strong)}
+#v-leave .submit:active{transform:scale(.98)}
+#v-leave .submit:disabled{opacity:.6;cursor:wait}
+#v-leave .fnote{text-align:center;color:var(--text-muted);font-size:14px;margin-top:14px;line-height:1.45}
+#v-leave .done{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px 20px;margin-top:4px}
+#v-leave .done-ico .ic{width:52px;height:52px;color:var(--accent);stroke-width:1.75}
+#v-leave .done h2{font-size:21px;font-weight:800;margin:12px 0 6px}
+#v-leave .done p{color:var(--text-muted);font-size:15px}
+#v-leave .ghost{margin-top:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font:inherit;font-weight:700;font-size:15px;min-height:46px;padding:0 20px;border-radius:var(--radius-sm);cursor:pointer}
+#v-leave .ghost:hover{border-color:var(--accent);color:var(--accent)}
+#v-leave .empty{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:34px 16px;text-align:center;color:var(--text-muted);font-size:16px}
+#v-leave .empty.err{color:#e05555}
+#v-leave #list{display:grid;gap:12px}
+#v-leave .lcard{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:14px 16px}
+#v-leave .lrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#v-leave .lname{font-size:17px;font-weight:800;min-width:0;overflow-wrap:anywhere}
+#v-leave .lbadge{flex:0 0 auto;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px}
+#v-leave .ldates{margin-top:6px;font-size:15px;font-weight:700;color:var(--text-dim)}
+#v-leave .lreason{margin-top:6px;font-size:14px;color:var(--text-muted);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+#v-leave .lang{display:flex;justify-content:flex-end;gap:4px;margin:-4px 0 14px}
+#v-leave .lang button{border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font:inherit;font-size:14px;font-weight:700;min-height:36px;padding:0 12px;border-radius:999px;cursor:pointer;transition:all .15s}
+#v-leave .lang button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+#v-leave.ind .field>span,#v-leave.ind .fhead{letter-spacing:.2px}
+#v-leave.ind .fhead{font-size:14px}
+#v-leave.ind .field>span{font-size:13px}
+#v-leave .dates .field{min-width:0}
+#v-leave .field input[type=date]{min-width:0;max-width:100%;font-size:16px}
+#v-leave .phone-line{text-align:center;margin-top:36px;font-size:14px;font-weight:700;letter-spacing:.4px;color:var(--text-muted)}
+#v-leave .phone-line a{color:var(--text-dim);white-space:nowrap}
+#v-leave .phone-line a:hover{color:var(--accent)}
+@media(max-width:420px){#v-leave .seg button{font-size:15px}#v-leave .field{padding:12px 14px}}
+@media(max-width:380px){#v-leave .dates .field{padding:12px 10px}#v-leave .field input[type=date]{font-size:15px}}
+#v-leave .phone-line{margin-top:28px}
+#v-leave .sumshot{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:14px;padding:10px 12px;border-radius:10px;margin:14px 0}
+#v-leave .sumrows{text-align:left;margin:4px 0 12px}
+#v-leave .sumrows>div{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--border);font-size:15px}
+#v-leave .sumrows span{color:var(--text-muted);flex:none}#v-leave .sumrows b{text-align:right;word-break:break-word}
+#v-leave .sumnote{border:1px dashed var(--border);border-radius:10px;padding:10px 12px;color:var(--text-muted);font-size:14px;margin-bottom:14px}
+#v-leave .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 </style>
 </head>
 <body>
@@ -1019,7 +1079,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v83</span>
+    <span class="app-ver" id="appVer" title="App version">v84</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1111,9 +1171,46 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 <div class="us-modal" id="atModal"><div class="us-in" id="atForm" role="dialog"></div></div>
 <div class="at-pop" id="atOt"></div>
 <div class="view" id="v-leave">
-  <div class="sp-wrap" id="lvView"></div>
+  <div class="sp-wrap" id="lvView">
+<div class="lang" role="group" aria-label="Language">
+<button type="button" data-lang="en" class="on">English</button>
+<button type="button" data-lang="hi" lang="hi">हिंदी</button>
+<button type="button" data-lang="kn" lang="kn">ಕನ್ನಡ</button>
 </div>
-<div class="us-modal" id="lvModal"><div class="us-in" id="lvForm" role="dialog"></div></div>
+<div class="seg" role="tablist">
+<button class="on" id="lvTA" role="tab" aria-selected="true" data-t="tabApply">Apply for Leave</button>
+<button id="lvTL" role="tab" aria-selected="false" data-t="tabList">Who's Applied</button>
+</div>
+<section id="lvA">
+<p class="lede" data-t="ledeApply">Going to hometown or taking leave? Fill this in before you go.</p>
+<form id="lvForm" novalidate autocomplete="off">
+<div class="fcard"><div class="fhead" data-t="hDetails">YOUR DETAILS</div>
+<label class="field"><span data-t="lName">NAME</span><input id="lvName" type="text" data-tp="pName" maxlength="80" autocomplete="off"></label></div>
+<div class="fcard"><div class="fhead" data-t="hDates">LEAVE DATES</div>
+<div class="dates">
+<label class="field"><span data-t="lFrom">LEAVE FROM</span><input id="lvFrom" type="date"></label>
+<label class="field"><span data-t="lTo">LEAVE TO</span><input id="lvTo" type="date"></label>
+</div></div>
+<div class="fcard"><div class="fhead" data-t="hReason">REASON</div>
+<label class="field"><textarea id="lvReason" rows="4" data-tp="pReason" maxlength="500"></textarea></label></div>
+<p class="ferr" id="lvErr" role="alert"></p>
+<button class="submit" id="lvGo" type="submit" data-t="submit">Submit Leave Request</button>
+<p class="fnote" data-t="note">Please submit at least 90 days before your leave start date.</p>
+</form>
+<div class="done" id="lvDone" hidden>
+<div class="done-ico"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+<h2 data-t="doneTitle">Leave request submitted</h2>
+<div id="lvSum"></div>
+<button class="ghost" id="lvAgain" type="button" data-t="again">Submit another</button>
+</div>
+</section>
+<section id="lvL" hidden>
+<p class="lede" data-t="ledeList">Everyone who has applied for leave so far.</p>
+<div id="lvList"><div class="empty" data-t="loading">Loading…</div></div>
+</section>
+<p class="phone-line">MOBILE: <a href="tel:+919035140865">+91 9035140865</a></p>
+  </div>
+</div>
 
 <!-- CALCULATORS -->
 <div class="view" id="v-calc">
@@ -3029,64 +3126,75 @@ var AT=(function(){
 })();
 function openAtt(fromPop){if(!attAny())return go('home');go('att',fromPop);AT.open();}
 
-/* ══ LEAVE REQUEST (standalone Home tile) ══ */
+/* ══ LEAVE REQUEST (standalone Home tile) — same layout, wording and languages as the team-site leave form ══ */
 var LV=(function(){
   function $(id){return document.getElementById(id);}
-  var sub='apply',rows=null,busy=false,MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var T={"en":{"tabApply":"Apply for Leave","tabList":"Who's Applied","ledeApply":"Going to hometown or taking leave? Fill this in before you go.","hDetails":"YOUR DETAILS","lName":"NAME","pName":"Your full name","hDates":"LEAVE DATES","lFrom":"LEAVE FROM","lTo":"LEAVE TO","hReason":"REASON","pReason":"Why do you need this leave?","submit":"Submit Leave Request","submitting":"Submitting…","note":"Please submit at least 90 days before your leave start date.","doneTitle":"Leave request submitted","again":"Submit another","ledeList":"Everyone who has applied for leave so far.","loading":"Loading…","empty":"No leave applications yet.","day":"day","days":"days","eName":"Please enter your name.","eDates":"Please choose both leave dates.","eOrder":"\"Leave To\" cannot be before \"Leave From\".","eReason":"Please enter a reason.","eFail":"Could not submit. Please try again.","eLoad":"Could not load the list. Please try again.","shot":"📷 Please take a screenshot of this screen for your records","dnOk":"Submitted {n} days in advance — meets the 90-day guideline.","dnLess":"Submitted {n} days in advance — this is less than the usual 90-day notice."},"hi":{"tabApply":"छुट्टी के लिए आवेदन","tabList":"किसने आवेदन किया","ledeApply":"गाँव जा रहे हैं या छुट्टी ले रहे हैं? जाने से पहले यह फॉर्म भरें।","hDetails":"आपकी जानकारी","lName":"नाम","pName":"अपना पूरा नाम","hDates":"छुट्टी की तारीखें","lFrom":"छुट्टी कब से","lTo":"छुट्टी कब तक","hReason":"कारण","pReason":"आपको यह छुट्टी क्यों चाहिए?","submit":"छुट्टी का आवेदन भेजें","submitting":"भेजा जा रहा है…","note":"कृपया छुट्टी शुरू होने की तारीख से कम से कम 90 दिन पहले आवेदन करें।","doneTitle":"छुट्टी का आवेदन भेज दिया गया","again":"एक और आवेदन भेजें","ledeList":"अब तक छुट्टी के लिए आवेदन करने वाले सभी लोग।","loading":"लोड हो रहा है…","empty":"अभी तक कोई छुट्टी आवेदन नहीं।","day":"दिन","days":"दिन","eName":"कृपया अपना नाम लिखें।","eDates":"कृपया दोनों तारीखें चुनें।","eOrder":"\"छुट्टी कब तक\" की तारीख \"छुट्टी कब से\" से पहले नहीं हो सकती।","eReason":"कृपया कारण लिखें।","eFail":"आवेदन नहीं भेजा जा सका। कृपया फिर से कोशिश करें।","eLoad":"सूची लोड नहीं हो सकी। कृपया फिर से कोशिश करें।","shot":"📷 कृपया अपने रिकॉर्ड के लिए इस स्क्रीन का स्क्रीनशॉट ले लें","dnOk":"{n} दिन पहले जमा किया — 90 दिन के नियम के अनुसार है।","dnLess":"{n} दिन पहले जमा किया — यह सामान्य 90 दिन की सूचना से कम है।"},"kn":{"tabApply":"ರಜೆಗೆ ಅರ್ಜಿ","tabList":"ಯಾರು ಅರ್ಜಿ ಹಾಕಿದ್ದಾರೆ","ledeApply":"ಊರಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಾ ಅಥವಾ ರಜೆ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿದ್ದೀರಾ? ಹೋಗುವ ಮೊದಲು ಇದನ್ನು ಭರ್ತಿ ಮಾಡಿ.","hDetails":"ನಿಮ್ಮ ವಿವರಗಳು","lName":"ಹೆಸರು","pName":"ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು","hDates":"ರಜೆಯ ದಿನಾಂಕಗಳು","lFrom":"ಆರಂಭ ದಿನಾಂಕ","lTo":"ಕೊನೆಯ ದಿನಾಂಕ","hReason":"ಕಾರಣ","pReason":"ನಿಮಗೆ ಈ ರಜೆ ಏಕೆ ಬೇಕು?","submit":"ರಜೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ","submitting":"ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ…","note":"ದಯವಿಟ್ಟು ನಿಮ್ಮ ರಜೆ ಆರಂಭವಾಗುವ ದಿನಾಂಕಕ್ಕಿಂತ ಕನಿಷ್ಠ 90 ದಿನಗಳ ಮೊದಲು ಅರ್ಜಿ ಸಲ್ಲಿಸಿ.","doneTitle":"ರಜೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಲಾಗಿದೆ","again":"ಇನ್ನೊಂದು ಅರ್ಜಿ ಸಲ್ಲಿಸಿ","ledeList":"ಇಲ್ಲಿಯವರೆಗೆ ರಜೆಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿದ ಎಲ್ಲರೂ.","loading":"ಲೋಡ್ ಆಗುತ್ತಿದೆ…","empty":"ಇನ್ನೂ ಯಾವುದೇ ರಜೆ ಅರ್ಜಿಗಳಿಲ್ಲ.","day":"ದಿನ","days":"ದಿನಗಳು","eName":"ದಯವಿಟ್ಟು ನಿಮ್ಮ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.","eDates":"ದಯವಿಟ್ಟು ಎರಡೂ ದಿನಾಂಕಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.","eOrder":"\"ಕೊನೆಯ ದಿನಾಂಕ\" \"ಆರಂಭ ದಿನಾಂಕ\"ಕ್ಕಿಂತ ಮೊದಲು ಇರಬಾರದು.","eReason":"ದಯವಿಟ್ಟು ಕಾರಣವನ್ನು ನಮೂದಿಸಿ.","eFail":"ಸಲ್ಲಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.","eLoad":"ಪಟ್ಟಿ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.","shot":"📷 ದಯವಿಟ್ಟು ನಿಮ್ಮ ದಾಖಲೆಗಾಗಿ ಈ ಪರದೆಯ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಿ","dnOk":"{n} ದಿನ ಮೊದಲು ಸಲ್ಲಿಸಲಾಗಿದೆ — 90 ದಿನಗಳ ನಿಯಮಕ್ಕೆ ಅನುಗುಣವಾಗಿದೆ.","dnLess":"{n} ದಿನ ಮೊದಲು ಸಲ್ಲಿಸಲಾಗಿದೆ — ಇದು ಸಾಮಾನ್ಯ 90 ದಿನಗಳ ಸೂಚನೆಗಿಂತ ಕಡಿಮೆ."}};
+  var L='en',rows=null,busy=false,listMode=false,sumData=null,lastErrKey=null;
+  try{var sv=localStorage.getItem('leaveLang');if(sv&&T[sv])L=sv;}catch(e){}
+  function t(k){return T[L][k];}
   function call(fn,args){return fetch('/api/attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
-  function fd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:s;}
+  function dmy(d){var p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+  function days(a,b){return Math.round((new Date(b)-new Date(a))/864e5)+1;}
   function myName(){try{return (typeof ME!=='undefined'&&ME&&ME.name)||'';}catch(e){return '';}}
-  function open(){sub='apply';shell();}
-  function shell(){
-    $('lvView').innerHTML='<div class="at-seg"><button class="'+(sub==='apply'?'on':'')+'" data-lv-sub="apply">Apply for Leave</button><button class="'+(sub==='list'?'on':'')+'" data-lv-sub="list">Who\'s Applied</button></div><div id="lvBody"></div>';
-    draw();if(sub==='list'&&!rows)load();
+  function msg(cls,k){return '<div class="empty'+(cls?' '+cls:'')+'">'+esc(t(k))+'</div>';}
+  function card(x){var n=days(x.start,x.end);return '<div class="lcard"><div class="lrow"><div class="lname">'+esc(x.name)+'</div><div class="lbadge">'+n+' '+(n===1?t('day'):t('days'))+'</div></div><div class="ldates">'+dmy(x.start)+' → '+dmy(x.end)+'</div>'+(x.reason?'<div class="lreason">'+esc(x.reason)+'</div>':'')+'</div>';}
+  function drawList(){var box=$('lvList');if(!box)return;if(!rows){box.innerHTML=msg('','loading');return;}box.innerHTML=rows.length?rows.map(card).join(''):msg('','empty');}
+  function drawSum(){
+    var el=$('lvSum');if(!el||!sumData)return;var d=sumData,n=d.daysNotice,txt=n==null?'':t(d.appliedPrior==='Yes'?'dnOk':'dnLess').replace('{n}',n);
+    el.innerHTML='<div class="sumshot">'+esc(t('shot'))+'</div>'
+      +'<div class="sumrows"><div><span>'+esc(t('lName'))+'</span><b>'+esc(d.name)+'</b></div><div><span>'+esc(t('lFrom'))+'</span><b>'+dmy(d.from)+'</b></div><div><span>'+esc(t('lTo'))+'</span><b>'+dmy(d.to)+'</b></div><div><span>'+esc(t('hReason'))+'</span><b>'+esc(d.reason)+'</b></div></div>'
+      +(txt?'<div class="sumnote">'+esc(txt)+'</div>':'');
   }
-  function draw(){
-    var el=$('lvBody');if(!el)return;
-    if(sub==='apply'){
-      el.innerHTML='<div class="us-note" style="margin-bottom:12px">Going to hometown or taking leave? Fill this in before you go.</div><div class="ex-card">'
-        +'<div class="ex-f"><label for="lvName">Name</label><input type="text" id="lvName" autocomplete="off" placeholder="Your full name" value="'+esc(myName())+'"></div>'
-        +'<div class="at-two"><div class="ex-f"><label for="lvStart">Leave from</label><input type="date" id="lvStart"></div><div class="ex-f"><label for="lvEnd">Leave to</label><input type="date" id="lvEnd"></div></div>'
-        +'<div class="ex-f"><label for="lvReason">Reason</label><textarea id="lvReason" rows="3" placeholder="Why do you need this leave?"></textarea></div>'
-        +'<button class="btn-submit" id="lvGo" data-lv-go>Submit Leave Request</button><div class="ex-msg err" id="lvMsg" role="alert"></div><div class="sp-notes">Please submit at least 90 days before your leave start date.</div></div>';
-    }else{
-      if(!rows){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading…</div>';return;}
-      el.innerHTML=rows.length?'<div class="at-pg">'+rows.map(function(r){return '<div class="at-pc"><div class="at-pt"><b>'+esc(r.name)+'</b></div><div class="at-lr"><span>Leave from</span><b>'+fd(r.start)+'</b></div><div class="at-lr"><span>Leave to</span><b>'+fd(r.end)+'</b></div></div>';}).join('')+'</div>':'<div class="sp-empty">No leave applications yet.</div>';
-    }
+  function applyLang(){
+    var root=$('v-leave');root.classList.toggle('ind',L!=='en');
+    [].forEach.call(root.querySelectorAll('[data-t]'),function(el){el.textContent=t(el.getAttribute('data-t'));});
+    [].forEach.call(root.querySelectorAll('[data-tp]'),function(el){el.placeholder=t(el.getAttribute('data-tp'));});
+    [].forEach.call(root.querySelectorAll('.lang button'),function(b){var on=b.getAttribute('data-lang')===L;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+    if(lastErrKey&&$('lvErr'))$('lvErr').textContent=t(lastErrKey);
+    if(rows)drawList();drawSum();
+  }
+  function show(list){
+    listMode=list;$('lvTA').classList.toggle('on',!list);$('lvTL').classList.toggle('on',list);
+    $('lvTA').setAttribute('aria-selected',!list);$('lvTL').setAttribute('aria-selected',list);$('lvA').hidden=list;$('lvL').hidden=!list;
+    if(list)load();
   }
   function load(manual){
-    api('leave.list').then(function(r){rows=r;if(sub==='list')draw();if(manual)showToast('Updated','success');})
-      .catch(function(){if(sub==='list'&&$('lvBody'))$('lvBody').innerHTML='<div class="sp-empty">Could not load the list.</div>';});
+    drawList();
+    api('leave.list').then(function(r){rows=r;drawList();if(manual)showToast('Updated','success');}).catch(function(){var b=$('lvList');if(b)b.innerHTML=msg('err','eLoad');});
   }
-  function submit(){
-    if(busy)return;var v={name:$('lvName').value.trim(),start:$('lvStart').value,end:$('lvEnd').value,reason:$('lvReason').value.trim()},m=$('lvMsg');m.textContent='';
-    if(!v.name){m.textContent='Please enter your name.';return;}if(!v.start||!v.end){m.textContent='Please pick both leave dates.';return;}
-    if(v.end<v.start){m.textContent='"Leave to" is before "Leave from".';return;}if(!v.reason){m.textContent='Please enter a reason.';return;}
-    if(navigator.onLine===false){m.textContent="You're offline — not saved";return;}
-    busy=true;$('lvGo').disabled=true;$('lvGo').textContent='Submitting…';
-    api('leave.submit',v).then(function(r){
-      busy=false;rows=null;
-      $('lvForm').innerHTML='<div class="at-narrow" style="text-align:center"><div class="us-note" style="background:var(--accent-soft);color:var(--accent);font-weight:700;padding:10px;border-radius:10px;margin-bottom:14px">📷 Please take a screenshot of this screen for your records</div>'
-        +'<h3>Leave Request Submitted</h3><div class="at-det">'
-        +'<div><span>Name</span><b>'+esc(v.name)+'</b></div><div><span>Leave from</span><b>'+fd(v.start)+'</b></div><div><span>Leave to</span><b>'+fd(v.end)+'</b></div><div><span>Reason</span><b>'+esc(v.reason)+'</b></div></div>'
-        +'<div class="us-note" style="margin:12px 0">'+(r.appliedPrior==='Yes'?'Submitted '+r.daysNotice+' days in advance — meets the 90-day guideline.':'Submitted '+r.daysNotice+' days in advance — this is less than the usual 90-day notice.')+'</div>'
-        +'<div class="us-act"><button class="btn-submit" data-lv-done>Done</button></div></div>';
-      $('lvModal').classList.add('open');shell();
-    }).catch(function(e){busy=false;var b=$('lvGo');if(b){b.disabled=false;b.textContent='Submit Leave Request';}if($('lvMsg'))$('lvMsg').textContent=e.message||'Could not submit';});
+  function open(){
+    applyLang();show(false);
+    var n=$('lvName');if(n&&!n.value)n.value=myName();
+    $('lvDone').hidden=true;$('lvForm').hidden=false;
   }
-  function closeM(){$('lvModal').classList.remove('open');}
+  function fail(k){lastErrKey=k;$('lvErr').textContent=t(k);}
   document.addEventListener('click',function(ev){
-    var t=ev.target,x;if(!t.closest)return;
-    if(t===$('lvModal')){closeM();return;}
-    if(!t.closest('#v-leave')&&!t.closest('#lvModal'))return;
-    if((x=t.closest('[data-lv-sub]'))){sub=x.getAttribute('data-lv-sub');shell();if(sub==='list')load();return;}
-    if(t.closest('[data-lv-go]')){submit();return;}
-    if(t.closest('[data-lv-done]')){closeM();return;}
+    var tg=ev.target;if(!tg.closest||!tg.closest('#v-leave'))return;var x;
+    if((x=tg.closest('.lang button'))){L=x.getAttribute('data-lang');try{localStorage.setItem('leaveLang',L);}catch(e){}applyLang();return;}
+    if(tg.closest('#lvTA')){show(false);return;}
+    if(tg.closest('#lvTL')){show(true);return;}
+    if(tg.closest('#lvAgain')){$('lvDone').hidden=true;$('lvForm').hidden=false;sumData=null;return;}
   });
-  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&$('lvModal')&&$('lvModal').classList.contains('open'))closeM();});
-  return {open:open,refresh:function(){if(sub==='list')load(true);else showToast('Nothing to refresh here','success');}};
+  document.addEventListener('change',function(ev){var tg=ev.target;if(tg&&tg.id==='lvFrom'){var to=$('lvTo');to.min=tg.value;if(to.value&&to.value<tg.value)to.value=tg.value;}});
+  document.addEventListener('submit',function(ev){
+    if(!ev.target||ev.target.id!=='lvForm')return;ev.preventDefault();if(busy)return;
+    lastErrKey=null;$('lvErr').textContent='';
+    var d={name:$('lvName').value.trim(),start:$('lvFrom').value,end:$('lvTo').value,reason:$('lvReason').value.trim()};
+    if(!d.name){fail('eName');$('lvName').focus();return;}
+    if(!d.start||!d.end){fail('eDates');return;}
+    if(d.end<d.start){fail('eOrder');return;}
+    if(!d.reason){fail('eReason');$('lvReason').focus();return;}
+    if(navigator.onLine===false){fail('eFail');return;}
+    busy=true;var b=$('lvGo');b.disabled=true;b.textContent=t('submitting');
+    api('leave.submit',d).then(function(r){
+      rows=null;sumData={name:d.name,from:d.start,to:d.end,reason:d.reason,daysNotice:r&&r.daysNotice,appliedPrior:r&&r.appliedPrior};
+      drawSum();$('lvForm').hidden=true;$('lvDone').hidden=false;window.scrollTo(0,0);$('lvFrom').value='';$('lvTo').value='';$('lvReason').value='';
+    }).catch(function(){fail('eFail');}).then(function(){busy=false;b.disabled=false;b.textContent=t('submit');});
+  });
+  return {open:open,refresh:function(){if(listMode)load(true);else showToast('Nothing to refresh here','success');}};
 })();
 function openLeave(fromPop){if(!can('attendance.leave'))return go('home');go('leave',fromPop);LV.open();}
 

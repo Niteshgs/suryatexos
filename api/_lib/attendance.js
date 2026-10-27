@@ -269,8 +269,8 @@ async function notifyLeave(d) {
 }
 async function leaveList() {
   await ensureTimeFmt(T.leave);
-  const r = (await G.batchGet(SHEET_ID(), [q(T.leave) + '!B2:D5000'], 'serial'))[0] || [];
-  return r.filter((x) => x[0] && x[1] && x[2]).map((x) => ({ name: str(x[0]), start: dateKey(x[1]), end: dateKey(x[2]) })).reverse();
+  const r = (await G.batchGet(SHEET_ID(), [q(T.leave) + '!B2:E5000'], 'serial'))[0] || [];
+  return r.filter((x) => x[0] && x[1] && x[2]).map((x) => ({ name: str(x[0]), start: dateKey(x[1]), end: dateKey(x[2]), reason: str(x[3]) })).reverse();
 }
 
 /* ---------- Team site (public leave form on team-suryatex.vercel.app) — token-gated, see api/attendance.js ---------- */
