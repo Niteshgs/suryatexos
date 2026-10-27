@@ -1,6 +1,6 @@
 // Vercel serverless proxy → Apps Script Web App.
-// Env: APPS_SCRIPT_URL, APPS_SCRIPT_TOKEN, APP_PASSCODE (optional)
-const ACTIONS = ['getAll', 'saveStock', 'updateMin', 'addMaterial', 'addOrder', 'updateOrder'];
+// Env: APPS_SCRIPT_URL, APPS_SCRIPT_TOKEN. Callers must be signed in and have the matching permission (see _lib/auth.js).
+const A = require('./_lib/auth');
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -10,14 +10,15 @@ module.exports = async (req, res) => {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
 
-  const pass = process.env.APP_PASSCODE;
-  if (pass && body.passcode !== pass) return res.status(401).json({ ok: false, error: 'Wrong passcode' });
-  if (!ACTIONS.includes(body.action)) return res.status(400).json({ ok: false, error: 'Bad action' });
+  const me = await A.guard(req, res); if (!me) return;
+  const need = A.ROUTE_PERMS.yarn[body.action];
+  if (!need) return res.status(400).json({ ok: false, error: 'Bad action' });
+  if (!A.allow(me, res, need)) return;
 
   const url = process.env.APPS_SCRIPT_URL, token = process.env.APPS_SCRIPT_TOKEN;
   if (!url || !token) return res.status(500).json({ ok: false, error: 'Server not configured' });
 
-  const { passcode, ...rest } = body;
+  const { passcode, ...rest } = body;   // (legacy field, never forwarded)
   try {
     const r = await fetch(url, {
       method: 'POST',

@@ -1,9 +1,10 @@
 // Vercel serverless proxy → Suryatex OS Hub (standalone Apps Script).
-// Env: HUB_SCRIPT_URL, HUB_SCRIPT_TOKEN, APP_PASSCODE (optional, shared with the other routes)
+// Env: HUB_SCRIPT_URL, HUB_SCRIPT_TOKEN. Callers must be signed in and have the matching permission (see _lib/auth.js).
 // When GOOGLE_SERVICE_KEY is set, knitted.* is served directly from Google Sheets (no Apps Script).
 // Set KNITTED_VIA_HUB=1 to switch back to the Hub script without a code change.
 const G = require('./_lib/google');
 const KN = require('./_lib/knitted');
+const A = require('./_lib/auth');
 const direct = (fn) => G.enabled() && process.env.KNITTED_VIA_HUB !== '1' && !!KN.ROUTES[fn];
 async function run(fn, args, meta) {
   if (direct(fn)) {
@@ -12,10 +13,6 @@ async function run(fn, args, meta) {
   }
   return callHub(fn, args, meta);
 }
-const FUNCTIONS = [
-  'knitted.getAll', 'knitted.saveBeams', 'knitted.verifyPin',
-  'knitted.addTape', 'knitted.removeTape', 'knitted.renameTape', 'knitted.activity',
-];
 
 async function callHub(fn, args, meta) {
   const url = process.env.HUB_SCRIPT_URL, token = process.env.HUB_SCRIPT_TOKEN;
@@ -51,12 +48,14 @@ module.exports = async (req, res) => {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
 
-  const pass = process.env.APP_PASSCODE;
-  if (pass && body.passcode !== pass) return res.status(401).json({ ok: false, error: 'Wrong passcode' });
-  if (!FUNCTIONS.includes(body.fn)) return res.status(400).json({ ok: false, error: 'Bad function' });
+  const me = await A.guard(req, res); if (!me) return;
+  const need = A.ROUTE_PERMS.hub[body.fn];
+  if (!need) return res.status(400).json({ ok: false, error: 'Bad function' });
+  if (!A.allow(me, res, need)) return;
 
   const m = body.meta || {};
-  const meta = { user: String(m.user || '').slice(0, 60), device: String(m.device || '').slice(0, 80), pin: String(m.pin || '').slice(0, 20) };
+  // the name written to the Entry Log is the verified signed-in person, not whatever the browser says
+  const meta = { user: String(me.name || me.email).slice(0, 60), device: String(m.device || '').slice(0, 80), pin: String(m.pin || '').slice(0, 20) };
   try {
     const r = await run(body.fn, body.args, meta);
     return res.status(r.status).json(r.json);

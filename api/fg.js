@@ -1,6 +1,6 @@
 // Vercel serverless proxy → Finished Goods Apps Script API (read-only).
-// Env: FG_SCRIPT_URL, FG_SCRIPT_TOKEN, APP_PASSCODE (optional, shared with /api/sheet)
-const ACTIONS = ['getAll', 'sweepPhotos'];
+// Env: FG_SCRIPT_URL, FG_SCRIPT_TOKEN. Callers must be signed in and have the matching permission (see _lib/auth.js).
+const A = require('./_lib/auth');
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -12,9 +12,10 @@ module.exports = async (req, res) => {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
 
-  const pass = process.env.APP_PASSCODE;
-  if (pass && body.passcode !== pass) return res.status(401).json({ ok: false, error: 'Wrong passcode' });
-  if (!ACTIONS.includes(body.action)) return res.status(400).json({ ok: false, error: 'Bad action' });
+  const me = await A.guard(req, res); if (!me) return;
+  const need = A.ROUTE_PERMS.fg[body.action];
+  if (!need) return res.status(400).json({ ok: false, error: 'Bad action' });
+  if (!A.allow(me, res, need)) return;
 
   const url = process.env.FG_SCRIPT_URL, token = process.env.FG_SCRIPT_TOKEN;
   if (!url || !token) return res.status(500).json({ ok: false, error: 'Finished Goods is not connected yet' });
