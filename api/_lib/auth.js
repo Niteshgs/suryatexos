@@ -25,6 +25,10 @@ const CATALOG = [
     { id: 'sales.touch', name: 'Customer Touch Points (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers' } ] },
   { id: 'expenses', name: 'Cash Expenses', items: [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
+  { id: 'attendance', name: 'Attendance', items: [
+    { id: 'attendance.mark', name: 'Mark daily attendance' }, { id: 'attendance.view', name: 'Register & Profiles (view)' },
+    { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' },
+    { id: 'attendance.leave', name: 'Leave Plan Form (apply & see who applied)' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
@@ -47,6 +51,12 @@ const ROUTE_PERMS = {
   sales: {
     'touch.getAll': ['sales.touch'], 'touch.toggle': ['sales.touch'],
     'touch.addClient': ['sales.touchmanage'], 'touch.updateClient': ['sales.touchmanage'], 'touch.archiveClient': ['sales.touchmanage'],
+  },
+  attendance: {
+    'att.getAll': ['attendance.mark', 'attendance.view', 'attendance.edit', 'attendance.staff'], 'att.save': ['attendance.mark'],
+    'att.bulk': ['attendance.edit'], 'att.monthSave': ['attendance.edit'],
+    'att.addWorker': ['attendance.staff'], 'att.setStatus': ['attendance.staff'], 'att.rebuild': ['attendance.staff'],
+    'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],
   },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
 };

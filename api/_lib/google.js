@@ -62,14 +62,18 @@ async function batchUpdate(id, data, inputOption) {
   await api('POST', base(id) + '/values:batchUpdate', { valueInputOption: inputOption || 'RAW', data });
 }
 async function append(id, range, rows, inputOption) {
-  await api('POST', base(id) + '/values/' + encodeURIComponent(range) + ':append?valueInputOption=' + (inputOption || 'RAW') + '&insertDataOption=INSERT_ROWS', { values: rows });
+  const j = await api('POST', base(id) + '/values/' + encodeURIComponent(range) + ':append?valueInputOption=' + (inputOption || 'RAW') + '&insertDataOption=INSERT_ROWS', { values: rows });
+  return (j.updates && j.updates.updatedRange) || '';   // e.g. "Register!A21:A21"
+}
+async function clear(id, ranges) {
+  if (ranges.length) await api('POST', base(id) + '/values:batchClear', { ranges });
 }
 async function sheetProps(id) {
   const j = await api('GET', base(id) + '?fields=sheets.properties(title,sheetId,gridProperties(frozenRowCount,columnCount))');
   return (j.sheets || []).map((s) => s.properties);
 }
 async function format(id, requests) {
-  if (requests.length) await api('POST', base(id) + ':batchUpdate', { requests });
+  if (requests.length) return api('POST', base(id) + ':batchUpdate', { requests });
 }
 async function sheetTitles(id) {
   const j = await api('GET', base(id) + '?fields=sheets.properties.title');
@@ -94,4 +98,4 @@ async function accessReport(id) {
   return out;
 }
 
-module.exports = { accessReport, enabled, token, batchGet, batchUpdate, append, sheetTitles, sheetProps, format, q, serviceEmail: () => (serviceKey() || {}).client_email };
+module.exports = { accessReport, enabled, token, batchGet, batchUpdate, append, clear, sheetTitles, sheetProps, format, q, serviceEmail: () => (serviceKey() || {}).client_email };
