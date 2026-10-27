@@ -413,7 +413,21 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .app-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 14px 18px;text-align:center;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .15s,transform .1s}
 a.app-tile{display:block;text-decoration:none}
 .app-tile:hover{border-color:var(--accent)}
-.home-bar{display:flex;justify-content:flex-end;margin:0 0 10px}
+.home-bar{display:flex;justify-content:flex-end;gap:10px;margin:0 0 10px}
+.home-cust{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:0 0 14px}
+.hc-t{font-weight:800;font-size:15px}.hc-s{font-size:12px;color:var(--text-muted);margin:4px 0 8px}
+.hc-r{display:flex;align-items:center;gap:12px;min-height:44px;border-top:1px solid var(--border);cursor:pointer;font-size:15px}
+.hc-r input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.home-more{margin:18px 0 0}.home-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;font-size:14px;color:var(--text-muted);list-style:none}
+.home-more summary::-webkit-details-marker{display:none}.home-more summary::before{content:"\25B8";margin-right:8px}.home-more[open] summary::before{content:"\25BE"}
+.home-more .app-grid{margin-top:8px}
+#homeGridMore.as-list{display:flex;flex-direction:column;gap:10px;grid-template-columns:none}
+#homeGridMore.as-list .app-tile{display:grid;grid-template-columns:44px 1fr auto;grid-template-rows:auto auto;column-gap:14px;row-gap:2px;align-items:center;align-content:center;text-align:left;padding:12px 16px;min-height:68px;width:100%}
+#homeGridMore.as-list .app-ico{grid-column:1;grid-row:1/3;width:44px;height:44px;margin:0;border-radius:12px}
+#homeGridMore.as-list .app-ico .ic{width:24px;height:24px}
+#homeGridMore.as-list .app-name{grid-column:2;grid-row:1;align-self:end;line-height:1.2}
+#homeGridMore.as-list .app-sub{grid-column:2;grid-row:2;align-self:start;line-height:1.3;margin-top:0}
+#homeGridMore.as-list .app-tile::after{content:"\203A";grid-column:3;grid-row:1/3;font-size:26px;color:var(--text-muted)}
 .home-tg{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .home-tg .ic{width:22px;height:22px}
 #homeGrid.as-list{display:flex;flex-direction:column;gap:10px;grid-template-columns:none}
@@ -1116,7 +1130,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v87</span>
+    <span class="app-ver" id="appVer" title="App version">v88</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1137,7 +1151,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <!-- HOME -->
 <div class="view" id="v-home">
-  <div class="home-bar"><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button></div>
+  <div class="home-bar"><button type="button" class="home-tg" id="homeCustBtn" style="display:none" onclick="toggleCust()" aria-label="Choose which apps to show on Home" title="Customize Home" aria-expanded="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button></div>
   <div class="app-grid" id="homeGrid">
     <button class="app-tile" id="tileYarn" onclick="openYarn()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
@@ -1185,6 +1199,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-sub">People · Permissions</div>
     </button>
   </div>
+  <div class="home-cust" id="homeCust" style="display:none"><div class="hc-t">Choose what shows on your Home</div><div class="hc-s">Switch off apps you don't need every day. They move to "Put away" below — still one tap away. Only you (admin) see this.</div><div id="homeCustList"></div></div>
+  <details class="home-more" id="homeMore" style="display:none"><summary id="homeMoreSum">Put away</summary><div class="app-grid" id="homeGridMore"></div></details>
   <div class="no-acc" id="noAcc" style="display:none">You're signed in, but no functions are switched on for you yet.<br>Please ask the admin to give you access.</div>
   <div class="who" id="whoBar"></div>
   <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Install app</button></div>
@@ -1594,6 +1610,7 @@ function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
   show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny());show('tileLeave',can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||can('sales.touch')||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
+  arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
   fit(document.getElementById('yarnNav'),{dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc'});
   fit(document.getElementById('fgNav'),{fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep'});
@@ -3341,7 +3358,20 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg');if(!g||!b)return;var l=m==='list';g.classList.toggle('as-list',l);b.setAttribute('aria-label',l?'Switch to icon view':'Switch to list view');b.title=l?'Icon view':'List view';document.getElementById('tgList').style.display=l?'none':'';document.getElementById('tgGrid').style.display=l?'':'none';}
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileLeave','tileCalc','tileUsers'];
+function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
+function homeHidden(){if(!ME||!ME.isAdmin)return [];try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
+function arrangeHome(){var admin=!!(ME&&ME.isAdmin),hid=homeHidden(),main=document.getElementById('homeGrid'),more=document.getElementById('homeGridMore'),n=0;
+ var order=HOME_TILES.map(function(id){return document.getElementById(id);});
+ order.forEach(function(el){if(!el)return;var away=admin&&hid.indexOf(el.id)>=0;(away?more:main).appendChild(el);if(away&&el.style.display!=='none')n++;});
+ document.getElementById('homeCustBtn').style.display=admin?'':'none';
+ var d=document.getElementById('homeMore');d.style.display=n?'':'none';document.getElementById('homeMoreSum').textContent='Put away ('+n+')';
+ if(!admin)document.getElementById('homeCust').style.display='none';
+ var l=document.getElementById('homeCustList');if(l&&document.getElementById('homeCust').style.display!=='none')drawCust();}
+function drawCust(){var hid=homeHidden(),h='';HOME_TILES.forEach(function(id){var el=document.getElementById(id);if(!el||el.style.display==='none')return;var nm=el.querySelector('.app-name').textContent;h+='<label class="hc-r"><input type="checkbox" data-hc="'+id+'"'+(hid.indexOf(id)<0?' checked':'')+'><span>'+nm+'</span></label>';});document.getElementById('homeCustList').innerHTML=h;}
+function toggleCust(){var c=document.getElementById('homeCust'),on=c.style.display==='none';c.style.display=on?'':'none';document.getElementById('homeCustBtn').setAttribute('aria-expanded',on?'true':'false');if(on)drawCust();}
+document.addEventListener('change',function(e){var id=e.target&&e.target.getAttribute&&e.target.getAttribute('data-hc');if(!id||!ME||!ME.isAdmin)return;var hid=homeHidden().filter(function(x){return x!==id;});if(!e.target.checked)hid.push(id);try{localStorage.setItem(homeKey(),JSON.stringify(hid));}catch(x){}arrangeHome();});
+function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg');if(!g||!b)return;var l=m==='list';g.classList.toggle('as-list',l);document.getElementById('homeGridMore').classList.toggle('as-list',l);b.setAttribute('aria-label',l?'Switch to icon view':'Switch to list view');b.title=l?'Icon view':'List view';document.getElementById('tgList').style.display=l?'none':'';document.getElementById('tgGrid').style.display=l?'':'none';}
 function toggleHomeView(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}m=m==='list'?'icons':'list';try{localStorage.setItem('homeView',m);}catch(e){}applyHomeView(m);}
 (function(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}applyHomeView(m);})();
 </script>
