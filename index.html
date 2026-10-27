@@ -1130,7 +1130,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v89</span>
+    <span class="app-ver" id="appVer" title="App version">v90</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1183,11 +1183,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-name">Attendance</div>
       <div class="app-sub">Daily · Register · Profiles</div>
     </button>
-    <button class="app-tile" id="tileLeave" onclick="openLeave()" style="display:none">
-      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></div>
-      <div class="app-name">Leave Request</div>
-      <div class="app-sub">Apply · Who's applied</div>
-    </button>
     <button class="app-tile" id="tileCalc" onclick="openCalc()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg></div>
       <div class="app-name">Calculators</div>
@@ -1195,7 +1190,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
     </button>
     <button class="app-tile" id="tileUsers" onclick="openUsers()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
-      <div class="app-name">Team Access</div>
+      <div class="app-name">Access Controls</div>
       <div class="app-sub">People · Permissions</div>
     </button>
   </div>
@@ -1484,7 +1479,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Team Access','People & permissions'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1608,7 +1603,7 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny());show('tileLeave',can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||can('sales.touch')||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
@@ -1645,7 +1640,7 @@ function usersLoad(){
   }).catch(function(){document.getElementById('usView').innerHTML='<div class="empty-state">Network error. Try again.</div>';});
 }
 function usersRender(){
-  var h='<div class="us-bar"><div><h2>Team access</h2><p>Choose who can open what. Changes apply within about 30 seconds.</p></div><button class="us-add" data-us-add>+ Add person</button></div>';
+  var h='<div class="us-bar"><div><h2>Access Controls</h2><p>Choose who can open what. Changes apply within about 30 seconds.</p></div><button class="us-add" data-us-add>+ Add person</button></div>';
   US.list.forEach(function(u){
     var chips=u.role==='Admin'?'<span class="us-chip">Everything</span>':(u.access.length?US.cat.map(function(g){
       var have=g.items.filter(function(i){return u.access.indexOf(i.id)>=0;});
@@ -2891,6 +2886,7 @@ var AT=(function(){
     if(can('attendance.mark'))t.push(['mark','Mark']);
     if(can('attendance.view')||can('attendance.edit')){t.push(['register','Register']);t.push(['profiles','Profiles']);}
     if(can('attendance.staff'))t.push(['staff','Staff']);
+    if(can('attendance.leave'))t.push(['leave','Leave']);
     return t;
   }
   function needsData(){return true;}
@@ -2933,7 +2929,7 @@ var AT=(function(){
     });
   }
   function refresh(){load(true);}
-  var ICON={mark:'i-users',register:'i-cal',profiles:'i-note',staff:'i-gear'},LBL={mark:'Attendance',register:'Register',profiles:'Profiles',staff:'Settings'};
+  var ICON={mark:'i-users',register:'i-cal',profiles:'i-note',staff:'i-gear',leave:'i-clock'},LBL={mark:'Attendance',register:'Register',profiles:'Profiles',staff:'Settings',leave:'Leave'};
   function nav(){
     var t=tabs(),n=$('atNav');
     n.style.gridTemplateColumns='repeat('+t.length+',1fr)';
@@ -3210,7 +3206,7 @@ var AT=(function(){
     if(t.closest('[data-at-retry]')){load(false);return;}
     if(!t.closest('#v-att')&&!t.closest('#atModal')&&!t.closest('#atOt')&&!t.closest('#atNav'))return;
     if(t===$('atModal')){closeForm();return;}if(t===$('atOt')){closeOT();return;}
-    if((x=t.closest('[data-at-tab]'))){tab=x.getAttribute('data-at-tab');q='';shell();if(!D||Date.now()-lastLoad>30000)load(false);return;}
+    if((x=t.closest('[data-at-tab]'))){if(x.getAttribute('data-at-tab')==='leave'){openLeave();return;}tab=x.getAttribute('data-at-tab');q='';shell();if(!D||Date.now()-lastLoad>30000)load(false);return;}
     if((x=t.closest('[data-at-shift]'))){var p=parts(S.ds),d=new Date(p.y,p.m,p.d+ +x.getAttribute('data-at-shift'));S.ds=ymd(d);render();return;}
     if((x=t.closest('[data-at-mark]'))){var a=x.getAttribute('data-at-mark'),i=a.lastIndexOf('|');mark(a.slice(0,i),a.slice(i+1));return;}
     if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');render();focusBy('data-at-ot',w);},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
@@ -3266,7 +3262,7 @@ var AT=(function(){
   document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Tab'&&$('atModal')&&$('atModal').classList.contains('open')){trapTab(ev);return;}if((ev.key==='ArrowDown'||ev.key==='ArrowUp')&&$('atOt')&&$('atOt').classList.contains('open')){var mi=[].slice.call($('atOt').querySelectorAll('.at-mi')),ix=mi.indexOf(document.activeElement);if(mi.length){ev.preventDefault();mi[(ix+(ev.key==='ArrowDown'?1:-1)+mi.length)%mi.length].focus();}return;}if(ev.key==='Escape'){if($('atOt')&&$('atOt').classList.contains('open')){closeOT();return;}if($('atModal')&&$('atModal').classList.contains('open')){closeForm();return;}}if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute&&(t.getAttribute('data-at-sw')!=null&&t.tagName==='TR'||t.getAttribute('data-at-prof')!=null)){ev.preventDefault();t.click();return;}if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
   return {open:open,load:load,refresh:refresh,flush:flush,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
-function openAtt(fromPop){if(!attAny())return go('home');go('att',fromPop);AT.open();}
+function openAtt(fromPop){if(!attAny()){if(can('attendance.leave'))return openLeave(fromPop);return go('home');}go('att',fromPop);AT.open();}
 
 /* ══ LEAVE REQUEST (standalone Home tile) — same layout, wording and languages as the team-site leave form ══ */
 var LV=(function(){
@@ -3358,7 +3354,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileLeave','tileCalc','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileCalc','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
