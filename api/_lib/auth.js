@@ -136,23 +136,25 @@ function keysOf(v) {
   String(v || '').split(/[\s,;]+/).forEach((k) => { if (ALL_KEYS.includes(k)) seen.add(k); });
   return [...seen];
 }
+const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileAtt', 'tileLeave', 'tileCalc', 'tileUsers'];
+function homeOf(v) { const seen = new Set(); String(v || '').split(/[\s,;]+/).forEach((k) => { if (HOME_IDS.includes(k)) seen.add(k); }); return [...seen]; }
 function parseUsers(rows) {
   const head = (rows[0] || []).map((h) => String(h).trim().toLowerCase());
   const col = (name, dflt) => { const i = head.indexOf(name); return i >= 0 ? i : dflt; };
-  const c = { email: col('email', 0), name: col('name', 1), role: col('role', 2), active: col('active', 3), access: col('access', 4), last: col('last sign-in', 5) };
+  const c = { email: col('email', 0), name: col('name', 1), role: col('role', 2), active: col('active', 3), access: col('access', 4), last: col('last sign-in', 5), home: col('home hidden', 6) };
   const out = [];
   rows.slice(1).forEach((r, i) => {
     const email = String(r[c.email] || '').trim().toLowerCase();
     if (!email) return;
     out.push({ row: i + 2, email, name: String(r[c.name] || '').trim(), role: roleOf(r[c.role]), active: yes(r[c.active]),
-      access: keysOf(r[c.access]), lastSignIn: String(r[c.last] || '') });
+      access: keysOf(r[c.access]), lastSignIn: String(r[c.last] || ''), homeHidden: homeOf(r[c.home]) });
   });
   return out;
 }
 async function loadUsers(force) {
   if (!force && cache.list && Date.now() - cache.at < 30000) return cache.list;
   try {
-    const [rows] = await G.batchGet(USERS_ID(), ['A1:F500']);
+    const [rows] = await G.batchGet(USERS_ID(), ['A1:G500']);
     cache = { at: Date.now(), list: parseUsers(rows) };
   } catch (e) {
     if (cache.list && Date.now() - cache.at < 3600 * 1000) return cache.list;   // brief Google hiccup: keep using the last list
@@ -164,7 +166,7 @@ const forget = () => { cache = { at: 0, list: null }; };
 
 function meOf(u) {
   const isAdmin = u.role === 'Admin';
-  return { email: u.email, name: u.name || u.email.split('@')[0], role: u.role, isAdmin, access: isAdmin ? ALL_KEYS.slice() : u.access };
+  return { email: u.email, name: u.name || u.email.split('@')[0], role: u.role, isAdmin, access: isAdmin ? ALL_KEYS.slice() : u.access, homeHidden: isAdmin ? (u.homeHidden || []) : [] };
 }
 
 /* ---------- request checks ---------- */
@@ -203,6 +205,20 @@ async function ensureHeader() {
   const have = (rows[0] || []).map((h) => String(h).trim().toLowerCase());
   if (HEADER.some((h) => !have.includes(h.toLowerCase()))) await G.batchUpdate(USERS_ID(), [{ range: 'A1:F1', values: [HEADER] }]);
 }
+// Admin's own Home layout (apps put away). Column G of the users sheet; nothing else in the sheet is touched.
+async function saveHome(me, ids) {
+  if (!me.isAdmin) throw new Error('Admins only');
+  const list = await loadUsers(true);
+  const u = list.find((x) => x.email === me.email);
+  if (!u) throw new Error('User not found');
+  const clean = homeOf((Array.isArray(ids) ? ids : []).join(','));
+  const [h] = await G.batchGet(USERS_ID(), ['G1:G1']);
+  const upd = [{ range: 'G' + u.row, values: [[clean.join(',')]] }];
+  if (!(h[0] && String(h[0][0] || '').trim())) upd.push({ range: 'G1', values: [['Home hidden']] });
+  await G.batchUpdate(USERS_ID(), upd);
+  forget();
+  return clean;
+}
 async function listUsers() {
   const list = await loadUsers(true);
   return list.map((u) => ({ email: u.email, name: u.name, role: u.role, active: u.active, access: u.role === 'Admin' ? ALL_KEYS.slice() : u.access, lastSignIn: u.lastSignIn }));
@@ -227,4 +243,4 @@ async function saveUser(me, input) {
   return listUsers();
 }
 
-module.exports = { CATALOG, ALL_KEYS, ROUTE_PERMS, ROLES, verifyGoogle, loadUsers, meOf, setSession, clearSession, whoami, guard, allow, touch, listUsers, saveUser, forget };
+module.exports = { CATALOG, ALL_KEYS, ROUTE_PERMS, ROLES, verifyGoogle, loadUsers, meOf, setSession, clearSession, whoami, guard, allow, touch, listUsers, saveUser, saveHome, forget };

@@ -1130,7 +1130,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v88</span>
+    <span class="app-ver" id="appVer" title="App version">v89</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1610,7 +1610,7 @@ function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
   show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny());show('tileLeave',can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||can('sales.touch')||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
-  arrangeHome();
+  syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
   fit(document.getElementById('yarnNav'),{dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc'});
   fit(document.getElementById('fgNav'),{fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep'});
@@ -3360,7 +3360,10 @@ window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document
 <script>
 var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileLeave','tileCalc','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
-function homeHidden(){if(!ME||!ME.isAdmin)return [];try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
+function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
+function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
+function saveHome(list){ME.homeHidden=list;try{localStorage.setItem(homeKey(),JSON.stringify(list));}catch(e){}authPost({action:'saveHome',hidden:list}).then(function(j){if(!j||!j.ok)showToast('Could not save your Home layout \u2014 it is kept on this device only','danger');}).catch(function(){showToast('Could not save your Home layout \u2014 it is kept on this device only','danger');});}
+function syncHomeOld(){if(!ME||!ME.isAdmin||ME.homeHidden&&ME.homeHidden.length)return;var l=localHidden();if(l.length){ME.homeHidden=l;saveHome(l);}}
 function arrangeHome(){var admin=!!(ME&&ME.isAdmin),hid=homeHidden(),main=document.getElementById('homeGrid'),more=document.getElementById('homeGridMore'),n=0;
  var order=HOME_TILES.map(function(id){return document.getElementById(id);});
  order.forEach(function(el){if(!el)return;var away=admin&&hid.indexOf(el.id)>=0;(away?more:main).appendChild(el);if(away&&el.style.display!=='none')n++;});
@@ -3370,7 +3373,7 @@ function arrangeHome(){var admin=!!(ME&&ME.isAdmin),hid=homeHidden(),main=docume
  var l=document.getElementById('homeCustList');if(l&&document.getElementById('homeCust').style.display!=='none')drawCust();}
 function drawCust(){var hid=homeHidden(),h='';HOME_TILES.forEach(function(id){var el=document.getElementById(id);if(!el||el.style.display==='none')return;var nm=el.querySelector('.app-name').textContent;h+='<label class="hc-r"><input type="checkbox" data-hc="'+id+'"'+(hid.indexOf(id)<0?' checked':'')+'><span>'+nm+'</span></label>';});document.getElementById('homeCustList').innerHTML=h;}
 function toggleCust(){var c=document.getElementById('homeCust'),on=c.style.display==='none';c.style.display=on?'':'none';document.getElementById('homeCustBtn').setAttribute('aria-expanded',on?'true':'false');if(on)drawCust();}
-document.addEventListener('change',function(e){var id=e.target&&e.target.getAttribute&&e.target.getAttribute('data-hc');if(!id||!ME||!ME.isAdmin)return;var hid=homeHidden().filter(function(x){return x!==id;});if(!e.target.checked)hid.push(id);try{localStorage.setItem(homeKey(),JSON.stringify(hid));}catch(x){}arrangeHome();});
+document.addEventListener('change',function(e){var id=e.target&&e.target.getAttribute&&e.target.getAttribute('data-hc');if(!id||!ME||!ME.isAdmin)return;var hid=homeHidden().filter(function(x){return x!==id;});if(!e.target.checked)hid.push(id);saveHome(hid);arrangeHome();});
 function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg');if(!g||!b)return;var l=m==='list';g.classList.toggle('as-list',l);document.getElementById('homeGridMore').classList.toggle('as-list',l);b.setAttribute('aria-label',l?'Switch to icon view':'Switch to list view');b.title=l?'Icon view':'List view';document.getElementById('tgList').style.display=l?'none':'';document.getElementById('tgGrid').style.display=l?'':'none';}
 function toggleHomeView(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}m=m==='list'?'icons':'list';try{localStorage.setItem('homeView',m);}catch(e){}applyHomeView(m);}
 (function(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}applyHomeView(m);})();
