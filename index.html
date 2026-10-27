@@ -1019,7 +1019,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v81</span>
+    <span class="app-ver" id="appVer" title="App version">v82</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1069,7 +1069,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
     <button class="app-tile" id="tileAtt" onclick="openAtt()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
       <div class="app-name">Attendance</div>
-      <div class="app-sub">Daily · Register · Leave</div>
+      <div class="app-sub">Daily · Register · Profiles</div>
+    </button>
+    <button class="app-tile" id="tileLeave" onclick="openLeave()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></div>
+      <div class="app-name">Leave Request</div>
+      <div class="app-sub">Apply · Who's applied</div>
     </button>
     <button class="app-tile" id="tileCalc" onclick="openCalc()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg></div>
@@ -1105,6 +1110,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 </div>
 <div class="us-modal" id="atModal"><div class="us-in" id="atForm" role="dialog"></div></div>
 <div class="at-pop" id="atOt"></div>
+<div class="view" id="v-leave">
+  <div class="sp-wrap" id="lvView"></div>
+</div>
+<div class="us-modal" id="lvModal"><div class="us-in" id="lvForm" role="dialog"></div></div>
 
 <!-- CALCULATORS -->
 <div class="view" id="v-calc">
@@ -1313,7 +1322,7 @@ function fmtD(d){if(!d)return '';var p=String(d).split('-');if(p.length!==3)retu
 function netRate(r){var m=String(r||'').replace(/[₹,\s]/g,'').match(/^([\d.]+)(?:-([\d.]+)%)?/);if(!m)return null;var g=parseFloat(m[1]);if(isNaN(g))return null;return g*(1-(m[2]?parseFloat(m[2]):0)/100);}
 
 /* ══ NAV / SHELL ══ */
-function refreshCur(){if(current==='att')AT.refresh();else if(current==='exp')EX.refresh();else if(current==='sales')SP.load(true);else if(current.indexOf('fg')===0)FG.load(true);else if(current.indexOf('kn')===0)KN.load(true);else loadData(true);}
+function refreshCur(){if(current==='att')AT.refresh();else if(current==='leave')LV.refresh();else if(current==='exp')EX.refresh();else if(current==='sales')SP.load(true);else if(current.indexOf('fg')===0)FG.load(true);else if(current.indexOf('kn')===0)KN.load(true);else loadData(true);}
 var lastLoad=0;
 function readCache(){try{return JSON.parse(localStorage.getItem('sx_cache')||'null');}catch(e){return null;}}
 function renderData(d){allData=d.stock||[];allOrders=d.orders||[];updateStats();if(mainTab==='orders')renderOrderCards();else renderCards();}
@@ -1324,7 +1333,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Team Access','People & permissions'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Leave'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Team Access','People & permissions'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1344,6 +1353,7 @@ function openView(v,fromPop){
   else if(v==='sales')openSales(fromPop);
   else if(v==='exp')openExp(fromPop);
   else if(v==='att')openAtt(fromPop);
+  else if(v==='leave')openLeave(fromPop);
   else if(v==='calc')openCalc(fromPop);
   else go(v,fromPop);
 }
@@ -1356,14 +1366,14 @@ function go(v,fromPop){
   document.getElementById('hTitle').textContent=HEAD[v][0];
   document.getElementById('hSub').textContent=HEAD[v][1];
   document.getElementById('appVer').style.display=(v==='home')?'':'none';
-  document.getElementById('refreshBtn').style.display=(v==='dash'||v==='sales'||v==='exp'||v==='att'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
+  document.getElementById('refreshBtn').style.display=(v==='dash'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
   var isKN=v.indexOf('kn')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='sales'||v==='exp'||v==='att'||v==='calc'||isFG||isKN)?'none':'';
+  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
   document.getElementById('atNav').style.display=v==='att'?'':'none';
-  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&!isKN);
+  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&v!=='leave'&&!isKN);
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
@@ -1391,10 +1401,11 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'sales.touch',exp:'expenses.*',att:'attendance.*',calc:'calc.*',users:'@admin'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'sales.touch',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
+function attAny(){return ['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
-function canView(v){var k=VIEW_PERM[v];if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
+function canView(v){var k=VIEW_PERM[v];if(k==='@att')return attAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
 function authPost(body){return fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
 function clearPrivate(){['sx_cache','sx_fg','sx_kn','sx_sales','sx_exp','sx_att','sx_me','sx_me_email','sx_user_name'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}
 function showSignIn(msg){
@@ -1443,7 +1454,7 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',canAny('attendance.'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny());show('tileLeave',can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||can('sales.touch')||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
   fit(document.getElementById('yarnNav'),{dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc'});
@@ -2691,7 +2702,7 @@ var AT=(function(){
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var MONF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  var OTA=null,D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,leaveSub='apply',leaveRows=null,busyKey='',errRow={};
+  var OTA=null,D=null,tab='',q='',loading=false,lastLoad=0,queue={},MEd=null,BK=null,OTCB=null,formState=null,busyKey='',errRow={};
   var now=new Date(),S={ds:ymd(now),rM:now.getMonth(),rY:now.getFullYear(),pM:now.getMonth(),pY:now.getFullYear()};
   function $(id){return document.getElementById(id);}
   function pad(n){return String(n).padStart(2,'0');}
@@ -2711,20 +2722,18 @@ var AT=(function(){
     if(can('attendance.mark'))t.push(['mark','Mark']);
     if(can('attendance.view')||can('attendance.edit')){t.push(['register','Register']);t.push(['profiles','Profiles']);}
     if(can('attendance.staff'))t.push(['staff','Staff']);
-    if(can('attendance.leave'))t.push(['leave','Leave']);
     return t;
   }
-  function needsData(){return tab!=='leave';}
+  function needsData(){return true;}
   function open(){
     var t=tabs();if(!t.length){go('home');return;}
     if(!t.some(function(x){return x[0]===tab;}))tab=t[0][0];
     if(!D&&needsData()){try{var c=JSON.parse(localStorage.getItem('sx_att')||'null');if(c&&c.d)D=c.d;}catch(e){}}
     shell();
     if(needsData()&&Date.now()-lastLoad>30000)load(false);
-    if(tab==='leave')loadLeave();
   }
   function load(manual){
-    if(loading||!tabs().some(function(x){return x[0]!=='leave';}))return;loading=true;
+    if(loading||!tabs().length)return;loading=true;
     var btn=$('refreshBtn'),icon=$('refreshIcon');btn.disabled=true;icon.classList.add('spin');
     api('att.getAll').then(function(d){
       loading=false;btn.disabled=false;icon.classList.remove('spin');D=d;lastLoad=Date.now();
@@ -2736,8 +2745,8 @@ var AT=(function(){
       else showToast(navigator.onLine===false?'Offline — showing last saved data':'Sync failed','danger');
     });
   }
-  function refresh(){if(tab==='leave')loadLeave(true);else load(true);}
-  var ICON={mark:'i-users',register:'i-cal',profiles:'i-note',staff:'i-gear',leave:'i-clock'},LBL={mark:'Attendance',register:'Register',profiles:'Profiles',staff:'Settings',leave:'Leave'};
+  function refresh(){load(true);}
+  var ICON={mark:'i-users',register:'i-cal',profiles:'i-note',staff:'i-gear'},LBL={mark:'Attendance',register:'Register',profiles:'Profiles',staff:'Settings'};
   function nav(){
     var t=tabs(),n=$('atNav');
     n.style.gridTemplateColumns='repeat('+t.length+',1fr)';
@@ -2747,8 +2756,7 @@ var AT=(function(){
   function render(){
     var el=$('atBody');if(!el)return;
     if(needsData()&&!D){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading attendance…</div>';return;}
-    el.innerHTML=tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():tab==='staff'?bStaff():bLeave();
-    if(tab==='leave')drawLeave();
+    el.innerHTML=tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():bStaff();
     if(tab==='register')scrollToday();
   }
   function stat(l,v){return '<div class="sp-stat"><div class="sp-num">'+v+'</div><div class="sp-lab">'+l+'</div></div>';}
@@ -2938,44 +2946,6 @@ var AT=(function(){
     var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance.csv';a.click();
   }
 
-  /* ---------- Leave Plan ---------- */
-  function bLeave(){
-    return '<div class="at-seg"><button class="'+(leaveSub==='apply'?'on':'')+'" data-at-ls="apply">Apply for Leave</button><button class="'+(leaveSub==='list'?'on':'')+'" data-at-ls="list">Who\'s Applied</button></div><div id="atLv"></div>';
-  }
-  function drawLeave(){
-    var el=$('atLv');if(!el)return;
-    if(leaveSub==='apply'){
-      el.innerHTML='<div class="us-note" style="margin-bottom:12px">Going to hometown or taking leave? Fill this in before you go.</div><div class="ex-card">'
-        +'<div class="ex-f"><label for="lvName">Name</label><input type="text" id="lvName" autocomplete="off" placeholder="Your full name" value="'+esc((ME_user()||''))+'"></div>'
-        +'<div class="at-two"><div class="ex-f"><label for="lvStart">Leave from</label><input type="date" id="lvStart"></div><div class="ex-f"><label for="lvEnd">Leave to</label><input type="date" id="lvEnd"></div></div>'
-        +'<div class="ex-f"><label for="lvReason">Reason</label><textarea id="lvReason" rows="3" placeholder="Why do you need this leave?"></textarea></div>'
-        +'<button class="btn-submit" id="lvGo" data-at-lvgo>Submit Leave Request</button><div class="ex-msg err" id="lvMsg" role="alert"></div><div class="sp-notes">Please submit at least 90 days before your leave start date.</div></div>';
-    }else{
-      if(!leaveRows){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading…</div>';return;}
-      el.innerHTML=leaveRows.length?'<div class="at-pg">'+leaveRows.map(function(r){return '<div class="at-pc"><div class="at-pt"><b>'+esc(r.name)+'</b></div><div class="at-lr"><span>Leave from</span><b>'+fd(r.start)+'</b></div><div class="at-lr"><span>Leave to</span><b>'+fd(r.end)+'</b></div></div>';}).join('')+'</div>':'<div class="sp-empty">No leave applications yet.</div>';
-    }
-  }
-  function ME_user(){try{return (typeof ME!=='undefined'&&ME&&ME.name)||'';}catch(e){return '';}}
-  function fd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:s;}
-  function loadLeave(manual){
-    api('leave.list').then(function(r){leaveRows=r;if(tab==='leave'&&leaveSub==='list')drawLeave();if(manual)showToast('Updated','success');}).catch(function(){if(leaveSub==='list'&&$('atLv'))$('atLv').innerHTML='<div class="sp-empty">Could not load the list.</div>';});
-  }
-  function submitLeave(){
-    if(busyKey)return;var v={name:$('lvName').value.trim(),start:$('lvStart').value,end:$('lvEnd').value,reason:$('lvReason').value.trim()},m=$('lvMsg');m.textContent='';
-    if(!v.name){m.textContent='Please enter your name.';return;}if(!v.start||!v.end){m.textContent='Please pick both leave dates.';return;}if(!v.reason){m.textContent='Please enter a reason.';return;}
-    if(navigator.onLine===false){m.textContent="You're offline — not saved";return;}
-    busyKey='lv';$('lvGo').disabled=true;$('lvGo').textContent='Submitting…';
-    api('leave.submit',v).then(function(r){
-      busyKey='';leaveRows=null;
-      form('<div class="at-narrow" style="text-align:center"><div class="us-note" style="background:var(--accent-soft);color:var(--accent);font-weight:700;padding:10px;border-radius:10px;margin-bottom:14px">📷 Please take a screenshot of this screen for your records</div>'
-        +'<h3>Leave Request Submitted</h3><div class="at-det">'
-        +'<div><span>Name</span><b>'+esc(v.name)+'</b></div><div><span>Leave from</span><b>'+fd(v.start)+'</b></div><div><span>Leave to</span><b>'+fd(v.end)+'</b></div><div><span>Reason</span><b>'+esc(v.reason)+'</b></div></div>'
-        +'<div class="us-note" style="margin:12px 0">'+(r.appliedPrior==='Yes'?'Submitted '+r.daysNotice+' days in advance — meets the 90-day guideline.':'Submitted '+r.daysNotice+' days in advance — this is less than the usual 90-day notice.')+'</div>'
-        +'<div class="us-act"><button class="btn-submit" data-at-cancel>Done</button></div></div>');
-      render();
-    }).catch(function(e){busyKey='';var b=$('lvGo');if(b){b.disabled=false;b.textContent='Submit Leave Request';}if($('lvMsg'))$('lvMsg').textContent=e.message||'Could not submit';});
-  }
-
   /* ---------- modals ---------- */
   function form(html){$('atForm').innerHTML=html;$('atModal').classList.add('open');}
   function closeForm(){$('atModal').classList.remove('open');MEd=null;BK=null;busyKey='';}
@@ -3003,7 +2973,7 @@ var AT=(function(){
     if(t.closest('[data-at-retry]')){load(false);return;}
     if(!t.closest('#v-att')&&!t.closest('#atModal')&&!t.closest('#atOt')&&!t.closest('#atNav'))return;
     if(t===$('atModal')){closeForm();return;}if(t===$('atOt')){closeOT();return;}
-    if((x=t.closest('[data-at-tab]'))){tab=x.getAttribute('data-at-tab');q='';shell();if(tab==='leave')loadLeave();else if(!D||Date.now()-lastLoad>30000)load(false);return;}
+    if((x=t.closest('[data-at-tab]'))){tab=x.getAttribute('data-at-tab');q='';shell();if(!D||Date.now()-lastLoad>30000)load(false);return;}
     if((x=t.closest('[data-at-shift]'))){var p=parts(S.ds),d=new Date(p.y,p.m,p.d+ +x.getAttribute('data-at-shift'));S.ds=ymd(d);render();return;}
     if((x=t.closest('[data-at-mark]'))){var a=x.getAttribute('data-at-mark'),i=a.lastIndexOf('|');mark(a.slice(0,i),a.slice(i+1));return;}
     if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');render();},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
@@ -3038,8 +3008,6 @@ var AT=(function(){
     if(t.closest('[data-at-export]')){exportCSV();return;}
     if(t.closest('[data-at-rebuild]')){var pp=parts(S.ds);confirmForm('Rebuild Register sheet?','This rewrites the "Register" tab of the Google Sheet for '+MONF[pp.m]+' '+pp.y+' from the attendance data (the previous month is archived to "Yearly Register" first).','Rebuild',function(){
       runBusy(api('att.rebuild',{year:pp.y,month:pp.m}),function(r){return 'Register rebuilt — '+r.month;});});return;}
-    if((x=t.closest('[data-at-ls]'))){leaveSub=x.getAttribute('data-at-ls');render();if(leaveSub==='list')loadLeave();return;}
-    if(t.closest('[data-at-lvgo]')){submitLeave();return;}
     if(t.closest('[data-at-cancel]')){closeForm();return;}
   });
   document.addEventListener('input',function(ev){
@@ -3057,7 +3025,68 @@ var AT=(function(){
   document.addEventListener('keydown',function(ev){var t=ev.target;if(ev.key==='Escape'){if($('atOt')&&$('atOt').classList.contains('open')){closeOT();return;}if($('atModal')&&$('atModal').classList.contains('open')){closeForm();return;}}if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute('data-at-sw')!=null&&t.tagName==='TR'){ev.preventDefault();t.click();return;}if(ev.key==='Enter'&&t&&t.getAttribute&&(t.getAttribute('data-at-rmk')!=null||t.id==='atNew'||t.id==='lvName')){if(t.id==='atNew'){var b=document.querySelector('[data-at-addgo]');if(b)b.click();}else t.blur();}});
   return {open:open,load:load,refresh:refresh,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
-function openAtt(fromPop){if(!canAny('attendance.'))return go('home');go('att',fromPop);AT.open();}
+function openAtt(fromPop){if(!attAny())return go('home');go('att',fromPop);AT.open();}
+
+/* ══ LEAVE REQUEST (standalone Home tile) ══ */
+var LV=(function(){
+  function $(id){return document.getElementById(id);}
+  var sub='apply',rows=null,busy=false,MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function call(fn,args){return fetch('/api/attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
+    .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
+  function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
+  function fd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:s;}
+  function myName(){try{return (typeof ME!=='undefined'&&ME&&ME.name)||'';}catch(e){return '';}}
+  function open(){sub='apply';shell();}
+  function shell(){
+    $('lvView').innerHTML='<div class="at-seg"><button class="'+(sub==='apply'?'on':'')+'" data-lv-sub="apply">Apply for Leave</button><button class="'+(sub==='list'?'on':'')+'" data-lv-sub="list">Who\'s Applied</button></div><div id="lvBody"></div>';
+    draw();if(sub==='list'&&!rows)load();
+  }
+  function draw(){
+    var el=$('lvBody');if(!el)return;
+    if(sub==='apply'){
+      el.innerHTML='<div class="us-note" style="margin-bottom:12px">Going to hometown or taking leave? Fill this in before you go.</div><div class="ex-card">'
+        +'<div class="ex-f"><label for="lvName">Name</label><input type="text" id="lvName" autocomplete="off" placeholder="Your full name" value="'+esc(myName())+'"></div>'
+        +'<div class="at-two"><div class="ex-f"><label for="lvStart">Leave from</label><input type="date" id="lvStart"></div><div class="ex-f"><label for="lvEnd">Leave to</label><input type="date" id="lvEnd"></div></div>'
+        +'<div class="ex-f"><label for="lvReason">Reason</label><textarea id="lvReason" rows="3" placeholder="Why do you need this leave?"></textarea></div>'
+        +'<button class="btn-submit" id="lvGo" data-lv-go>Submit Leave Request</button><div class="ex-msg err" id="lvMsg" role="alert"></div><div class="sp-notes">Please submit at least 90 days before your leave start date.</div></div>';
+    }else{
+      if(!rows){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading…</div>';return;}
+      el.innerHTML=rows.length?'<div class="at-pg">'+rows.map(function(r){return '<div class="at-pc"><div class="at-pt"><b>'+esc(r.name)+'</b></div><div class="at-lr"><span>Leave from</span><b>'+fd(r.start)+'</b></div><div class="at-lr"><span>Leave to</span><b>'+fd(r.end)+'</b></div></div>';}).join('')+'</div>':'<div class="sp-empty">No leave applications yet.</div>';
+    }
+  }
+  function load(manual){
+    api('leave.list').then(function(r){rows=r;if(sub==='list')draw();if(manual)showToast('Updated','success');})
+      .catch(function(){if(sub==='list'&&$('lvBody'))$('lvBody').innerHTML='<div class="sp-empty">Could not load the list.</div>';});
+  }
+  function submit(){
+    if(busy)return;var v={name:$('lvName').value.trim(),start:$('lvStart').value,end:$('lvEnd').value,reason:$('lvReason').value.trim()},m=$('lvMsg');m.textContent='';
+    if(!v.name){m.textContent='Please enter your name.';return;}if(!v.start||!v.end){m.textContent='Please pick both leave dates.';return;}
+    if(v.end<v.start){m.textContent='"Leave to" is before "Leave from".';return;}if(!v.reason){m.textContent='Please enter a reason.';return;}
+    if(navigator.onLine===false){m.textContent="You're offline — not saved";return;}
+    busy=true;$('lvGo').disabled=true;$('lvGo').textContent='Submitting…';
+    api('leave.submit',v).then(function(r){
+      busy=false;rows=null;
+      $('lvForm').innerHTML='<div class="at-narrow" style="text-align:center"><div class="us-note" style="background:var(--accent-soft);color:var(--accent);font-weight:700;padding:10px;border-radius:10px;margin-bottom:14px">📷 Please take a screenshot of this screen for your records</div>'
+        +'<h3>Leave Request Submitted</h3><div class="at-det">'
+        +'<div><span>Name</span><b>'+esc(v.name)+'</b></div><div><span>Leave from</span><b>'+fd(v.start)+'</b></div><div><span>Leave to</span><b>'+fd(v.end)+'</b></div><div><span>Reason</span><b>'+esc(v.reason)+'</b></div></div>'
+        +'<div class="us-note" style="margin:12px 0">'+(r.appliedPrior==='Yes'?'Submitted '+r.daysNotice+' days in advance — meets the 90-day guideline.':'Submitted '+r.daysNotice+' days in advance — this is less than the usual 90-day notice.')+'</div>'
+        +'<div class="us-act"><button class="btn-submit" data-lv-done>Done</button></div></div>';
+      $('lvModal').classList.add('open');shell();
+    }).catch(function(e){busy=false;var b=$('lvGo');if(b){b.disabled=false;b.textContent='Submit Leave Request';}if($('lvMsg'))$('lvMsg').textContent=e.message||'Could not submit';});
+  }
+  function closeM(){$('lvModal').classList.remove('open');}
+  document.addEventListener('click',function(ev){
+    var t=ev.target,x;if(!t.closest)return;
+    if(t===$('lvModal')){closeM();return;}
+    if(!t.closest('#v-leave')&&!t.closest('#lvModal'))return;
+    if((x=t.closest('[data-lv-sub]'))){sub=x.getAttribute('data-lv-sub');shell();if(sub==='list')load();return;}
+    if(t.closest('[data-lv-go]')){submit();return;}
+    if(t.closest('[data-lv-done]')){closeM();return;}
+  });
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&$('lvModal')&&$('lvModal').classList.contains('open'))closeM();});
+  return {open:open,refresh:function(){if(sub==='list')load(true);else showToast('Nothing to refresh here','success');}};
+})();
+function openLeave(fromPop){if(!can('attendance.leave'))return go('home');go('leave',fromPop);LV.open();}
 
 /* ══ PWA ══ */
 if('serviceWorker' in navigator){

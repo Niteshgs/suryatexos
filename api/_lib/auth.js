@@ -27,8 +27,9 @@ const CATALOG = [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
   { id: 'attendance', name: 'Attendance', items: [
     { id: 'attendance.mark', name: 'Mark daily attendance' }, { id: 'attendance.view', name: 'Register & Profiles (view)' },
-    { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' },
-    { id: 'attendance.leave', name: 'Leave Plan Form (apply & see who applied)' } ] },
+    { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' } ] },
+  { id: 'leave', name: 'Leave Request', items: [
+    { id: 'attendance.leave', name: 'Leave Request (apply & see who applied)' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
