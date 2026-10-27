@@ -12,6 +12,18 @@ module.exports = async (req, res) => {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
 
+  // Public team-site leave form (team-suryatex.vercel.app): no sign-in, but only with the shared server-to-server token.
+  const given = req.headers['x-team-token'];
+  if (given !== undefined) {
+    const want = process.env.TEAM_LEAVE_TOKEN || '';
+    const h = (v) => require('crypto').createHash('sha256').update(String(v)).digest();
+    if (!want || !require('crypto').timingSafeEqual(h(given), h(want))) return res.status(401).json({ ok: false, error: 'Not allowed' });
+    if (!/^team\./.test(String(body.fn)) || !E.ROUTES[body.fn]) return res.status(400).json({ ok: false, error: 'Bad function' });
+    if (!G.enabled()) return res.status(500).json({ ok: false, error: 'Google connection is not set up' });
+    try { return res.status(200).json({ ok: true, data: await E.ROUTES[body.fn](body.args || {}, 'Team site (public form)') }); }
+    catch (e) { return res.status(200).json({ ok: false, error: e.message }); }
+  }
+
   const me = await A.guard(req, res); if (!me) return;
   const need = A.ROUTE_PERMS.attendance[body.fn];
   if (!need || !E.ROUTES[body.fn]) return res.status(400).json({ ok: false, error: 'Bad function' });

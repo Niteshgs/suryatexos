@@ -263,10 +263,47 @@ async function leaveList() {
   return r.filter((x) => x[0] && x[1] && x[2]).map((x) => ({ name: str(x[0]), start: dateKey(x[1]), end: dateKey(x[2]) })).reverse();
 }
 
+/* ---------- Team site (public leave form on team-suryatex.vercel.app) — token-gated, see api/attendance.js ---------- */
+const crypto = require('crypto');
+const rowKey = (name, start, end) => crypto.createHash('sha1').update(str(name) + '|' + str(start) + '|' + str(end)).digest('hex').slice(0, 8);
+async function teamLeaveList() {
+  await ensureTimeFmt(T.leave);
+  const r = (await G.batchGet(SHEET_ID(), [q(T.leave) + '!A2:E5000'], 'serial'))[0] || [];
+  const out = [];
+  r.forEach((x, i) => { if (x[1] && x[2] && x[3]) { const from = dateKey(x[2]), to = dateKey(x[3]); out.push({ id: (i + 2) + 'x' + rowKey(x[1], from, to), name: str(x[1]), from, to, reason: str(x[4]) }); } });
+  return out.reverse();
+}
+async function teamRow(id) {   // find the sheet row for an id, refusing if that row has changed since the list was loaded
+  const m = /^(\d{1,6})x([0-9a-f]{8})$/.exec(str(id)); if (!m) throw new Error('Missing entry.');
+  const row = +m[1]; if (row < 2) throw new Error('Missing entry.');
+  const x = ((await G.batchGet(SHEET_ID(), [q(T.leave) + '!A' + row + ':E' + row], 'serial'))[0] || [])[0] || [];
+  if (!x[1] || rowKey(x[1], dateKey(x[2]), dateKey(x[3])) !== m[2]) throw new Error('This entry has changed or no longer exists. Please refresh.');
+  return { row, name: str(x[1]), from: dateKey(x[2]), to: dateKey(x[3]) };
+}
+async function teamLeaveEdit(a, op) {
+  const name = str(a.name).trim().slice(0, 80), reason = str(a.reason).trim().slice(0, 500), from = str(a.from).trim(), to = str(a.to).trim();
+  if (!name) throw new Error('Please enter a name.');
+  if (!YMD.test(from) || !YMD.test(to)) throw new Error('Please choose both leave dates.');
+  if (to < from) throw new Error('"Leave To" cannot be before "Leave From".');
+  if (!reason) throw new Error('Please enter a reason.');
+  const old = await teamRow(a.id);
+  await G.batchUpdate(SHEET_ID(), [{ range: q(T.leave) + '!B' + old.row + ':E' + old.row, values: [[safe(name), text(from), text(to), safe(reason)]] }], 'USER_ENTERED');
+  await logRow(op, 'LEAVE EDIT', name, from, old.name + ' ' + old.from + '→' + old.to, name + ' ' + from + '→' + to);
+  return { ok: true, entry: { id: old.row + 'x' + rowKey(name, from, to), name, from, to, reason } };
+}
+async function teamLeaveDelete(a, op) {
+  const old = await teamRow(a.id), sid = (await sheetIds())[T.leave];
+  if (sid == null) throw new Error('Leave sheet not found');
+  await G.format(SHEET_ID(), [{ deleteDimension: { range: { sheetId: sid, dimension: 'ROWS', startIndex: old.row - 1, endIndex: old.row } } }]);
+  await logRow(op, 'LEAVE DELETE', old.name, old.from, old.from + '→' + old.to, 'deleted');
+  return { ok: true };
+}
+
 const ROUTES = {
   'att.getAll': () => getAll(),
   'att.save': save, 'att.bulk': bulk, 'att.monthSave': monthSave,
   'att.addWorker': addWorker, 'att.setStatus': setStatus, 'att.rebuild': rebuild,
   'leave.submit': (a) => leaveSubmit(a), 'leave.list': () => leaveList(),
+  'team.leaveSubmit': (a) => leaveSubmit(a), 'team.leaveList': () => teamLeaveList(), 'team.leaveEdit': teamLeaveEdit, 'team.leaveDelete': teamLeaveDelete,
 };
 module.exports = { ROUTES, _t: { dateKey, normStatus, code, parse } };
