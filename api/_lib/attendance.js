@@ -245,7 +245,7 @@ async function leaveSubmit(a) {
   return { ok: true, daysNotice, appliedPrior: prior, alert };
 }
 // Owner e-mail alert via a small Apps Script web app (env LEAVE_ALERT_URL / LEAVE_ALERT_SECRET). Never blocks or fails the request.
-const ALERT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbx1F51ikjgrRKfPZ4TT5xbuKZdbKNLZulPIQJrKv0FYJ18-q5taZX2Gd5TUmfm7oTH6/exec';
+const ALERT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxnqHgUun_SUMuB8kOe9De86IhB5LEIgk-qBqbB-sg9Mnjv-fmfc4arC4Q7a25TUlzN/exec';
 async function notifyLeave(d) {
   const secret = process.env.LEAVE_ALERT_SECRET, url = process.env.LEAVE_ALERT_URL || ALERT_URL_DEFAULT;
   if (!secret) return 'skipped';
