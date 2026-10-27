@@ -787,6 +787,48 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
   body.nav-on .bnav{width:232px}
   #v-dash{max-width:1320px}
 }
+/* DESKTOP POLISH (v74) */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0}
+@media(hover:hover){
+  .sp-tab:hover,.sp-chip:hover,.sp-t:hover,.sp-ib:hover{border-color:var(--accent);color:var(--accent)}
+  .sp-t.done:hover{border-color:var(--success);color:var(--success);filter:brightness(1.15)}
+  .sp-ib.del:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
+  .sp-a:hover{filter:brightness(1.2)}
+  .sp-c:hover{background:var(--surface2)}
+  .us-card:hover{background:var(--surface2)}
+  .ex-row:hover{background:var(--surface2)}
+  .btn-submit:hover,.us-add:hover{filter:brightness(1.08)}
+}
+@media(min-width:900px){
+  .sp-wrap,.us-wrap{max-width:980px;padding:28px 28px 56px}
+  #v-sales .sp-wrap{max-width:1040px}
+  #exView{max-width:760px}
+  #exView .ex-card{padding:22px 24px}
+  .sp-head h2{font-size:26px}
+  .sp-stats{gap:14px}
+  .sp-stat{padding:16px 8px}
+  .sp-num{font-size:30px}
+  .sp-t{font-size:12px}
+  .app-tile{padding:30px 16px 26px}
+  .app-grid{gap:22px}
+  .app-tile:hover{transform:translateY(-2px)}
+  .ex-d{font-size:15px}
+  .ex-a{font-size:18px}
+}
+@media(min-width:1180px){
+  .sp-list{display:grid;grid-template-columns:1fr 1fr}
+  .sp-lh,.sp-empty{grid-column:1/-1}
+  .sp-c{border-right:1px solid var(--border)}
+  .sp-c:nth-child(even){border-right:none}
+  .us-wrap{max-width:1040px;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:12px;align-items:start}
+  .us-wrap>*{grid-column:1/-1}
+  .us-wrap>.us-card{grid-column:auto;margin-bottom:0}
+}
+@media(min-width:1500px){
+  .sp-wrap,#v-sales .sp-wrap{max-width:1180px}
+  .us-wrap{max-width:1180px;grid-template-columns:repeat(3,1fr)}
+}
 @keyframes vin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .view.show{animation:vin .18s ease-out}
 .upd{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));z-index:1001;background:var(--accent-strong);color:#fff;padding:11px 20px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.35);white-space:nowrap}
@@ -817,7 +859,7 @@ header{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-ins
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v73</span>
+    <span class="app-ver" id="appVer" title="App version">v74</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
