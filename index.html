@@ -25,8 +25,8 @@
 .light{
   --kn-field:#F3EEE6;
   --bg:#F6F3EE;--surface:#FFFFFF;--surface2:#EEE9E1;--border:#DDD6CA;--text:#1B1915;--text-muted:#6B645A;--text-dim:#3A352E;
-  --success:#1B7F4C;--success-soft:rgba(27,127,76,0.1);--danger:#BE3A33;--danger-soft:rgba(190,58,51,0.1);
-  --accent:#9A6516;--accent-strong:#9A6516;--accent-soft:rgba(154,101,22,0.1);--on:#FFFFFF;--on-danger:#FFFFFF;--on-warn:#FFFFFF;
+  --success:#1B7F4C;--success-soft:rgba(27,127,76,0.1);--danger:#B3342E;--danger-soft:rgba(179,52,46,0.1);
+  --accent:#86560F;--accent-strong:#86560F;--accent-soft:rgba(134,86,15,0.1);--on:#FFFFFF;--on-danger:#FFFFFF;--on-warn:#FFFFFF;
   --warn:#8A5F00;--warn-soft:rgba(138,95,0,0.1);--info:#2F5FB8;--purple:#7b3fc8;--purple-soft:rgba(123,63,200,0.1);
 }
 #v-entry,#v-proc{--text-dim:#A09A90}
@@ -412,7 +412,7 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .home-title h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .home-title p{font-size:14px;color:var(--text-muted);margin-top:4px}
 .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-.app-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 14px 18px;text-align:center;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .15s,transform .1s}
+.app-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 14px 18px;text-align:center;cursor:pointer;font-family:inherit;color:var(--text);transition:border-color .15s,transform .1s}
 a.app-tile{display:block;text-decoration:none}
 .app-tile:hover{border-color:var(--accent)}
 .home-bar{display:flex;justify-content:flex-end;gap:10px;margin:0 0 10px}
@@ -1132,7 +1132,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v94</span>
+    <span class="app-ver" id="appVer" title="App version">v95</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
