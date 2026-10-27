@@ -1019,7 +1019,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v80</span>
+    <span class="app-ver" id="appVer" title="App version">v81</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2810,10 +2810,10 @@ var AT=(function(){
     },8000);
   }
   function menuHTML(cur,custom){
-    var opts=[[0,'No OT'],[4,'4 hours'],[7,'7 hours']];
+    var opts=[[0,'No OT'],[2,'2 hours'],[4,'4 hours'],[7,'7 hours']];
     return opts.map(function(o){return '<button class="at-mi'+(cur===o[0]?' sel':'')+'" role="menuitem" data-at-otv="'+o[0]+'">'+o[1]+(cur===o[0]?' ✓':'')+'</button>';}).join('')
-      +(custom?'<div class="at-cust"><input id="atOtC" type="number" min="0" max="24" inputmode="numeric" aria-label="Custom overtime hours" placeholder="Hours" value="'+(cur>0&&cur!==4&&cur!==7?cur:'')+'"><button class="at-opt-go" data-at-otc>Set</button></div>'
-        :'<button class="at-mi'+(cur>0&&cur!==4&&cur!==7?' sel':'')+'" role="menuitem" data-at-otcm>Custom…'+(cur>0&&cur!==4&&cur!==7?' ('+cur+'h) ✓':'')+'</button>');
+      +(custom?'<div class="at-cust"><input id="atOtC" type="number" min="0" max="24" inputmode="numeric" aria-label="Custom overtime hours" placeholder="Hours" value="'+(cur>0&&cur!==2&&cur!==4&&cur!==7?cur:'')+'"><button class="at-opt-go" data-at-otc>Set</button></div>'
+        :'<button class="at-mi'+(cur>0&&cur!==2&&cur!==4&&cur!==7?' sel':'')+'" role="menuitem" data-at-otcm>Custom…'+(cur>0&&cur!==2&&cur!==4&&cur!==7?' ('+cur+'h) ✓':'')+'</button>');
   }
   function pickOT(cb,cur,title,anchor){
     OTCB=cb;OTA={cur:cur,anchor:anchor,title:title};drawOT(false);
