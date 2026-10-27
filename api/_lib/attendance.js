@@ -241,7 +241,21 @@ async function leaveSubmit(a) {
   const daysNotice = Math.round((day(start) - day(todayIST())) / 86400000), prior = daysNotice >= 90 ? 'Yes' : 'No';
   await ensureTimeFmt(T.leave);
   await G.append(SHEET_ID(), q(T.leave) + '!A1', [[nowIST(), safe(name), text(start), text(end), safe(reason), daysNotice, prior, 'Pending']], 'USER_ENTERED');
-  return { ok: true, daysNotice, appliedPrior: prior };
+  const alert = await notifyLeave({ name, start, end, reason, daysNotice, appliedPrior: prior });
+  return { ok: true, daysNotice, appliedPrior: prior, alert };
+}
+// Owner e-mail alert via a small Apps Script web app (env LEAVE_ALERT_URL / LEAVE_ALERT_SECRET). Never blocks or fails the request.
+const ALERT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbx1F51ikjgrRKfPZ4TT5xbuKZdbKNLZulPIQJrKv0FYJ18-q5taZX2Gd5TUmfm7oTH6/exec';
+async function notifyLeave(d) {
+  const secret = process.env.LEAVE_ALERT_SECRET, url = process.env.LEAVE_ALERT_URL || ALERT_URL_DEFAULT;
+  if (!secret) return 'skipped';
+  try {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...d, secret }), signal: ctl.signal, redirect: 'follow' });
+    clearTimeout(t);
+    const j = await r.json().catch(() => ({}));
+    return j && j.ok ? 'sent' : 'failed';
+  } catch (e) { return 'failed'; }
 }
 async function leaveList() {
   await ensureTimeFmt(T.leave);
