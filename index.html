@@ -1162,7 +1162,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v98</span>
+    <span class="app-ver" id="appVer" title="App version">v99</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1346,7 +1346,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
     <div class="shade-pick">
       <button type="button" class="shade-btn" id="shadeBtn" aria-expanded="false" aria-controls="shadePanel" onclick="shadeToggle()"><span class="sb-k">Shade</span><span class="sb-v" id="shadeBtnV">List view</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>
       <div class="shade-panel" id="shadePanel" hidden>
-        <div class="sp-top"><button type="button" class="sp-wide on" data-sh="" onclick="shadePick('')">List view</button><button type="button" class="sp-wide" data-sh="*" onclick="shadePick('*')">All shades &middot; bulk</button></div>
+        <div class="sp-top"><button type="button" class="sp-wide on" data-sh="" onclick="shadePick('')">List view</button><button type="button" class="sp-wide" data-sh="*" onclick="shadePick('*')">Bulk view</button></div>
         <div class="b-shades" id="dShades" role="group" aria-label="Choose a shade"></div>
       </div>
     </div>
@@ -1798,7 +1798,7 @@ function shadeToggle(force){
 }
 function shadeMark(){
   document.querySelectorAll('#shadePanel [data-sh]').forEach(function(b){var on=b.getAttribute('data-sh')===dShade;b.classList.toggle('on',on);if(b.classList.contains('b-shade'))b.setAttribute('aria-pressed',on?'true':'false');});
-  document.getElementById('shadeBtnV').textContent=dShade===''?'List view':dShade==='*'?'All shades · bulk':dShade;
+  document.getElementById('shadeBtnV').textContent=dShade===''?'List view':dShade==='*'?'Bulk view':dShade;
   document.getElementById('shadeBtn').classList.toggle('on',dShade!=='');
 }
 function shadePick(sh){dShade=sh;shadeMark();shadeToggle(false);renderCards();}
