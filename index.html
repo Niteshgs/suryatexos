@@ -1173,7 +1173,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v103</span>
+    <span class="app-ver" id="appVer" title="App version">v104</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3143,21 +3143,29 @@ var AT=(function(){
       l[i].classList.toggle('bad',!!errRow[w+'|'+S.ds]);}
   }
   function persist(w,ds,st,ot,rm){
-    var ts=outAdd(w,ds,st,ot,rm);delete errRow[w+'|'+ds];sendOne(w,ds,st,ot,rm,ts);
+    var ts=outAdd(w,ds,st,ot,rm);delete errRow[w+'|'+ds];
+    setTimeout(function(){sendOne(w,ds,st,ot,rm,ts);},400);   // quick mark → unmark taps send only the last state
   }
+  var slots=0,waiters=[],tries={};
+  function acquire(){return new Promise(function(res){if(slots<3){slots++;res();}else waiters.push(res);});}
+  function release(){var n=waiters.shift();if(n)n();else slots--;}
   function sendOne(w,ds,st,ot,rm,ts){
     var key=w+'|'+ds;if(inflight[ts])return;inflight[ts]=1;
     queue[key]=(queue[key]||Promise.resolve()).then(function(){
       var cur=outMine().filter(function(x){return x.w===w&&x.ds===ds;})[0];
       if(!cur||cur.ts!==ts)return;                       // a newer edit of the same row replaced this one
-      return api('att.save',{worker:w,date:ds,status:st,ot:ot,remarks:rm}).then(function(){
-        outDone(w,ds,ts);if(D){try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}}
+      return acquire().then(function(){return api('att.save',{worker:w,date:ds,status:st,ot:ot,remarks:rm});}).then(function(){
+        release();delete tries[ts];outDone(w,ds,ts);if(D){try{localStorage.setItem('sx_att',JSON.stringify({t:Date.now(),d:D}));}catch(e){}}
         if(errRow[key]){delete errRow[key];}
       },function(e){
-        if(e&&e.transient){syncSoon();toastOnce('Saved on this phone — it will sync when the signal is back','danger');}
-        else{outDone(w,ds,ts);errRow[key]=true;toastOnce('Some changes were not saved — tap Retry on the row','danger');}
+        release();
+        var bad=e&&/^(Invalid|OT must)/.test(e.message||''),n=tries[ts]=(tries[ts]||0)+1;
+        var tr=!!(e&&e.transient);
+        if(!bad&&((tr&&navigator.onLine!==false&&n<8)||(!tr&&n<4))){setTimeout(function(){delete inflight[ts];sendOne(w,ds,st,ot,rm,ts);},Math.min(1500*n,6000));return 'retry';}   // busy / rate-limited: try again quietly
+        if(!bad&&tr){delete tries[ts];syncSoon();return;}
+        outDone(w,ds,ts);delete tries[ts];errRow[key]=true;toastOnce('Not saved: '+((e&&e.message)||'try again').slice(0,90)+' — tap Retry on the row','danger');
       });
-    }).then(function(){delete inflight[ts];redrawMark();updBanner();},function(){delete inflight[ts];});
+    }).then(function(r){if(r!=='retry')delete inflight[ts];redrawMark();updBanner();},function(){delete inflight[ts];});
   }
   function syncSoon(){if(syncT)return;syncT=setTimeout(function(){syncT=0;flush();},15000);}
   function flush(manual){

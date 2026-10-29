@@ -34,11 +34,16 @@ async function token() {
 }
 
 async function api(method, url, body) {
-  const r = await fetch(url, {
-    method, headers: { Authorization: 'Bearer ' + (await token()), 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const text = await r.text();
+  let r, text;
+  for (let attempt = 0; ; attempt++) {                     // Google is briefly busy (429/5xx) when taps come fast: wait and retry
+    r = await fetch(url, {
+      method, headers: { Authorization: 'Bearer ' + (await token()), 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    text = await r.text();
+    if ((r.status === 429 || r.status >= 500) && attempt < 3) { await new Promise((z) => setTimeout(z, 400 * (attempt + 1) + Math.random() * 300)); continue; }
+    break;
+  }
   let j = {}; try { j = text ? JSON.parse(text) : {}; } catch (e) {}
   if (!r.ok) {
     const msg = (j.error && j.error.message) || text.slice(0, 200);
