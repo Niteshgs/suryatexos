@@ -1181,7 +1181,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v108</span>
+    <span class="app-ver" id="appVer" title="App version">v109</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3110,9 +3110,7 @@ var AT=(function(){
       +'<div id="atStrip">'+stripHtml()+'</div>'
       +'<div id="atSyncBox">'+syncBanner()+'</div>'
       +'<div id="atAllBox">'+allHtml()+'</div>'
-      +search()+'<div id="atList">'+listMark()+'</div><div class="at-btns">'
-      +(can('attendance.staff')?'<button class="btn-submit" data-at-addstaff>+ Add Staff</button>':'')
-      +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>'+pushBox();
+      +search()+'<div id="atList">'+listMark()+'</div>'+pushBox();
   }
   /* ---- one-time phone alert when the day's attendance is complete (Admin / Partner only) ---- */
   var pushOn=null;
