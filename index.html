@@ -1173,7 +1173,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v104</span>
+    <span class="app-ver" id="appVer" title="App version">v105</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3106,9 +3106,9 @@ var AT=(function(){
   function syncBanner(){return '';}   // no sync box: rows show "Marking…"; failures are shown on the row and by a toast
   function updBanner(){var e=$('atSyncBox');if(e)e.innerHTML=syncBanner();}
   function nmHtml(w){
-    var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],wait=!bad&&isPending(w,S.ds),lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
+    var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
     return '<div class="at-n">'+esc(w)+'</div>'
-      +(bad?'<div class="at-s err"><button class="at-rr" data-at-rr="'+esc(w)+'" aria-label="Not saved. Retry for '+esc(w)+'">⚠ Not saved · Retry</button></div>':wait?'<div class="at-s wait"><i class="at-dot" aria-hidden="true"></i>Marking…</div>':'<div class="at-s '+k+'">'+lbl+'</div>');
+      +(bad?'<div class="at-s err"><button class="at-rr" data-at-rr="'+esc(w)+'" aria-label="Not saved. Retry for '+esc(w)+'">⚠ Not saved · Retry</button></div>':'<div class="at-s '+k+'">'+lbl+'</div>');
   }
   function rowMark(w){
     var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds];
