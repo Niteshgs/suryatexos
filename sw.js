@@ -1,5 +1,5 @@
 // Suryatex OS service worker: fast shell, offline fallback. Never touches /api/*.
-const V = 'sx-v61';
+const V = 'sx-v62';
 const SHELL = ['/', '/logo.svg', '/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -44,4 +44,19 @@ self.addEventListener('fetch', (e) => {
       return hit || net;
     })
   );
+});
+
+// Phone notifications (Attendance complete alert)
+self.addEventListener('push', (e) => {
+  let d = {}; try { d = e.data ? e.data.json() : {}; } catch (x) {}
+  e.waitUntil(self.registration.showNotification(d.title || 'Suryatex OS', {
+    body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png', tag: 'att-done', data: { url: d.url || '/' },
+  }));
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow((e.notification.data && e.notification.data.url) || '/');
+  }));
 });

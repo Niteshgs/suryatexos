@@ -1131,6 +1131,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .at-upd{font-size:12px;color:var(--text-muted);text-align:right;margin:-4px 2px 8px;min-height:16px}.at-upd.old{color:var(--warn)}
 .at-sync{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--warn-soft);border:1px solid var(--warn);color:var(--text);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:13px}
 .at-sync button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--warn);background:transparent;color:var(--warn);font:inherit;font-weight:800;cursor:pointer}
+.at-pushbox{margin-top:12px}.at-push{width:100%}.at-push.on{border-color:var(--success);color:color-mix(in srgb,var(--success) 78%,var(--text))}
 .at-s.wait{color:var(--warn);display:flex;align-items:center;gap:6px}
 .at-dot{width:7px;height:7px;border-radius:50%;background:var(--warn);animation:atPulse 1s ease-in-out infinite}
 @keyframes atPulse{0%,100%{opacity:.35}50%{opacity:1}}
@@ -1180,7 +1181,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v107</span>
+    <span class="app-ver" id="appVer" title="App version">v108</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3037,7 +3038,7 @@ var AT=(function(){
     if(!t.some(function(x){return x[0]===tab;}))tab=t[0][0];
     if(!D&&needsData()){try{var c=JSON.parse(localStorage.getItem('sx_att')||'null');if(c&&c.d)D=c.d;}catch(e){}overlayOut();}
     shell();
-    startTimers();flush();
+    startTimers();flush();pushInit();
     if(needsData()&&Date.now()-lastLoad>30000)load(false);
   }
   /* ---- keep the screen fresh when several people use it ---- */
@@ -3111,7 +3112,41 @@ var AT=(function(){
       +'<div id="atAllBox">'+allHtml()+'</div>'
       +search()+'<div id="atList">'+listMark()+'</div><div class="at-btns">'
       +(can('attendance.staff')?'<button class="btn-submit" data-at-addstaff>+ Add Staff</button>':'')
-      +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>';
+      +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>'+pushBox();
+  }
+  /* ---- one-time phone alert when the day's attendance is complete (Admin / Partner only) ---- */
+  var pushOn=null;
+  function pushOK(){return !!ME&&(ME.isAdmin||ME.role==='Partner')&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;}
+  function pushLabel(){
+    if(Notification.permission==='denied')return '🔕 Notifications are blocked — allow them in your phone\'s app settings';
+    return pushOn?'🔔 Alerts on · tap to turn off':'🔔 Notify me when attendance is complete';
+  }
+  function pushBox(){return pushOK()?'<div class="at-pushbox"><button class="at-ghost at-push'+(pushOn?' on':'')+'" id="atPush" data-at-push'+(Notification.permission==='denied'?' disabled':'')+'>'+pushLabel()+'</button></div>':'';}
+  function pushPaint(){var b=$('atPush');if(!b)return;b.textContent=pushLabel();b.classList.toggle('on',!!pushOn);b.disabled=Notification.permission==='denied';}
+  function pcall(fn,args){return fetch('/api/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json();});}
+  function b64(k){var p='='.repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,'+').replace(/_/g,'/')),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+  function pushInit(){
+    if(!pushOK()||pushOn!==null)return;pushOn=false;
+    navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription();}).then(function(sub){
+      if(!sub||Notification.permission!=='granted'){pushPaint();return;}
+      return pcall('push.status',{endpoint:sub.endpoint}).then(function(j){pushOn=!!(j.ok&&j.data&&j.data.on);pushPaint();});
+    }).catch(function(){pushPaint();});
+  }
+  function pushToggle(){
+    var b=$('atPush');if(b)b.disabled=true;
+    navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription().then(function(sub){
+        if(pushOn&&sub){return pcall('push.unsubscribe',{endpoint:sub.endpoint}).then(function(){return sub.unsubscribe();}).then(function(){pushOn=false;showToast('Alerts turned off','success');});}
+        return Notification.requestPermission().then(function(perm){
+          if(perm!=='granted'){showToast('Notifications were not allowed','danger');return;}
+          return pcall('push.status',{}).then(function(j){
+            if(!j.ok)throw new Error(j.error||'Could not set up alerts');
+            return (sub?Promise.resolve(sub):reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(j.data.key)}));
+          }).then(function(sb){return pcall('push.subscribe',{sub:sb.toJSON()});}).then(function(j){
+            if(!j.ok)throw new Error(j.error||'Could not save alerts');pushOn=true;showToast('Done — you will get one alert when attendance is complete','success');});
+        });
+      });
+    }).catch(function(e){showToast((e&&e.message)||'Could not change alerts','danger');}).then(pushPaint);
   }
   function syncBanner(){return '';}   // no sync box: rows show "Marking…"; failures are shown on the row and by a toast
   function updBanner(){var e=$('atSyncBox');if(e)e.innerHTML=syncBanner();}
@@ -3392,6 +3427,7 @@ var AT=(function(){
     if((x=t.closest('[data-at-mark]'))){var a=x.getAttribute('data-at-mark'),i=a.lastIndexOf('|');mark(a.slice(0,i),a.slice(i+1));return;}
     if((x=t.closest('[data-at-ot]'))){var w=x.getAttribute('data-at-ot'),r0=rec(w,S.ds);if(r0.status==='absent')return;pickOT(function(v){var r=rec(w,S.ds);setRec(w,'present',v,r.remarks||'');fastUpdate([w],['data-at-ot',w]);},r0.status==='present'?(r0.ot||0):-1,'OT — '+w,x);return;}
     if(t.closest('[data-at-allp]')){markAll();return;}
+    if(t.closest('[data-at-push]')){pushToggle();return;}
     if(t.closest('[data-at-sync]')){flush(true);return;}
     if((x=t.closest('[data-at-psort]'))){S.psort=x.getAttribute('data-at-psort');render();focusBy('data-at-psort',S.psort);return;}
     if(t.closest('[data-at-today]')){S.ds=today();render();return;}

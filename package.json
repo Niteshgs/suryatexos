@@ -1,1 +1,1 @@
-{ "name":"suryatexos","private":true,"engines":{"node":"24.x"} }
+{"name":"suryatexos","private":true,"engines":{"node":"24.x"},"dependencies":{"web-push":"^3.6.7"}}

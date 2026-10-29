@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     return res.status(403).json({ ok: false, forbidden: true, error: 'You can only mark today\'s attendance' });
 
   try {
-    let data = await E.ROUTES[body.fn](body.args || {}, (me.name || "") + " <" + me.email + "> · web");
+    let data = await E.ROUTES[body.fn](body.args || {}, (me.name || "") + " <" + me.email + "> · web", { email: me.email, role: me.role });
     if (inCharge && body.fn === 'att.getAll' && data && data.attendance) {
       const keep = {}; Object.keys(data.attendance).forEach((k) => { if (k.slice(-10) === today) keep[k] = data.attendance[k]; });
       data = Object.assign({}, data, { attendance: keep });

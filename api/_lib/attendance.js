@@ -144,7 +144,27 @@ function checkDate(d) { d = str(d).trim(); const m = YMD.exec(d); if (!m || +m[2
 function checkStatus(s) { s = str(s); if (s !== '' && s !== 'present' && s !== 'absent') throw new Error('Invalid status'); return s; }
 function checkOT(v, status) { const n = Math.round(Number(v) || 0); if (n < 0 || n > 24) throw new Error('OT must be between 0 and 24 hours'); return status === 'present' ? n : (status === '' ? n : 0); }
 
-async function save(a, op) {
+let rosterCache = { at: 0, list: [] };
+// After a save for today: if that left nobody unmarked, send the one-time "attendance complete" phone alert. Never blocks or fails the save.
+async function maybeAlertDone(rows, idx, worker, ds, status, actor) {
+  try {
+    const today = new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
+    if (ds !== today || !status) return;
+    const P = require('./push');
+    if (!(await P.pending(today))) return;
+    if (Date.now() - rosterCache.at > 300000) {
+      const w = (await G.batchGet(SHEET_ID(), [q(T.workers) + '!A2:B2000']))[0] || [];
+      rosterCache = { at: Date.now(), list: w.filter((r) => str(r[0]).trim() && (str(r[1]).trim() || 'Active') !== 'Archived').map((r) => str(r[0]).trim()) };
+    }
+    const st = {}; rows.forEach((r) => { if (dateKey(r[1]) === today) st[str(r[0])] = normStatus(r[2]); });
+    st[worker] = status;
+    const list = rosterCache.list; if (!list.length || !list.includes(worker)) return;
+    if (list.some((n) => !st[n])) return;
+    await P.attendanceDone(today, { present: list.filter((n) => st[n] === 'present').length, absent: list.filter((n) => st[n] === 'absent').length, total: list.length }, actor);
+  } catch (e) { /* an alert problem must never block saving attendance */ }
+}
+
+async function save(a, op, actor) {
   const worker = checkWorker(a.worker), ds = checkDate(a.date), status = checkStatus(a.status), ot = checkOT(a.ot, status), remarks = str(a.remarks).trim().slice(0, 200);
   const rows = (await G.batchGet(SHEET_ID(), [q(T.att) + '!A2:E30000'], 'serial'))[0] || [];
   let idx = -1; for (let i = 0; i < rows.length; i++) if (str(rows[i][0]) === worker && dateKey(rows[i][1]) === ds) { idx = i; break; }
@@ -157,6 +177,7 @@ async function save(a, op) {
     await G.append(SHEET_ID(), q(T.att) + '!A1', [[worker, ds, status, ot, remarks]], 'RAW');
     await Promise.all([logRow(op, 'MARK', worker, ds, '', fmt(status, ot, remarks)), syncCell(worker, ds, status, ot, op)]);
   }
+  await maybeAlertDone(rows, idx, worker, ds, status, actor);
   return { ok: true };
 }
 
