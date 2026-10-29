@@ -634,7 +634,7 @@ a.app-tile{display:block;text-decoration:none}
 .at-reg .st{position:sticky;left:0;background:var(--surface2);text-align:left;min-width:120px;font-weight:700;z-index:1;white-space:nowrap}
 .at-reg thead .st{z-index:3}
 .at-reg tbody tr{cursor:pointer}
-.at-reg .sun{background:var(--accent-soft)}.at-reg td.p{color:var(--success);font-weight:700}.at-reg td.a{color:var(--danger);font-weight:800}
+.at-reg .sun{background:var(--accent-soft)}.at-reg td.p{color:color-mix(in srgb,var(--success) 78%,var(--text));font-weight:700}.at-reg td.a{color:color-mix(in srgb,var(--danger) 78%,var(--text));font-weight:800}
 .at-pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .at-pc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px}
 .at-pc[data-at-prof]{cursor:pointer}
@@ -656,6 +656,13 @@ a.app-tile{display:block;text-decoration:none}
 .at-me.sun{background:var(--accent-soft)}.at-me.today{box-shadow:inset 3px 0 0 var(--accent)}
 .at-md{width:54px;font-weight:800;font-size:14px}.at-md i{font-style:normal;font-size:11px;color:var(--text-muted);font-weight:600}
 .at-me .at-b{width:40px;height:40px}.at-me .at-ot{height:40px}
+.sw-head{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sw-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sw-eye{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+.sw-name{margin:2px 0 8px;font-size:24px;font-weight:800;line-height:1.15;color:var(--text);overflow-wrap:anywhere}
+.sw-mon{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong,var(--accent));font-size:13px;font-weight:700}
+.sw-mon .ic{width:15px;height:15px}
+.sw-p{color:color-mix(in srgb,var(--success) 78%,var(--text));font-weight:800}.sw-a{color:color-mix(in srgb,var(--danger) 78%,var(--text));font-weight:800}
 .at-sw{width:100%;border-collapse:collapse;font-size:13px;text-align:center}
 .at-sw th{font-size:10px;letter-spacing:.6px;color:var(--text-muted);padding:6px 2px}
 .at-sw td{border-bottom:1px solid var(--border);padding:6px 2px}.at-sw td.sun{background:var(--accent-soft)}.at-sw .gap{width:14px;border:none}
@@ -1173,7 +1180,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v105</span>
+    <span class="app-ver" id="appVer" title="App version">v106</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3256,10 +3263,11 @@ var AT=(function(){
     function cell(d){if(d>n)return {d:'',ot:'',l:''};var r=rec(w,dsOf(y,m,d));return {d:d,ot:r.status==='present'?r.ot:'',l:r.status==='present'?'✓':r.status==='absent'?'✗':''};}
     var rows='';for(var i=0;i<16;i++){if(i+1>15&&i+16>n)break;var L=i+1<=15?cell(i+1):{d:'',ot:'',l:''},R=cell(i+16);
       var ls=(i+1<=15&&isSun(y,m,i+1))?' class="sun"':'',rs=(i+16<=n&&isSun(y,m,i+16))?' class="sun"':'';
-      rows+='<tr><td'+ls+'>'+L.d+'</td><td'+ls+'>'+L.ot+'</td><td'+ls+'>'+L.l+'</td><td class="gap"></td><td'+rs+'>'+R.d+'</td><td'+rs+'>'+R.ot+'</td><td'+rs+'>'+R.l+'</td></tr>';}
+      var mk=function(l){return l==='✓'?'<span class="sw-p">✓</span>':l==='✗'?'<span class="sw-a">✗</span>':'';};
+      rows+='<tr><td'+ls+'>'+L.d+'</td><td'+ls+'>'+L.ot+'</td><td'+ls+'>'+mk(L.l)+'</td><td class="gap"></td><td'+rs+'>'+R.d+'</td><td'+rs+'>'+R.ot+'</td><td'+rs+'>'+mk(R.l)+'</td></tr>';}
     var bd=Object.keys(s.bd).sort(function(a,b){return a-b;}).map(function(k){return '<div class="at-bdl">'+s.bd[k]+' × '+k+' = '+(s.bd[k]*k)+' hrs</div>';}).join('');
-    form('<div class="at-wide"><div class="at-mh"><div><div class="us-note" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--accent)">Attendance Swatch</div><h3 style="margin:0">'+esc(w)+'</h3><div class="us-note" style="margin-top:2px">'+MONF[m]+' '+y+'</div></div></div>'
-      +'<table class="at-sw"><thead><tr><th></th><th>OT</th><th>DAY</th><th class="gap"></th><th></th><th>OT</th><th>DAY</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    form('<div class="at-wide"><div class="sw-head"><div class="sw-top"><div class="sw-eye">Attendance swatch</div><button class="at-x" data-at-cancel aria-label="Close">✕</button></div><h3 class="sw-name">'+esc(w)+'</h3><div class="sw-mon"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>'+MONF[m]+' '+y+'</div></div>'
+      +'<table class="at-sw"><thead><tr><th>DATE</th><th>OT</th><th>P / A</th><th class="gap"></th><th>DATE</th><th>OT</th><th>P / A</th></tr></thead><tbody>'+rows+'</tbody></table>'
       +'<div class="at-tot"><div><div class="sp-lab" style="margin:0">Present Days</div><div class="at-big">'+s.present+'</div></div><div style="text-align:right">'+bd+'<div class="at-big" style="color:var(--accent)">TOTAL: '+s.ot+' hrs</div></div></div>'
       +'<div class="us-act"><button class="us-cancel" data-at-cancel>Close</button></div></div>');
   }
