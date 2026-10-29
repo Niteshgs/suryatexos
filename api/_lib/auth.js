@@ -26,7 +26,7 @@ const CATALOG = [
   { id: 'expenses', name: 'Cash Expenses', items: [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
   { id: 'attendance', name: 'Attendance', items: [
-    { id: 'attendance.mark', name: 'Mark daily attendance' }, { id: 'attendance.view', name: 'Register & Profiles (view)' },
+    { id: 'attendance.mark', name: 'Mark daily attendance' }, { id: 'attendance.markToday', name: 'Attendance in-charge (staff): mark TODAY only — no calendar, no mark-all, no staff or bulk tools' }, { id: 'attendance.view', name: 'Register & Profiles (view)' },
     { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' },
     { id: 'attendance.leave', name: 'Leave Request (apply & see who applied)' } ] },
   { id: 'calc', name: 'Calculators', items: [
@@ -53,7 +53,7 @@ const ROUTE_PERMS = {
     'touch.addClient': ['sales.touchmanage'], 'touch.updateClient': ['sales.touchmanage'], 'touch.archiveClient': ['sales.touchmanage'],
   },
   attendance: {
-    'att.getAll': ['attendance.mark', 'attendance.view', 'attendance.edit', 'attendance.staff'], 'att.save': ['attendance.mark'],
+    'att.getAll': ['attendance.mark', 'attendance.markToday', 'attendance.view', 'attendance.edit', 'attendance.staff'], 'att.save': ['attendance.mark', 'attendance.markToday'],
     'att.bulk': ['attendance.edit'], 'att.monthSave': ['attendance.edit'],
     'att.addWorker': ['attendance.staff'], 'att.setStatus': ['attendance.staff'], 'att.rebuild': ['attendance.staff'],
     'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],

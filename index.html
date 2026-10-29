@@ -1180,7 +1180,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v106</span>
+    <span class="app-ver" id="appVer" title="App version">v107</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1567,7 +1567,7 @@ function go(v,fromPop){
   document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('show',x.id==='v-'+(v.indexOf('fg')===0?'fg':v.indexOf('kn')===0?'kn':v));});
   document.querySelectorAll('.bnav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v);});
   document.getElementById('hTitle').textContent=HEAD[v][0];
-  document.getElementById('hSub').textContent=HEAD[v][1];
+  document.getElementById('hSub').textContent=(v==='att'&&can('attendance.markToday')&&!['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can))?'Mark today':HEAD[v][1];
   document.getElementById('appVer').style.display=(v==='home')?'':'none';
   document.getElementById('refreshBtn').style.display=(v==='dash'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
@@ -1607,7 +1607,7 @@ var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleu
 var ME=null, GSI_STATE='';
 var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
-function attAny(){return ['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can);}
+function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
 function salesAny(){return can('sales.touchA')||can('sales.touchB');}
 function canView(v){var k=VIEW_PERM[v];if(k==='@att')return attAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
@@ -3023,15 +3023,17 @@ var AT=(function(){
   function rec(w,ds){return (D&&D.attendance[w+'|'+ds])||{status:'',ot:0,remarks:''};}
   function tabs(){
     var t=[];
-    if(can('attendance.mark'))t.push(['mark','Mark']);
+    if(can('attendance.mark')||can('attendance.markToday'))t.push(['mark','Mark']);
     if(can('attendance.view')||can('attendance.edit')){t.push(['register','Register']);t.push(['profiles','Profiles']);}
     if(can('attendance.staff'))t.push(['staff','Staff']);
     if(can('attendance.leave'))t.push(['leave','Leave']);
     return t;
   }
   function needsData(){return true;}
+  function inCharge(){return can('attendance.markToday')&&!['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can);}
   function open(){
     var t=tabs();if(!t.length){go('home');return;}
+    if(inCharge())S.ds=ymd(new Date());
     if(!t.some(function(x){return x[0]===tab;}))tab=t[0][0];
     if(!D&&needsData()){try{var c=JSON.parse(localStorage.getItem('sx_att')||'null');if(c&&c.d)D=c.d;}catch(e){}overlayOut();}
     shell();
@@ -3072,12 +3074,13 @@ var AT=(function(){
   var ICON={mark:'i-users',register:'i-cal',profiles:'i-note',staff:'i-gear',leave:'i-clock'},LBL={mark:'Attendance',register:'Register',profiles:'Profiles',staff:'Settings',leave:'Leave'};
   function nav(){
     var t=tabs(),n=$('atNav');
-    n.style.gridTemplateColumns='repeat('+t.length+',1fr)';
+    n.style.display=t.length<2?'none':'';n.style.gridTemplateColumns='repeat('+t.length+',1fr)';
     n.innerHTML=t.map(function(x){return '<button class="'+(tab===x[0]?'on':'')+'"'+(tab===x[0]?' aria-current="page"':'')+' data-at-tab="'+x[0]+'"><span><svg class="ic" aria-hidden="true"><use href="#'+ICON[x[0]]+'"/></svg></span>'+LBL[x[0]]+'</button>';}).join('');
   }
   function shell(){nav();$('atView').innerHTML='<div id="atBody"></div>';render();}
   function render(){
     var el=$('atBody');if(!el)return;
+    if(inCharge()&&S.ds!==today())S.ds=today();   // in-charge is always on today, even if the app stayed open past midnight
     if(needsData()&&!D){el.innerHTML='<div class="loading"><div class="spinner"></div>Loading attendance…</div>';return;}
     el.innerHTML='<div class="at-upd" id="atUpd"></div>'+(tab==='mark'?bMark():tab==='register'?bReg():tab==='profiles'?bProf():bStaff());
     updLabel();
@@ -3098,11 +3101,11 @@ var AT=(function(){
     var nm=D.workers.length-c.present-c.absent;
     return '<div class="at-strip" aria-live="polite"><span class="p"><b>'+c.present+'</b> Present</span><span class="a"><b>'+c.absent+'</b> Absent</span><span class="n"><b>'+nm+'</b> Not marked</span><span class="t">of '+D.workers.length+'</span></div>';
   }
-  function allHtml(){var vis=filt(D.workers).filter(function(w){return !rec(w,S.ds).status;}).length;return vis>0?'<button class="at-all" data-at-allp>✓ Mark all present'+(q.trim()?' (shown)':'')+' · '+vis+'</button>':'';}
+  function allHtml(){if(inCharge())return '';var vis=filt(D.workers).filter(function(w){return !rec(w,S.ds).status;}).length;return vis>0?'<button class="at-all" data-at-allp>✓ Mark all present'+(q.trim()?' (shown)':'')+' · '+vis+'</button>':'';}
   function bMark(){
     var p=parts(S.ds),sun=new Date(p.y,p.m,p.d).getDay()===0;
     return '<div class="at-date'+(sun?' sun':'')+'"><div class="at-dl">'+pad(p.d)+' '+MON[p.m]+' '+p.y+(sun?' <span class="at-sunb">SUNDAY</span>':'')+'</div>'
-      +'<div class="at-dc">'+(S.ds!==today()?'<button class="at-today" data-at-today>Today</button>':'')+'<button class="at-nb" data-at-shift="-1" aria-label="Previous day">‹</button><input type="date" id="atDate" class="at-di" aria-label="Attendance date" value="'+S.ds+'"><button class="at-nb" data-at-shift="1" aria-label="Next day">›</button></div></div>'
+      +(inCharge()?'':'<div class="at-dc">'+(S.ds!==today()?'<button class="at-today" data-at-today>Today</button>':'')+'<button class="at-nb" data-at-shift="-1" aria-label="Previous day">‹</button><input type="date" id="atDate" class="at-di" aria-label="Attendance date" value="'+S.ds+'"><button class="at-nb" data-at-shift="1" aria-label="Next day">›</button></div>')+'</div>'
       +'<div id="atStrip">'+stripHtml()+'</div>'
       +'<div id="atSyncBox">'+syncBanner()+'</div>'
       +'<div id="atAllBox">'+allHtml()+'</div>'

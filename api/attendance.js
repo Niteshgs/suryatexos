@@ -30,8 +30,19 @@ module.exports = async (req, res) => {
   if (!A.allow(me, res, need)) return;
   if (!G.enabled()) return res.status(500).json({ ok: false, error: 'Google connection is not set up' });
 
+  // Attendance in-charge (markToday only): today's date, nothing else.
+  const full = ['attendance.mark', 'attendance.view', 'attendance.edit', 'attendance.staff'].some((k) => me.access.includes(k));
+  const inCharge = !full && me.access.includes('attendance.markToday');
+  const today = new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);   // India date
+  if (inCharge && body.fn === 'att.save' && String((body.args || {}).date) !== today)
+    return res.status(403).json({ ok: false, forbidden: true, error: 'You can only mark today\'s attendance' });
+
   try {
-    const data = await E.ROUTES[body.fn](body.args || {}, (me.name || "") + " <" + me.email + "> · web");
+    let data = await E.ROUTES[body.fn](body.args || {}, (me.name || "") + " <" + me.email + "> · web");
+    if (inCharge && body.fn === 'att.getAll' && data && data.attendance) {
+      const keep = {}; Object.keys(data.attendance).forEach((k) => { if (k.slice(-10) === today) keep[k] = data.attendance[k]; });
+      data = Object.assign({}, data, { attendance: keep });
+    }
     return res.status(200).json({ ok: true, data });
   } catch (e) {
     return res.status(200).json({ ok: false, error: e.message });
