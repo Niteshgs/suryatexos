@@ -1173,7 +1173,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v102</span>
+    <span class="app-ver" id="appVer" title="App version">v103</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3103,10 +3103,7 @@ var AT=(function(){
       +(can('attendance.staff')?'<button class="btn-submit" data-at-addstaff>+ Add Staff</button>':'')
       +(can('attendance.edit')?'<button class="at-ghost" data-at-bulk>Bulk Mark</button>':'')+'</div>';
   }
-  function syncBanner(){
-    var n=outMine().filter(function(x){return !inflight[x.ts];}).length;if(!n)return '';
-    return '<div class="at-sync" role="status"><span><b>'+n+'</b> change'+(n===1?'':'s')+' saved on this phone, not synced yet'+(navigator.onLine===false?' (offline)':'')+'</span><button data-at-sync>Sync now</button></div>';
-  }
+  function syncBanner(){return '';}   // no sync box: rows show "Marking…"; failures are shown on the row and by a toast
   function updBanner(){var e=$('atSyncBox');if(e)e.innerHTML=syncBanner();}
   function nmHtml(w){
     var r=rec(w,S.ds),bad=errRow[w+'|'+S.ds],wait=!bad&&isPending(w,S.ds),lbl=r.status==='present'?'Present':r.status==='absent'?'Absent':'Not marked',k=r.status==='present'?'p':r.status==='absent'?'a':'n';
