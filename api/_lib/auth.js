@@ -22,7 +22,7 @@ const CATALOG = [
   { id: 'knitted', name: 'Knitted Production', items: [
     { id: 'knitted.entry', name: 'Entry' }, { id: 'knitted.dash', name: 'Dashboard' }, { id: 'knitted.admin', name: 'Admin (tapes & machine activity)' } ] },
   { id: 'sales', name: 'Sales', items: [
-    { id: 'sales.touch', name: 'Customer Touch Points (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers' } ] },
+    { id: 'sales.touchA', name: 'Touch Points · Class A customers (view & tick)' }, { id: 'sales.touchB', name: 'Touch Points · Class B customers (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers (in the classes they can open)' } ] },
   { id: 'expenses', name: 'Cash Expenses', items: [
     { id: 'expenses.add', name: 'Add expenses' }, { id: 'expenses.view', name: 'View expense list & monthly totals' } ] },
   { id: 'attendance', name: 'Attendance', items: [
@@ -49,7 +49,7 @@ const ROUTE_PERMS = {
     'knitted.renameTape': ['knitted.admin'], 'knitted.activity': ['knitted.admin'],
   },
   sales: {
-    'touch.getAll': ['sales.touch'], 'touch.toggle': ['sales.touch'],
+    'touch.getAll': ['sales.touchA', 'sales.touchB'], 'touch.toggle': ['sales.touchA', 'sales.touchB'],
     'touch.addClient': ['sales.touchmanage'], 'touch.updateClient': ['sales.touchmanage'], 'touch.archiveClient': ['sales.touchmanage'],
   },
   attendance: {
@@ -132,7 +132,10 @@ const yes = (v) => /^(yes|y|true|1|active)$/i.test(String(v == null ? '' : v).tr
 function roleOf(v) { const r = String(v || '').trim().toLowerCase(); return r === 'admin' ? 'Admin' : r === 'partner' ? 'Partner' : 'Staff'; }
 function keysOf(v) {
   const seen = new Set();
-  String(v || '').split(/[\s,;]+/).forEach((k) => { if (ALL_KEYS.includes(k)) seen.add(k); });
+  String(v || '').split(/[\s,;]+/).forEach((k) => {
+    if (k === 'sales.touch') { seen.add('sales.touchA'); seen.add('sales.touchB'); }   // older single permission = both classes
+    else if (ALL_KEYS.includes(k)) seen.add(k);
+  });
   return [...seen];
 }
 const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileAtt', 'tileLeave', 'tileCalc', 'tileUsers'];

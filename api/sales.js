@@ -18,8 +18,14 @@ module.exports = async (req, res) => {
   if (!A.allow(me, res, need)) return;
   if (!G.enabled()) return res.status(500).json({ ok: false, error: 'Google connection is not set up' });
 
+  // Class A and Class B are separate permissions: check the class this call touches.
+  const mayClass = (c) => me.access.includes('sales.touch' + c);
+  const args = body.args || {};
+  if (body.fn !== 'touch.getAll' && !mayClass(String(args.cls))) return res.status(403).json({ ok: false, forbidden: true, error: 'You do not have access to this' });
+
   try {
-    const data = await T.ROUTES[body.fn](body.args || {}, me.name || me.email);
+    let data = await T.ROUTES[body.fn](args, me.name || me.email);
+    if (body.fn === 'touch.getAll') { data = Object.assign({}, data); ['A', 'B'].forEach((c) => { if (!mayClass(c)) delete data[c]; }); }
     return res.status(200).json({ ok: true, data });
   } catch (e) {
     return res.status(200).json({ ok: false, error: e.message });

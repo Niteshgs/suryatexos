@@ -549,12 +549,12 @@ a.app-tile{display:block;text-decoration:none}
 .sp-tabs{display:flex;gap:8px;margin-bottom:14px}
 .sp-tab{padding:8px 20px;border-radius:20px;border:1px solid var(--border);font:inherit;font-size:13px;font-weight:700;color:var(--text-muted);background:transparent;cursor:pointer;min-height:38px}
 .sp-tab.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.sp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.sp-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 6px;text-align:center}
+.sp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.sp-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 2px;text-align:center;min-width:0}
 .sp-stat.ok{border-color:color-mix(in srgb,var(--success) 40%,transparent);background:color-mix(in srgb,var(--success) 12%,transparent)}
-.sp-num{font-size:24px;font-weight:800;color:var(--accent);line-height:1.1}
+.sp-num{font-size:18px;font-weight:800;color:var(--accent);line-height:1.1}
 .sp-stat.ok .sp-num{color:var(--success)}
-.sp-lab{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.6px;text-transform:uppercase;margin-top:4px}
+.sp-lab{font-size:9px;font-weight:700;color:var(--text-muted);letter-spacing:.2px;text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .sp-find{position:relative;margin-bottom:14px}
 .sp-find .stock-search{padding-right:44px;min-height:44px}
@@ -595,7 +595,6 @@ a.app-tile{display:block;text-decoration:none}
 .sp-a svg{width:16px;height:16px}
 .sp-nophone,.sp-notes{font-size:12px;color:var(--text-muted);margin-top:9px;font-style:italic}
 .sp-empty{padding:26px 16px;text-align:center;font-size:13px;color:var(--text-muted)}
-@media(max-width:480px){.sp-stats{grid-template-columns:repeat(2,1fr)}}
 
 /* ATTENDANCE */
 #atView{max-width:900px}
@@ -1031,9 +1030,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
   #exView{max-width:760px}
   #exView .ex-card{padding:22px 24px}
   .sp-head h2{font-size:26px}
-  .sp-stats{gap:14px}
-  .sp-stat{padding:16px 8px}
-  .sp-num{font-size:30px}
+  .sp-stats{gap:10px}
+  .sp-stat{padding:8px 8px}
+  .sp-num{font-size:22px}
   .sp-t{font-size:12px}
   .app-tile{padding:30px 16px 26px}
   .app-grid{gap:22px}
@@ -1169,7 +1168,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v100</span>
+    <span class="app-ver" id="appVer" title="App version">v101</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1594,11 +1593,12 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'sales.touch',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
-function canView(v){var k=VIEW_PERM[v];if(k==='@att')return attAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
+function salesAny(){return can('sales.touchA')||can('sales.touchB');}
+function canView(v){var k=VIEW_PERM[v];if(k==='@att')return attAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
 function authPost(body){return fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
 function clearPrivate(){['sx_cache','sx_fg','sx_kn','sx_sales','sx_exp','sx_att','sx_me','sx_me_email','sx_user_name'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}
 function showSignIn(msg){
@@ -1650,8 +1650,8 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',can('sales.touch'));show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
-  show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||can('sales.touch')||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
+  show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
   fit(document.getElementById('yarnNav'),{dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc'});
@@ -2650,11 +2650,13 @@ function openKN(v,fromPop){v=v||'knentry';if(!canView(v))v=can('knitted.entry')?
 var SP=(function(){
   var TPN=['Order Follow-up','Payment / Dispatch / Quotation','New Pattern / Catalog','Relationship Call / Visit','Sample / Quality Feedback'];
   var SK={'Completed':'completed','On Track':'ontrack','Not Started':'notstarted'};
-  var D=null,cls='A',filt='all',q='',lastLoad=0,loading=false,form=null,busy=false;
+  var D=null,cls='',filt='all',q='',lastLoad=0,loading=false,form=null,busy=false;
   function $(id){return document.getElementById(id);}
   function call(fn,args){return fetch('/api/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function canManage(){return can('sales.touchmanage');}
+  function myClasses(){return ['A','B'].filter(function(c){return can('sales.touch'+c)&&(!D||D[c]);});}
+  function fixCls(){var m=myClasses();if(m.indexOf(cls)<0)cls=m[0]||'';return m;}
   function open(){
     if(!D){try{var c=JSON.parse(localStorage.getItem('sx_sales')||'null');if(c&&c.d)D=c.d;}catch(e){}}
     if(D)render();
@@ -2685,16 +2687,16 @@ var SP=(function(){
     return p.length?' · '+p.join(' · '):'';
   }
   function render(){
-    if(!D)return;var data=D[cls],rows=data.rows||[],cnt={completed:0,ontrack:0,notstarted:0};
+    if(!D)return;var mine=fixCls();if(!cls){$('spView').innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>No customer list is available for your access.</div>';return;}var data=D[cls],rows=data.rows||[],cnt={completed:0,ontrack:0,notstarted:0};
     rows.forEach(function(r){cnt[SK[r.status]||'notstarted']++;});
     var h='<div class="sp-head"><div><h2>'+esc(data.activeMonth||'This month')+'</h2><p>Monthly customer touch point cycle</p></div>'
       +(canManage()?'<button class="us-add" data-sp-add>+ Add client</button>':'')+'</div>'
-      +'<div class="sp-tabs"><button class="sp-tab'+(cls==='A'?' on':'')+'" data-sp-cls="A">Class A</button><button class="sp-tab'+(cls==='B'?' on':'')+'" data-sp-cls="B">Class B</button></div>'
-      +'<div class="sp-find stock-search-wrap"><span class="stock-search-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></span><input type="search" class="stock-search" id="spSearch" placeholder="Search customer, phone or state…" aria-label="Search customers" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" value="'+esc(q)+'"><button type="button" class="sp-clear" id="spClear" data-sp-clearq aria-label="Clear search"'+(q?'':' hidden')+'><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>'
+      +(mine.length>1?'<div class="sp-tabs">'+mine.map(function(c){return '<button class="sp-tab'+(cls===c?' on':'')+'" data-sp-cls="'+c+'">Class '+c+'</button>';}).join('')+'</div>':'')
       +'<div class="sp-stats"><div class="sp-stat"><div class="sp-num">'+rows.length+'</div><div class="sp-lab">Customers</div></div>'
       +'<div class="sp-stat ok"><div class="sp-num">'+cnt.completed+'</div><div class="sp-lab">Completed</div></div>'
       +'<div class="sp-stat"><div class="sp-num">'+cnt.ontrack+'</div><div class="sp-lab">On Track</div></div>'
       +'<div class="sp-stat"><div class="sp-num">'+cnt.notstarted+'</div><div class="sp-lab">Not Started</div></div></div>'
+      +'<div class="sp-find stock-search-wrap"><span class="stock-search-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></span><input type="search" class="stock-search" id="spSearch" placeholder="Search customer, phone or state…" aria-label="Search customers" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" value="'+esc(q)+'"><button type="button" class="sp-clear" id="spClear" data-sp-clearq aria-label="Clear search"'+(q?'':' hidden')+'><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>'
       +'<div class="sp-chips">'+[['all','All'],['completed','Completed'],['ontrack','On Track'],['notstarted','Not Started']].map(function(f){return '<button class="sp-chip'+(filt===f[0]?' on':'')+'" data-sp-f="'+f[0]+'">'+f[1]+'</button>';}).join('')+'</div>'
       +'<div class="sp-list" id="spListBox">'+listHtml()+'</div>';
     $('spView').innerHTML=h;
@@ -2712,7 +2714,7 @@ var SP=(function(){
     h+='<div class="sp-lh"><span>Class '+cls+' customers</span><span>'+(narrowed?shown.length+' of '+rows.length:rows.length+' customer'+(rows.length===1?'':'s'))+'</span></div>';
     if(!shown.length){
       if(s){
-        var oc=cls==='A'?'B':'A',on=((D[oc]&&D[oc].rows)||[]).filter(function(r){return hit(r,s);}).length;
+        var oc=cls==='A'?'B':'A',on=myClasses().indexOf(oc)<0?0:((D[oc]&&D[oc].rows)||[]).filter(function(r){return hit(r,s);}).length;
         h+='<div class="sp-hit"><div>No Class '+cls+' customers match &ldquo;'+esc(q.trim())+'&rdquo;.</div>'+(on?'<button class="sp-chip on" data-sp-cls="'+oc+'">Show '+on+' in Class '+oc+'</button>':'')+'</div>';
       }else h+='<div class="sp-empty">'+(rows.length?'No customers match this filter yet.':'No customers in this class yet.')+'</div>';
     }
@@ -2755,7 +2757,7 @@ var SP=(function(){
     }else{
       var isNew=f.mode==='add',vl=f.cls==='B'?'Average monthly order value (Rs)':'Monthly order value (Rs)';
       h='<h3>'+(isNew?'Add client':'Edit '+esc(f.orig))+'</h3>'
-       +(isNew?'<div class="us-f"><label class="us-l">Add to</label><div class="us-seg" style="grid-template-columns:repeat(2,1fr)"><button type="button" data-sp-fcls="A" class="'+(f.cls==='A'?'on':'')+'">Class A</button><button type="button" data-sp-fcls="B" class="'+(f.cls==='B'?'on':'')+'">Class B</button></div></div>':'')
+       +(isNew&&myClasses().length>1?'<div class="us-f"><label class="us-l">Add to</label><div class="us-seg" style="grid-template-columns:repeat(2,1fr)"><button type="button" data-sp-fcls="A" class="'+(f.cls==='A'?'on':'')+'">Class A</button><button type="button" data-sp-fcls="B" class="'+(f.cls==='B'?'on':'')+'">Class B</button></div></div>':'')
        +'<div class="us-f"><label class="us-l" for="spName">Customer / Brand *</label><input type="text" id="spName" autocomplete="off" placeholder="e.g. Restwell Mattress Co." value="'+esc(f.name)+'"></div>'
        +'<div class="us-f"><label class="us-l" for="spPhone">Phone</label><input type="tel" id="spPhone" autocomplete="off" placeholder="e.g. 98765 43210" value="'+esc(f.phone)+'"></div>'
        +'<div class="us-f"><label class="us-l" for="spState">State</label><input type="text" id="spState" autocomplete="off" placeholder="e.g. Tamil Nadu" value="'+esc(f.state)+'"></div>'
@@ -2808,7 +2810,7 @@ var SP=(function(){
   });
   return {open:open,load:load,loaded:function(){return !!D;},since:function(){return lastLoad;}};
 })();
-function openSales(fromPop){if(!can('sales.touch')){go('home');return;}go('sales',fromPop);SP.open();}
+function openSales(fromPop){if(!salesAny()){go('home');return;}go('sales',fromPop);SP.open();}
 
 /* ══ CASH EXPENSES (same Google Sheet as the team's Cash Expenses app) ══ */
 var EX=(function(){
