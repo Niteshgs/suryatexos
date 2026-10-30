@@ -1,11 +1,11 @@
-// Roles Clarity documents (admin only). Stored on a "Roles" tab of the Users sheet, created on first use.
+// Roles Clarity documents (admin only). Stored on the "Roles" tab of the HR- Role Clarity Documents sheet.
 // A: id · B: role · C: status (Existing/Upcoming) · D: department · E: reports to · F: held by · G: purpose
 // H: responsibilities · I: decides alone · J: escalates to · K: measures (KPIs) · L: notes · M: updated · N: updated by
 const crypto = require('crypto');
 const G = require('./google');
 
-// Lives in the backend Users sheet by default; set ROLES_SHEET_ID to keep it in a separate Google Sheet instead.
-const USERS_ID = () => process.env.ROLES_SHEET_ID || process.env.USERS_SHEET_ID || '1S8RRCmLfPbzOh8j9QxHWyV3wUy0ip1PF6SMd8V6uAdo';
+// Lives in its own Google Sheet, "HR- Role Clarity Documents" (shared with the app's service account as Editor).
+const USERS_ID = () => process.env.ROLES_SHEET_ID || '1w_cKODu0yoibUkiOV-NPnyR5AzqXllpu8xm8MnJyHYQ';   // "HR- Role Clarity Documents"
 const TAB = 'Roles';
 const HEAD = ['ID', 'Role', 'Status', 'Department', 'Reports to', 'Held by', 'Purpose', 'Responsibilities', 'Decides alone', 'Escalates to', 'Measures', 'Notes', 'Updated', 'Updated by'];
 const FIELDS = ['role', 'status', 'dept', 'reports', 'holder', 'purpose', 'duties', 'decides', 'escalate', 'kpis', 'notes'];
@@ -25,7 +25,11 @@ async function read() {
   try {
     const [rows] = await G.batchGet(USERS_ID(), [TAB + '!A2:N500']);
     return (rows || []).map(toObj).filter((x) => x.id && x.role);
-  } catch (e) { return []; }                                   // tab not created yet
+  } catch (e) {
+    if (/parse range/i.test(e.message)) return [];               // tab not created yet
+    if (/permission|403|not found|404/i.test(e.message)) throw new Error('The app cannot open the Role Clarity sheet. Share it with the app\'s service account as Editor.');
+    throw e;
+  }
 }
 
 const ROUTES = {
