@@ -29,7 +29,23 @@
   --accent:#86560F;--accent-strong:#86560F;--accent-soft:rgba(134,86,15,0.1);--on:#FFFFFF;--on-danger:#FFFFFF;--on-warn:#FFFFFF;
   --warn:#8A5F00;--warn-soft:rgba(138,95,0,0.1);--info:#2F5FB8;--purple:#7b3fc8;--purple-soft:rgba(123,63,200,0.1);
 }
+.navy{
+  --kn-field:#0F1A2E;
+  --bg:#0B1424;--surface:#121E33;--surface2:#1A2A45;--border:#26395A;--text:#EAF0FA;--text-muted:#93A4C0;--text-dim:#C9D6EA;
+  --accent:#5AA9FF;--accent-strong:#5AA9FF;--accent-soft:rgba(90,169,255,0.14);--on:#06182E;
+  --success:#4CD08F;--success-soft:rgba(76,208,143,0.14);--danger:#FF7A7A;--danger-soft:rgba(255,122,122,0.14);
+  --warn:#F2C14E;--warn-soft:rgba(242,193,78,0.14);--info:#52D0D6;
+}
+.navy.light{
+  --kn-field:#EAF0F8;
+  --bg:#F2F5FA;--surface:#FFFFFF;--surface2:#E6ECF5;--border:#D2DBE8;--text:#0F1B2E;--text-muted:#54647C;--text-dim:#2E3F5A;
+  --accent:#1456B8;--accent-strong:#1456B8;--accent-soft:rgba(20,86,184,0.1);--on:#FFFFFF;
+  --success:#17754A;--success-soft:rgba(23,117,74,0.1);--danger:#BA3030;--danger-soft:rgba(186,48,48,0.1);
+  --warn:#8A5A00;--warn-soft:rgba(138,90,0,0.1);--info:#0B6F82;
+}
 #v-entry,#v-proc{--text-dim:#A09A90}
+.navy #v-entry,.navy #v-proc{--text-dim:#93A4C0}
+.navy.light #v-entry,.navy.light #v-proc{--text-dim:#54647C}
 .light #v-entry,.light #v-proc{--text-dim:#6B645A}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;transition:background .2s,color .2s;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
@@ -462,6 +478,24 @@ a.app-tile{display:block;text-decoration:none}
 #homeGridMore.as-list .app-tile::after{content:"\203A";grid-column:3;grid-row:1/3;font-size:26px;color:var(--text-muted)}
 .home-tg{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .home-tg .ic{width:22px;height:22px}
+.prof-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:inherit;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.prof-ov{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.35);display:none}
+.prof-ov.open{display:block}
+.prof-card{position:absolute;top:70px;right:12px;width:min(340px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 12px 36px rgba(0,0,0,.35)}
+.pf-who{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.pf-av{width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--on);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.pf-nm{font-size:16px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}.pf-em{font-size:12px;color:var(--text-muted);overflow-wrap:anywhere;margin-top:2px}
+.pf-role{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.pf-h{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px}
+.pf-th{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 12px;margin-bottom:8px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.pf-th[aria-checked=true]{border-color:var(--accent);background:var(--accent-soft)}
+.pf-sw{display:flex;flex:none;border-radius:8px;overflow:hidden;border:1px solid var(--border)}.pf-sw i{width:16px;height:30px;display:block}
+.pf-tn{font-weight:700;font-size:14px}.pf-ts{font-size:12px;color:var(--text-muted)}
+.pf-ck{margin-left:auto;color:var(--accent);font-weight:800;font-size:16px;visibility:hidden}.pf-th[aria-checked=true] .pf-ck{visibility:visible}
+.pf-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pf-seg button{min-height:44px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--text-muted);font:inherit;font-weight:700;cursor:pointer}
+.pf-seg button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.pf-out{width:100%;min-height:46px;margin-top:16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
 #homeGrid.as-list{display:flex;flex-direction:column;gap:10px;grid-template-columns:none}
 #homeGrid.as-list .app-tile{display:grid;grid-template-columns:44px 1fr auto;grid-template-rows:auto auto;column-gap:14px;row-gap:2px;align-items:center;align-content:center;text-align:left;padding:12px 16px;min-height:68px;width:100%}
 #homeGrid.as-list .app-ico{grid-column:1;grid-row:1/3}
@@ -1181,7 +1215,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v109</span>
+    <span class="app-ver" id="appVer" title="App version">v110</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1202,7 +1236,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <!-- HOME -->
 <div class="view" id="v-home">
-  <div class="home-bar"><button type="button" class="home-tg" id="homeCustBtn" style="display:none" onclick="toggleCust()" aria-label="Choose which apps to show on Home" title="Customize Home" aria-expanded="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button></div>
+  <div class="home-bar"><button type="button" class="home-tg" id="homeCustBtn" style="display:none" onclick="toggleCust()" aria-label="Choose which apps to show on Home" title="Customize Home" aria-expanded="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button><button type="button" class="prof-btn" id="profBtn" onclick="openProfile()" aria-label="Your profile and theme" aria-haspopup="dialog" title="Profile &amp; theme">?</button></div>
   <div class="app-grid" id="homeGrid">
     <button class="app-tile" id="tileYarn" onclick="openYarn()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
@@ -1249,6 +1283,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
   <details class="home-more" id="homeMore" style="display:none"><summary id="homeMoreSum">Put away</summary><div class="app-grid" id="homeGridMore"></div></details>
   <div class="no-acc" id="noAcc" style="display:none">You're signed in, but no functions are switched on for you yet.<br>Please ask the admin to give you access.</div>
   <div class="who" id="whoBar"></div>
+  <div class="prof-ov" id="profOv" onclick="if(event.target===this)closeProfile()"><div class="prof-card" role="dialog" aria-modal="true" aria-label="Profile and theme" id="profCard"></div></div>
   <div style="text-align:center"><button class="install-btn" id="installBtn" onclick="doInstall()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Install app</button></div>
   <div class="ios-hint" id="iosHint">To install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b></div>
 </div>
@@ -1595,9 +1630,25 @@ window.addEventListener('popstate',function(e){
 });
 var ICON_OK='<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>',ICON_RE='<svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>',ICON_CLOCK='<svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>';
 var ICON_SUN='<svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>',ICON_MOON='<svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg>';
-function setBar(l){var m=document.getElementById('themeColor');if(m)m.setAttribute('content',l?'#FFFFFF':'#1C1B19');}
-function toggleTheme(){var l=document.body.classList.toggle('light');setBar(l);document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}}
-try{if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');setBar(true);document.getElementById('themeBtn').innerHTML=ICON_SUN;}}catch(e){}
+function barColor(){var l=document.body.classList.contains('light'),n=document.body.classList.contains('navy');return l?'#FFFFFF':(n?'#121E33':'#1C1B19');}
+function setBar(l){var m=document.getElementById('themeColor');if(m)m.setAttribute('content',barColor());}
+var PAL={brass:{n:'Brass & Graphite',s:'Warm and classic',d:['#121110','#1C1B19','#D6A04A'],l:['#F6F3EE','#FFFFFF','#86560F']},navy:{n:'Midnight Navy',s:'Cool, calm and focused',d:['#0B1424','#121E33','#5AA9FF'],l:['#F2F5FA','#FFFFFF','#1456B8']}};
+function curPal(){return document.body.classList.contains('navy')?'navy':'brass';}
+function setPalette(p){document.body.classList.toggle('navy',p==='navy');setBar();try{localStorage.setItem('palette',p);}catch(e){}if(document.getElementById('profOv').classList.contains('open'))drawProfile();}
+function setMode(l){document.body.classList.toggle('light',l);setBar();document.getElementById('themeBtn').innerHTML=l?ICON_SUN:ICON_MOON;try{localStorage.setItem('theme',l?'light':'dark');}catch(e){}if(document.getElementById('profOv').classList.contains('open'))drawProfile();}
+function drawProfile(){
+  var m=ME||{},nm=m.name||m.email||'You',l=document.body.classList.contains('light'),cur=curPal();
+  var th=['brass','navy'].map(function(k){var c=PAL[k][l?'l':'d'];return '<button type="button" class="pf-th" role="radio" aria-checked="'+(cur===k)+'" onclick="setPalette(\''+k+'\')"><span class="pf-sw" aria-hidden="true"><i style="background:'+c[0]+'"></i><i style="background:'+c[1]+'"></i><i style="background:'+c[2]+'"></i></span><span><div class="pf-tn">'+PAL[k].n+'</div><div class="pf-ts">'+PAL[k].s+'</div></span><span class="pf-ck" aria-hidden="true">✓</span></button>';}).join('');
+  document.getElementById('profCard').innerHTML='<div class="pf-who"><div class="pf-av" aria-hidden="true">'+esc(nm.charAt(0).toUpperCase())+'</div><div><div class="pf-nm">'+esc(nm)+'</div><div class="pf-em">'+esc(m.email||'')+'</div><span class="pf-role">'+esc(m.role||'')+'</span></div></div>'
+    +'<div class="pf-h" id="pfThH">Theme</div><div role="radiogroup" aria-labelledby="pfThH">'+th+'</div>'
+    +'<div class="pf-h">Appearance</div><div class="pf-seg"><button type="button" aria-pressed="'+(!l)+'" onclick="setMode(false)">Dark</button><button type="button" aria-pressed="'+l+'" onclick="setMode(true)">Light</button></div>'
+    +'<button type="button" class="pf-out" onclick="signOut()">Sign out</button>';
+}
+function openProfile(){drawProfile();document.getElementById('profOv').classList.add('open');var f=document.querySelector('#profCard .pf-th[aria-checked=true]');if(f)f.focus();}
+function closeProfile(){document.getElementById('profOv').classList.remove('open');var b=document.getElementById('profBtn');if(b)b.focus();}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('profOv').classList.contains('open'))closeProfile();});
+function toggleTheme(){setMode(!document.body.classList.contains('light'));}
+try{if(localStorage.getItem('palette')==='navy')document.body.classList.add('navy');if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').innerHTML=ICON_SUN;}setBar();}catch(e){}
 function showToast(msg,type){var t=document.getElementById('toast');t.onclick=null;t.textContent=msg;t.className='toast show '+(type||'');if(type){clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},3000);}}
 
 function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast');t.innerHTML='';var s=document.createElement('span');s.textContent=msg;var b=document.createElement('button');b.type='button';b.className='toast-act';b.textContent=label;
@@ -1673,6 +1724,7 @@ function applyAccess(){
   kt.querySelector('[data-kt="knentry"]').style.display=can('knitted.entry')?'':'none';
   kt.querySelector('[data-kt="kn"]').style.display=can('knitted.dash')?'':'none';
   document.getElementById('p_name').value=ME.name;
+  var pb=document.getElementById('profBtn');if(pb)pb.textContent=String(ME.name||ME.email||'?').charAt(0).toUpperCase();
   document.getElementById('whoBar').innerHTML='<span>Signed in as <b>'+esc(ME.name)+'</b> · '+esc(ME.role)+'</span><button class="kn-link" onclick="signOut()">Sign out</button>';
 }
 function signOut(){
