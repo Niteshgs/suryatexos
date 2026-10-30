@@ -571,6 +571,24 @@ a.app-tile{display:block;text-decoration:none}
 .us-grp{border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;margin-bottom:10px}
 .us-grp .us-gh{font-weight:800}
 .us-grp .us-sub{padding-left:28px;font-size:14px}
+.dc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.dc-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 4px;text-align:center}
+.dc-stat b{display:block;font-size:20px;font-weight:800}.dc-stat span{font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.dc-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.dc-tabs button{background:var(--bg);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius);padding:10px 4px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.dc-tabs button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.dc-q{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;font:inherit;font-size:15px;color:var(--text);margin-bottom:12px}
+.dc-q:focus{outline:none;border-color:var(--accent)}
+.dc-st{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);white-space:nowrap}
+.dc-st.up{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.dc-sec{margin:0 0 14px}.dc-sec h4{font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.dc-sec p{font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.dc-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 16px}
+.dc-facts div{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;min-width:0}
+.dc-facts span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}.dc-facts b{font-size:14px;overflow-wrap:anywhere}
+.dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
+.us-f select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font:inherit;font-size:15px;color:var(--text)}
+.us-f textarea{min-height:84px;resize:vertical;font:inherit}
 .us-note{font-size:13px;color:var(--text-muted);line-height:1.45;padding:10px 12px;border:1px dashed var(--border);border-radius:var(--radius)}
 .us-err{color:var(--danger);font-size:13px;min-height:18px;margin:6px 0 10px}
 .us-act{display:flex;gap:10px}
@@ -1217,7 +1235,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v111</span>
+    <span class="app-ver" id="appVer" title="App version">v112</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1274,6 +1292,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg></div>
       <div class="app-name">Calculators</div>
       <div class="app-sub">Gross Value · Payment</div>
+    </button>
+    <button class="app-tile" id="tileDocs" onclick="openDocs()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></div>
+      <div class="app-name">Documents</div>
+      <div class="app-sub">Roles Clarity</div>
     </button>
     <button class="app-tile" id="tileUsers" onclick="openUsers()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
@@ -1353,6 +1376,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 <div class="view" id="v-calc">
   <div class="sp-wrap" id="clView"></div>
 </div>
+
+<!-- DOCUMENTS (admin) -->
+<div class="view" id="v-docs">
+  <div class="us-wrap" id="dcView"><div class="loading"><div class="spinner"></div>Loading roles…</div></div>
+</div>
+<div class="us-modal" id="dcModal"><div class="us-in" id="dcForm" role="dialog"></div></div>
 
 <!-- TEAM ACCESS (admin) -->
 <div class="view" id="v-users">
@@ -1574,7 +1603,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1591,6 +1620,7 @@ function openView(v,fromPop){
   else if(v.indexOf('fg')===0)openFG(v,fromPop);
   else if(v.indexOf('kn')===0)openKN(v,fromPop);
   else if(v==='users')openUsers(fromPop);
+  else if(v==='docs')openDocs(fromPop);
   else if(v==='sales')openSales(fromPop);
   else if(v==='exp')openExp(fromPop);
   else if(v==='att')openAtt(fromPop);
@@ -1611,10 +1641,10 @@ function go(v,fromPop){
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
   var isKN=v.indexOf('kn')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
+  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
   document.getElementById('atNav').style.display=v==='att'?'':'none';
-  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&v!=='leave'&&!isKN);
+  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&v!=='leave'&&!isKN);
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
@@ -1659,7 +1689,7 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
@@ -1716,7 +1746,7 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileUsers',can('@admin'));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
@@ -1755,6 +1785,7 @@ function bootAuth(){
 
 /* ══ TEAM ACCESS (admin only) ══ */
 var US={list:[],cat:[],roles:['Admin','Partner','Staff'],edit:null,busy:false};
+function openDocs(fromPop){if(!can('@admin')){go('home');return;}go('docs',fromPop);if(current==='docs')DC.open();}
 function openUsers(fromPop){go('users',fromPop);if(current==='users')usersLoad();}
 function usersLoad(){
   authPost({action:'users'}).then(function(j){
@@ -3042,6 +3073,81 @@ var CL=(function(){
 })();
 function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fromPop);CL.open();}
 
+/* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
+var DC=(function(){
+  var rows=null,filter='all',qs='',busy=false;
+  function $(i){return document.getElementById(i);}
+  function call(fn,args){return fetch('/api/docs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
+  function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
+  function load(){return api('roles.list').then(function(d){rows=d.roles;draw();}).catch(function(e){if(!rows)$('dcView').innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';});}
+  function hit(r){if(filter!=='all'&&r.status.toLowerCase()!==filter)return false;if(!qs)return true;return [r.role,r.dept,r.reports,r.holder,r.purpose,r.duties].join(' ').toLowerCase().indexOf(qs)>=0;}
+  function chip(r){return '<span class="dc-st'+(r.status==='Upcoming'?' up':'')+'">'+esc(r.status)+'</span>';}
+  function list(){
+    var l=rows.filter(hit);if(!l.length)return '<div class="empty-state">'+(rows.length?'No roles match.':'No roles yet. Tap “Add role” to write the first one.')+'</div>';
+    return l.map(function(r){return '<button type="button" class="us-card" data-dc-open="'+esc(r.id)+'"><div class="us-top"><b>'+esc(r.role)+'</b>'+chip(r)+'</div><div class="us-mail">'+esc([r.dept,r.reports?'Reports to '+r.reports:''].filter(Boolean).join(' · ')||'—')+'</div>'+(r.holder?'<div class="us-meta">'+esc(r.holder)+'</div>':'')+'</button>';}).join('');
+  }
+  function draw(){
+    if(!rows)return;var ex=rows.filter(function(r){return r.status==='Existing';}).length,up=rows.length-ex,box=$('dcView');
+    var keep=document.activeElement&&document.activeElement.id==='dcQ';
+    box.innerHTML='<div class="us-bar"><div><h2>Roles Clarity</h2><p>Who does what — existing and upcoming roles</p></div><button type="button" class="us-add" data-dc-add="1">+ Add role</button></div>'
+      +'<div class="dc-stats"><div class="dc-stat"><b>'+rows.length+'</b><span>Total</span></div><div class="dc-stat"><b>'+ex+'</b><span>Existing</span></div><div class="dc-stat"><b>'+up+'</b><span>Upcoming</span></div></div>'
+      +'<div class="dc-tabs" role="tablist">'+[['all','All'],['existing','Existing'],['upcoming','Upcoming']].map(function(t){return '<button type="button" role="tab" aria-selected="'+(filter===t[0])+'" class="'+(filter===t[0]?'on':'')+'" data-dc-f="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div>'
+      +'<input class="dc-q" id="dcQ" type="search" placeholder="Search roles, people, departments" aria-label="Search roles" value="'+esc(qs)+'" autocomplete="off"><div id="dcList">'+list()+'</div>';
+    if(keep){var q=$('dcQ');q.focus();q.setSelectionRange(q.value.length,q.value.length);}
+  }
+  function byId(id){return rows.filter(function(r){return r.id===id;})[0];}
+  function sec(t,v){return v?'<div class="dc-sec"><h4>'+t+'</h4><p>'+esc(v)+'</p></div>':'';}
+  function view(id){
+    var r=byId(id);if(!r)return;
+    $('dcForm').innerHTML='<div class="us-top" style="margin-bottom:12px"><h3 style="margin:0">'+esc(r.role)+'</h3>'+chip(r)+'</div>'
+      +'<div class="dc-facts"><div><span>Department</span><b>'+esc(r.dept||'—')+'</b></div><div><span>Reports to</span><b>'+esc(r.reports||'—')+'</b></div><div style="grid-column:1/-1"><span>'+(r.status==='Upcoming'?'Planned for':'Held by')+'</span><b>'+esc(r.holder||'—')+'</b></div></div>'
+      +sec('Purpose',r.purpose)+sec('Responsibilities',r.duties)+sec('Can decide alone',r.decides)+sec('Escalates to / checks with',r.escalate)+sec('How success is measured',r.kpis)+sec('Notes',r.notes)
+      +(r.updated?'<div class="us-meta">Updated '+esc(r.updated)+(r.by?' by '+esc(r.by):'')+'</div>':'')
+      +'<div class="us-act" style="margin-top:14px"><button type="button" class="us-cancel" data-dc-close="1">Close</button><button type="button" class="btn-submit" data-dc-edit="'+esc(id)+'">Edit</button></div>'
+      +'<div style="text-align:center"><button type="button" class="dc-del" data-dc-del="'+esc(id)+'">Delete role</button></div>';
+    $('dcModal').classList.add('open');
+  }
+  function fld(k,l,v,ta,ph){return '<div class="us-f"><label class="us-l" for="dc_'+k+'">'+l+'</label>'+(ta?'<textarea id="dc_'+k+'" maxlength="4000" placeholder="'+esc(ph||'')+'">'+esc(v||'')+'</textarea>':'<input type="text" id="dc_'+k+'" maxlength="120" value="'+esc(v||'')+'" placeholder="'+esc(ph||'')+'">')+'</div>';}
+  function form(id){
+    var r=id?byId(id):{status:'Existing'};if(!r)return;
+    $('dcForm').innerHTML='<h3>'+(id?'Edit role':'Add role')+'</h3>'
+      +fld('role','Role name',r.role,0,'e.g. Dispatch Executive')
+      +'<div class="us-f"><label class="us-l" for="dc_status">Status</label><select id="dc_status"><option'+(r.status==='Existing'?' selected':'')+'>Existing</option><option'+(r.status==='Upcoming'?' selected':'')+'>Upcoming</option></select></div>'
+      +fld('dept','Department',r.dept,0,'e.g. Dispatch')+fld('reports','Reports to',r.reports,0,'e.g. Partner')
+      +fld('holder',r.status==='Upcoming'?'Planned for':'Held by',r.holder,0,'Name(s), or “to be hired”')
+      +fld('purpose','Purpose — why this role exists',r.purpose,1)+fld('duties','Responsibilities',r.duties,1,'One per line')
+      +fld('decides','Can decide alone',r.decides,1)+fld('escalate','Escalates to / checks with',r.escalate,1)+fld('kpis','How success is measured',r.kpis,1)+fld('notes','Notes',r.notes,1)
+      +'<div class="us-err" id="dcErr" role="alert"></div><div class="us-act"><button type="button" class="us-cancel" data-dc-close="1">Cancel</button><button type="button" class="btn-submit" id="dcSave" data-dc-save="'+esc(id||'')+'">Save</button></div>';
+    $('dcModal').classList.add('open');setTimeout(function(){var f=$('dc_role');if(f&&!id)f.focus();},50);
+  }
+  function save(id){
+    if(busy)return;var a={id:id||undefined},ks=['role','status','dept','reports','holder','purpose','duties','decides','escalate','kpis','notes'];
+    ks.forEach(function(k){a[k]=$('dc_'+k).value;});
+    if(!a.role.trim()){$('dcErr').textContent='Give the role a name.';return;}
+    busy=true;var b=$('dcSave');b.disabled=true;b.textContent='Saving…';$('dcErr').textContent='';
+    api('roles.save',a).then(function(){busy=false;close();showToast('Role saved','success');return load();}).catch(function(e){busy=false;b.disabled=false;b.textContent='Save';$('dcErr').textContent=e.message;});
+  }
+  function del(id){
+    var r=byId(id);if(!r||!confirm('Delete the role "'+r.role+'"? This cannot be undone.'))return;
+    api('roles.remove',{id:id}).then(function(){close();showToast('Role deleted','success');return load();}).catch(function(e){showToast(e.message,'danger');});
+  }
+  function close(){$('dcModal').classList.remove('open');}
+  document.addEventListener('click',function(e){
+    var t=e.target;if(!t.closest)return;
+    if(t.id==='dcModal'){close();return;}
+    var x;
+    if((x=t.closest('[data-dc-open]')))return view(x.getAttribute('data-dc-open'));
+    if((x=t.closest('[data-dc-f]'))){filter=x.getAttribute('data-dc-f');return draw();}
+    if(t.closest('[data-dc-add]'))return form(null);
+    if((x=t.closest('[data-dc-edit]')))return form(x.getAttribute('data-dc-edit'));
+    if((x=t.closest('[data-dc-save]')))return save(x.getAttribute('data-dc-save')||null);
+    if((x=t.closest('[data-dc-del]')))return del(x.getAttribute('data-dc-del'));
+    if(t.closest('[data-dc-close]'))return close();
+  });
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='dcQ'){qs=e.target.value.trim().toLowerCase();$('dcList').innerHTML=list();}});
+  return {open:function(){close();if(!rows)$('dcView').innerHTML='<div class="loading"><div class="spinner"></div>Loading roles…</div>';load();}};
+})();
+
 /* ══ ATTENDANCE (same Google Sheet as the team's Staff Attendance app) ══ */
 var AT=(function(){
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3623,7 +3729,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileCalc','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileCalc','tileDocs','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
