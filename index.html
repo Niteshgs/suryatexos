@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Suryatex OS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" id="themeColor" content="#1C1B19">
+<meta name="theme-color" id="themeColor" content="#FFFFFF">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
@@ -1235,7 +1235,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v115</span>
+    <span class="app-ver" id="appVer" title="App version">v116</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1680,7 +1680,8 @@ function openProfile(){drawProfile();document.getElementById('profOv').classList
 function closeProfile(){document.getElementById('profOv').classList.remove('open');var b=document.getElementById('profBtn');if(b)b.focus();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('profOv').classList.contains('open'))closeProfile();});
 function toggleTheme(){setMode(!document.body.classList.contains('light'));}
-try{if(localStorage.getItem('palette')==='navy')document.body.classList.add('navy');if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').innerHTML=ICON_SUN;}setBar();}catch(e){}
+var dPal='navy',dMode='light';try{dPal=localStorage.getItem('palette')==='brass'?'brass':'navy';dMode=localStorage.getItem('theme')==='dark'?'dark':'light';}catch(e){}   /* first visit (nothing saved): Midnight Navy, light */
+document.body.classList.toggle('navy',dPal==='navy');if(dMode==='light'){document.body.classList.add('light');document.getElementById('themeBtn').innerHTML=ICON_SUN;}setBar();
 function showToast(msg,type){var t=document.getElementById('toast');t.onclick=null;t.textContent=msg;t.className='toast show '+(type||'');if(type){clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show');},3000);}}
 
 function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast');t.innerHTML='';var s=document.createElement('span');s.textContent=msg;var b=document.createElement('button');b.type='button';b.className='toast-act';b.textContent=label;
