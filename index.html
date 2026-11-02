@@ -1235,7 +1235,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v114</span>
+    <span class="app-ver" id="appVer" title="App version">v115</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1794,20 +1794,34 @@ function usersLoad(){
     US.list=j.users;US.cat=j.catalog;US.roles=j.roles||US.roles;usersRender();
   }).catch(function(){document.getElementById('usView').innerHTML='<div class="empty-state">Network error. Try again.</div>';});
 }
-function usersRender(){
-  var h='<div class="us-bar"><div><h2>Access Controls</h2><p>Choose who can open what. Changes apply within about 30 seconds.</p></div><button class="us-add" data-us-add>+ Add person</button></div>';
-  US.list.forEach(function(u){
-    var chips=u.role==='Admin'?'<span class="us-chip">Everything</span>':(u.access.length?US.cat.map(function(g){
-      var have=g.items.filter(function(i){return u.access.indexOf(i.id)>=0;});
-      if(!have.length)return '';
-      return '<span class="us-chip">'+esc(g.name)+(have.length<g.items.length?': '+have.map(function(i){return esc(i.name.replace(/ \(.*\)/,''));}).join(', '):'')+'</span>';
-    }).join(''):'<span class="us-chip none">No access yet</span>');
-    h+='<button class="us-card'+(u.active?'':' off')+'" data-us-edit="'+esc(u.email)+'"><div class="us-top"><b>'+esc(u.name||u.email.split('@')[0])+'</b><span class="us-role'+(u.role==='Admin'?' r-admin':'')+'">'+esc(u.role)+'</span></div>'
-      +'<div class="us-mail">'+esc(u.email)+'</div><div class="us-chips">'+chips+'</div>'
-      +'<div class="us-meta">'+(u.active?'Active':'Turned off')+(u.lastSignIn?' · Last sign-in '+esc(u.lastSignIn):' · Not signed in yet')+'</div></button>';
-  });
-  document.getElementById('usView').innerHTML=h;
+function usersChips(u){
+  return u.role==='Admin'?'<span class="us-chip">Everything</span>':(u.access.length?US.cat.map(function(g){
+    var have=g.items.filter(function(i){return u.access.indexOf(i.id)>=0;});
+    if(!have.length)return '';
+    return '<span class="us-chip">'+esc(g.name)+(have.length<g.items.length?': '+have.map(function(i){return esc(i.name.replace(/ \(.*\)/,''));}).join(', '):'')+'</span>';
+  }).join(''):'<span class="us-chip none">No access yet</span>');
 }
+function usersList(){
+  var q=(US.q||'').trim().toLowerCase(),n=0,h='';
+  US.list.forEach(function(u){
+    var nm=u.name||u.email.split('@')[0];
+    if(q&&(nm+' '+u.email+' '+u.role).toLowerCase().indexOf(q)<0)return;
+    n++;
+    h+='<button class="us-card'+(u.active?'':' off')+'" data-us-edit="'+esc(u.email)+'"><div class="us-top"><b>'+esc(nm)+'</b><span class="us-role'+(u.role==='Admin'?' r-admin':'')+'">'+esc(u.role)+'</span></div>'
+      +'<div class="us-mail">'+esc(u.email)+'</div><div class="us-chips">'+usersChips(u)+'</div>'
+      +'<div class="us-meta">'+(u.active?'Active':'Turned off')+(u.lastSignIn?' \u00b7 Last sign-in '+esc(u.lastSignIn):' \u00b7 Not signed in yet')+'</div></button>';
+  });
+  if(!n)h='<div class="empty-state">'+(q?'No one matches \u201c'+esc(US.q.trim())+'\u201d.':'No people yet.')+'</div>';
+  document.getElementById('usCount').textContent=q?n+' of '+US.list.length+' people':US.list.length+' people';
+  document.getElementById('usList').innerHTML=h;
+}
+function usersRender(){
+  var h='<div class="us-bar"><div><h2>Access Controls</h2><p>Choose who can open what. Changes apply within about 30 seconds.</p></div><button class="us-add" data-us-add>+ Add person</button></div>'
+   +'<input class="dc-q" id="usQ" type="search" placeholder="Search by name or email" aria-label="Search people" autocomplete="off" value="'+esc(US.q||'')+'">'
+   +'<div class="us-meta" id="usCount" style="margin:-4px 2px 10px"></div><div id="usList"></div>';
+  document.getElementById('usView').innerHTML=h;usersList();
+}
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='usQ'){US.q=e.target.value;usersList();}});
 function usersForm(u){
   var isNew=!u;u=u||{email:'',name:'',role:'Staff',active:true,access:[]};
   US.edit={isNew:isNew,email:u.email,name:u.name,role:u.role,active:u.active,access:u.access.slice(),self:!!ME&&u.email===ME.email};
