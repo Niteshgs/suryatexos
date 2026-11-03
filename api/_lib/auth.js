@@ -20,7 +20,7 @@ const CATALOG = [
   { id: 'fg', name: 'Finished Goods', items: [
     { id: 'fg.status', name: 'Stock status' }, { id: 'fg.po', name: 'PO Track' }, { id: 'fg.sweep', name: 'Stock Sweep' } ] },
   { id: 'knitted', name: 'Knitted Production', items: [
-    { id: 'knitted.entry', name: 'Entry' }, { id: 'knitted.dash', name: 'Dashboard' }, { id: 'knitted.admin', name: 'Admin (tapes & machine activity)' } ] },
+    { id: 'knitted.entry', name: 'Entry' }, { id: 'knitted.dash', name: 'Dashboard' }, { id: 'knitted.admin', name: 'Admin (tapes & machine activity)' }, { id: 'knitted.logs', name: 'Recent logs (last 10 saves & their status)' } ] },
   { id: 'sales', name: 'Sales', items: [
     { id: 'sales.touchA', name: 'Touch Points · Class A customers (view & tick)' }, { id: 'sales.touchB', name: 'Touch Points · Class B customers (view & tick)' }, { id: 'sales.touchmanage', name: 'Touch Points: add, edit & archive customers (in the classes they can open)' } ] },
   { id: 'expenses', name: 'Cash Expenses', items: [
@@ -47,6 +47,7 @@ const ROUTE_PERMS = {
     'knitted.saveBeams': ['knitted.entry'],
     'knitted.verifyPin': ['knitted.admin'], 'knitted.addTape': ['knitted.admin'], 'knitted.removeTape': ['knitted.admin'],
     'knitted.renameTape': ['knitted.admin'], 'knitted.activity': ['knitted.admin'],
+    'knitted.recentLogs': ['knitted.logs'],
   },
   sales: {
     'touch.getAll': ['sales.touchA', 'sales.touchB'], 'touch.toggle': ['sales.touchA', 'sales.touchB'],

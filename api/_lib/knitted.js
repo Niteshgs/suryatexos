@@ -302,6 +302,37 @@ async function activity(month, meta) {
   return a;
 }
 
+/* ---------- Recent logs: the last 10 saves, newest first (read from Entry Log) ---------- */
+const MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const STATUS_WORD = (a) => (/^save$/i.test(a) ? 'Saved' : /^cleared$/i.test(a) ? 'Cleared' : a || 'Saved');
+async function recentLogs() {
+  const titles = await G.sheetTitles(SHEET_ID);
+  if (!titles.includes(LOG)) return { logs: [] };
+  const [col] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:A')], 'serial');
+  const n = col.length;                                              // rows below the header
+  if (!n) return { logs: [] };
+  const from = Math.max(2, n + 2 - 120);                             // 10 saves is at most ~40 beam rows; read a safe window
+  const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A' + from + ':L' + (n + 1))], 'serial');
+  const groups = [];
+  for (const r of rows) {
+    const day = serialDay(cell(r, 0)), machine = String(cell(r, 3) || '').trim();
+    if (day == null || !machine) continue;
+    const secs = Math.round(dayFrac(cell(r, 1)) * 86400), user = String(cell(r, 2) || '').trim(), action = String(cell(r, 9) || '').trim();
+    const key = day + '|' + secs + '|' + user + '|' + machine;
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) { g = { key, machine, user, day, secs, beams: [] }; groups.push(g); }
+    g.beams.push({ beam: String(cell(r, 4) || ''), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), weightMtr: cnum(cell(r, 7)), weightRoll: cnum(cell(r, 8)), action });
+  }
+  const logs = groups.slice(-10).reverse().map((g) => {
+    const d = new Date(DAY0 + g.day * 864e5), acts = [...new Set(g.beams.map((b) => b.action))].map(STATUS_WORD);
+    const hh = Math.floor(g.secs / 3600), mm = Math.floor((g.secs % 3600) / 60);
+    return { machine: g.machine, user: g.user || 'Unknown', status: acts.join(' + ') || 'Saved',
+      when: d.getUTCDate() + ' ' + MON3[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'),
+      beams: g.beams.map((b) => ({ beam: b.beam, tape: b.tape, cycle: b.cycle, weightMtr: b.weightMtr, weightRoll: b.weightRoll, status: STATUS_WORD(b.action) })) };
+  });
+  return { logs };
+}
+
 const ROUTES = {
   'knitted.getAll': () => getAll(),
   'knitted.saveBeams': (a, m) => saveBeams(a.machineId, a.beams, m),
@@ -310,6 +341,7 @@ const ROUTES = {
   'knitted.removeTape': (a, m) => removeTape(a.name, m),
   'knitted.renameTape': (a, m) => renameTape(a.oldName, a.newName, m),
   'knitted.activity': (a, m) => activity(a.month, m),
+  'knitted.recentLogs': () => recentLogs(),
 };
 
 module.exports = { ROUTES, SHEET_ID };
