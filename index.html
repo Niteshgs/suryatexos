@@ -1246,7 +1246,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v118</span>
+    <span class="app-ver" id="appVer" title="App version">v119</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2887,7 +2887,7 @@ var SP=(function(){
     var r=rowOf(ri);if(!r)return;
     if(navigator.onLine===false){showToast("You're offline — not saved",'danger');return;}
     var prev={tp:r.tp.slice(),c:r.completion,s:r.status},done=!r.tp[i],c=cls,name=r.name;
-    r.tp[i]=done?1:0;var n=r.tp.reduce(function(a,b){return a+b;},0);r.completion=n/r.tp.length;r.status=n===0?'Not Started':(n>=2?'Completed':'On Track');render();
+    r.tp[i]=done?1:0;var n=r.tp.reduce(function(a,b){return a+b;},0),need=c==='A'?1:2;r.completion=c==='A'?(n>=1?1:0):n/r.tp.length;r.status=n===0?'Not Started':(n>=need?'Completed':'On Track');render();
     call('touch.toggle',{cls:c,row:ri,tp:i,done:done,expect:name}).then(function(j){
       if(j._status===401){showLock(j.error);return;}
       if(!j.ok)throw new Error(j.error||'Could not save');

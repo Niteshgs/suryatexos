@@ -20,7 +20,9 @@ const cfgOf = (cls) => { const c = CFG[cls]; if (!c) throw new Error('Unknown cl
 const str = (v) => (v === null || v === undefined ? '' : String(v));
 const clip = (v, n) => str(v).trim().slice(0, n);
 const num = (v) => { if (v === '' || v === null || v === undefined) return ''; const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : ''; };
-const statusOf = (done) => (done === 0 ? 'Not Started' : done >= 2 ? 'Completed' : 'On Track');
+// Touch points needed for "Completed": Class A = 1 (any one), Class B = 2. (The sheet's own Status column keeps its old formula, untouched.)
+const needOf = (cls) => (cls === 'A' ? 1 : 2);
+const statusOf = (done, cls) => (done === 0 ? 'Not Started' : done >= needOf(cls) ? 'Completed' : 'On Track');
 
 function monthLabel(d, tz) { return new Intl.DateTimeFormat('en-US', { timeZone: tz, month: 'long', year: 'numeric' }).format(d); }
 // The "Active month" cell can hold text ("October 2026") or, if Sheets converted it, a date serial number.
@@ -37,7 +39,7 @@ function parseRows(cls, values) {
     const tp = []; for (let t = 0; t < TP; t++) tp.push(str(r[c.tp - 1 + t]).trim() === 'Done' ? 1 : 0);
     const done = tp.reduce((a, b) => a + b, 0);
     const rec = { rowIndex: FIRST + i, name, phone: str(r[c.phone - 1]).trim(), state: str(r[c.state - 1]).trim(), tp,
-      completion: done / TP, status: statusOf(done), notes: str(r[c.notes - 1]) };
+      completion: cls === 'A' ? (done >= 1 ? 1 : 0) : done / TP, status: statusOf(done, cls), notes: str(r[c.notes - 1]) };
     if (c.split) { rec.totalValue = r[c.total - 1] === undefined ? '' : r[c.total - 1]; rec.avgOrderValue = r[c.avg - 1] === undefined ? '' : r[c.avg - 1]; }
     else rec.orderValue = r[c.order - 1] === undefined ? '' : r[c.order - 1];
     out.push(rec);
@@ -163,7 +165,7 @@ async function archiveClassMonth(cls, label) {
     const tps = []; for (let t = 0; t < TP; t++) tps.push(str(r[c.tp - 1 + t]));
     const done = tps.filter((x) => x.trim() === 'Done').length;
     rows.push([str(r[c.num - 1]), str(r[c.name - 1]), str(r[c.phone - 1]), str(r[c.state - 1]), str(r[(c.split ? c.avg : c.order) - 1]),
-      ...tps, str(r[c.comp - 1]) || Math.round((done / TP) * 100) + '%', str(r[c.status - 1]) || statusOf(done), str(r[c.notes - 1])]);
+      ...tps, str(r[c.comp - 1]) || Math.round((done / TP) * 100) + '%', cls === 'A' ? statusOf(done, 'A') : (str(r[c.status - 1]) || statusOf(done, cls)), str(r[c.notes - 1])]);
   });
   if (!rows.length) return;
   const [arc] = await G.batchGet(SHEET_ID(), [G.q(ARCHIVE) + '!A' + FIRST + ':B' + MAXROW], 'serial');
@@ -202,4 +204,4 @@ const ROUTES = {
   'touch.updateClient': (a) => updateClient(a),
   'touch.archiveClient': (a, who) => archiveClient(a, who),
 };
-module.exports = { ROUTES, SHEET_ID, rollover, _t: { normMonth, monthLabel, parseRows } };
+module.exports = { ROUTES, SHEET_ID, rollover, _t: { normMonth, monthLabel, parseRows, statusOf } };
