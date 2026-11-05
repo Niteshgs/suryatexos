@@ -5,7 +5,8 @@ const crypto = require('crypto');
 const G = require('./google');
 
 const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9AsuezpGeU4BppoJj6DGlFEd8';
-const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue';
+const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log';   // DATA is read-only: the app never writes to it
+const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
   'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by'];
 const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Beams', 'Base Meters (each beam)',
@@ -21,14 +22,17 @@ const wrap = async (fn) => { try { return await fn(); } catch (e) { if (/permiss
 
 async function ensureTabs() {
   const titles = await G.sheetTitles(SHEET_ID());
-  const adds = [PLAN, EXEC].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
+  const adds = [PLAN, EXEC, LOG].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
-  const [a, b] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1')]);
+  const [a, b, c] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1')]);
   const data = [];
   if (!str(((a[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'A1', L(PLAN_HEAD.length) + '1'), values: [PLAN_HEAD] });
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
+  if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
 }
+// A log line must never block the real work
+const log = (id, action, who, tape, details) => G.append(SHEET_ID(), range(LOG, 'A', L(LOG_HEAD.length)), [[stamp(), id, action, safe(who), safe(tape), safe(details || '')]]).catch(() => {});
 
 /* ---------- tape list ---------- */
 async function catalog() {
@@ -79,6 +83,7 @@ async function add(a, who) {
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(v.category), safe(v.stand), bEnds, safe(bYarn), f.baseBeams || '', f.baseMeters || '',
     dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '']]);
   await G.append(SHEET_ID(), range(EXEC, 'A', L(EXEC_HEAD.length)), [[id, safe(name), safe(v.stand), safe(bYarn), bEnds, f.baseBeams || '', f.baseMeters || '', safe(dYarn), dEnds, f.designBeams || '', f.designMeters || '', 'Planned', '', '']]);
+  await log(id, 'Planned', who, name, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : '') + (v.stand !== 'Not Relevant' ? ' (' + v.stand + ')' : ''));
   return { id };
 }
 
@@ -102,9 +107,10 @@ async function setStatus(a, who) {
   const ex = (await readExec()).find((j) => j.id === id);
   if (want === 'Done') { if (ex) await deleteExecRow(ex.row); }
   else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[want, upd[1], upd[2]]] }]);
+  await log(id, want === 'Planned' ? 'Reset to Planned' : want, who, job.tape, '');
   return { status: want };
 }
-async function cancel(a) {
+async function cancel(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Done') throw new Error('A finished job cannot be cancelled');
@@ -112,6 +118,7 @@ async function cancel(a) {
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Cancelled']] }]);
   const ex = (await readExec()).find((j) => j.id === job.id);
   if (ex) await deleteExecRow(ex.row);
+  await log(job.id, 'Cancelled', who, job.tape, '');
   return { status: 'Cancelled' };
 }
 
@@ -119,7 +126,7 @@ const ROUTES = {
   'warp.catalog': () => wrap(catalog),
   'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.add': (a, who) => wrap(() => add(a, who)),
-  'warp.cancel': (a) => wrap(() => cancel(a)),
+  'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),
 };
