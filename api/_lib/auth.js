@@ -29,6 +29,8 @@ const CATALOG = [
     { id: 'attendance.mark', name: 'Mark daily attendance' }, { id: 'attendance.markToday', name: 'Attendance in-charge (staff): mark TODAY only — no calendar, no mark-all, no staff or bulk tools' }, { id: 'attendance.view', name: 'Register & Profiles (view)' },
     { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' },
     { id: 'attendance.leave', name: 'Leave Request (apply & see who applied)' } ] },
+  { id: 'warping', name: 'Warping', items: [
+    { id: 'warping.plan', name: 'Planner (plan warping programs, see the queue)' }, { id: 'warping.execute', name: 'Execute (machine screen: see programs, mark Started / Done)' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
@@ -60,6 +62,10 @@ const ROUTE_PERMS = {
     'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],
   },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
+  warping: {
+    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.cancel': ['warping.plan'],
+    'warp.execList': ['warping.execute'], 'warp.setStatus': ['warping.execute'],
+  },
 };
 
 /* ---------- small helpers ---------- */
