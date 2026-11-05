@@ -1283,7 +1283,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v132</span>
+    <span class="app-ver" id="appVer" title="App version">v133</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3178,7 +3178,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='plan',editId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='plan',editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
@@ -3199,7 +3199,7 @@ var WP=(function(){
     var s='<div class="wp-job"><div class="wp-top"><b>'+esc(j.tape)+'</b>'+pill(j.status)+'</div>'+(standPill(j.stand)?'<div style="margin-top:6px">'+standPill(j.stand)+'</div>':'')+(j.status==='Done'&&j.done?'<div class="wp-stamp">'+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'<div class="wp-sub">'+esc(j.id)+(j.created&&!x&&j.status!=='Done'?' · '+esc(j.created):'')+'</div>'
       +part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn);
     if(j.started)s+='<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>';
-    if(x){var sid=esc(j.id);s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<div class="wp-sub">On hold — another job took priority</div><button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Mark done</button></div>';}
+    if(x){var sid=esc(j.id);s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<div class="wp-sub">On hold — another job took priority</div><button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':(askId===j.id?'<div class="wp-sub" style="text-align:center;margin-top:10px">Finish this job? This cannot be undone.</div><div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Yes, mark done</button></div>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-ask="'+sid+'">Mark done</button></div>');}
     else if(j.status==='Planned'&&canP()){s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-del="'+esc(j.id)+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+esc(j.id)+'">Execute</button><button type="button" class="wp-sm" data-wp-edit="'+esc(j.id)+'">Edit</button></div>';}
     if(j.status!=='Done'&&can('warping.cancel')&&!(j.status==='Planned'&&!x&&canP()))s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button></div>';
     return s+'</div>';
@@ -3249,7 +3249,7 @@ var WP=(function(){
   function fail(e){var b=$('wpView');if(!(tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
   function loadReady(){return api('warp.ready').then(function(d){ready=d.jobs;draw();}).catch(fail);}
   function refresh(){return tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;if(tab==='plan'&&!canP())tab='exec';if(tab==='exec'&&!canE())tab='plan';draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId)refresh();},30000);}
+  function open(){if(!canP()&&!canE())return;if(tab==='plan'&&!canP())tab='exec';if(tab==='exec'&&!canE())tab='plan';draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},30000);}
   function save(){
     if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
     api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Added to planning as '+d.id+'. Tap Execute below when it is ready for the machine.';sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
@@ -3266,13 +3266,15 @@ var WP=(function(){
   function cancel(id){if(busy||!confirm('Cancel this job?'))return;busy=true;api('warp.cancel',{id:id}).then(function(){busy=false;return refresh();}).catch(function(e){busy=false;fail(e);});}
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||!t.closest('#v-warp'))return;
-    if((x=t.closest('[data-wp-tab]'))){tab=x.getAttribute('data-wp-tab');sel=null;vr=null;editId=null;msg='';draw();return refresh();}
+    if((x=t.closest('[data-wp-tab]'))){tab=x.getAttribute('data-wp-tab');sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}
     if(t.closest('[data-wp-clear]')){sel=null;vr=null;return draw();}
     if(t.closest('[data-wp-save]'))return save();
-    if((x=t.closest('[data-wp-set]'))){var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1]);}
+    if((x=t.closest('[data-wp-ask]'))){askId=x.getAttribute('data-wp-ask');return draw();}
+    if(t.closest('[data-wp-back]')){askId=null;return draw();}
+    if((x=t.closest('[data-wp-set]'))){askId=null;var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1]);}
     if((x=t.closest('[data-wp-edit]'))){editId=x.getAttribute('data-wp-edit');msg='';return draw();}
     if(t.closest('[data-wp-ecancel]')){editId=null;return draw();}
     if((x=t.closest('[data-wp-esave]')))return eSave(x.getAttribute('data-wp-esave'));
