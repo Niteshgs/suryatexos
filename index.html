@@ -1317,7 +1317,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v153</span>
+    <span class="app-ver" id="appVer" title="App version">v154</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3213,6 +3213,15 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
   var tab='dash',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var ver=0,pend=0,q=Promise.resolve();
+  function nowStamp(){return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date()).replace(',','');}
+  function lists(){return [jobs,exec,ready,archived,board].filter(Boolean);}
+  function find(id){var r=null;lists().forEach(function(l){l.forEach(function(j){if(!r&&j.id===id)r=j;});});return r;}
+  function patch(id,fn){lists().forEach(function(l){l.forEach(function(j){if(j.id===id)fn(j);});});}
+  function gone(id){var f=function(l){return l&&l.filter(function(j){return j.id!==id;});};jobs=f(jobs);exec=f(exec);ready=f(ready);archived=f(archived);board=f(board);}
+  function bump(k,d){if(sum&&typeof sum[k]==='number'){sum[k]=Math.max(0,sum[k]+d);var e=$('wpSum');if(e)e.innerHTML=sumHtml();}}
+  function soft(ms){setTimeout(function(){if(pend||current!=='warp')return;if(editId||askId||addT||(sel&&tab==='plan'))return soft(3000);refresh();},ms);}
+  function bg(fn,args){pend++;q=q.then(function(){return api(fn,args);}).then(function(){pend--;if(!pend)soft(1500);},function(e){pend--;showToast(friendly(e.message),'error');if(!pend)refresh();});}
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
@@ -3224,13 +3233,13 @@ var WP=(function(){
     var box=function(t,k,lab,extra){var h='<b>'+v(k)+'</b><span>'+lab+'</span>'+(extra||'<em>&nbsp;</em>');return (t==='plan'?canP():t==='exec'?canE():true)?'<button type="button" class="wp-sbox" data-wp-tab="'+t+'" aria-label="'+lab+'">'+h+'</button>':'<div class="wp-sbox">'+h+'</div>';};
     return box('plan','planning','Planning')+box('exec','execute','In execute',sum&&sum.hold?'<em>'+n(sum.hold)+' on hold</em>':'')+box('ready','doneToday','Done today');
   }
-  function loadSum(){return api('warp.summary').then(function(d){sum=d;var e=$('wpSum');if(e)e.innerHTML=sumHtml();}).catch(function(){});}
+  function loadSum(){var v=ver;return api('warp.summary').then(function(d){if(v!==ver)return;sum=d;var e=$('wpSum');if(e)e.innerHTML=sumHtml();}).catch(function(){});}
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(s)+'</span>';}
   function part(label,beams,m,ends,yarn){if(!beams)return '';return '<div class="wp-part">'+(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'')+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill">'+esc(st)+'</span>':'';}
   function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return t?'<span class="wp-standpill">'+esc(t)+'</span>':'<span></span>';}
   function head(j){return '<div class="wp-top"><b>'+esc(j.tape)+'</b>'+pill(j.status)+'</div>';}
-  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+esc(j.id)+'</span></span></div>';}
+  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+(String(j.id).indexOf('tmp')===0?'Saving…':esc(j.id))+'</span></span></div>';}
   function when(j){
     var d=(j.status==='Done'||j.status==='Archived')&&j.done,r=(j.status==='Started'||j.status==='On hold')&&j.started;
     var lab=d?'Done':r?'Started':'Planned',t=d?j.done:r?j.started:j.created,by=d?j.doneBy:r?j.startedBy:j.by;
@@ -3247,7 +3256,7 @@ var WP=(function(){
     var s='',sid=esc(j.id);
     if(x){s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':(askId===j.id?'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Confirm?</button></div>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-ask="'+sid+'">Mark done</button></div>');}
     else if(j.status==='Planned'&&canP()){s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-del="'+sid+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Execute</button><button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';}
-    if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Send to Archive</button>';
+    if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
     if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
     if(x&&j.status!=='Done'&&j.status!=='Archived'&&can('warping.cancel'))s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+sid+'">Cancel job</button></div>';
     return s;
@@ -3347,30 +3356,77 @@ var WP=(function(){
     var cards=box.querySelectorAll('.wp-job[data-jid]');
     for(var i=0;i<cards.length;i++){var id=cards[i].getAttribute('data-jid'),st=cards[i].getAttribute('data-jst');if(seen[id]&&seen[id]!==st)cards[i].classList.add('wp-flash');seen[id]=st;}
   }
-  function loadPlan(){loadSum();return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){jobs=d.jobs;})]).then(draw).catch(fail);}
-  function loadExec(){loadSum();return api('warp.execList').then(function(d){exec=d.jobs;draw();}).catch(fail);}
+  function loadPlan(){loadSum();var v=ver;return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){if(v===ver)jobs=d.jobs;})]).then(draw).catch(fail);}
+  function loadExec(){loadSum();var v=ver;return api('warp.execList').then(function(d){if(v===ver)exec=d.jobs;draw();}).catch(fail);}
   function friendly(m){return /429|quota|too many/i.test(m||'')?'Google is busy for a moment. Wait a minute and tap the tab again.':m;}
   function fail(e){e=new Error(friendly(e.message));var b=$('wpView');if(!(tab==='archive'?archived:tab==='dash'?board:tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
-  function loadReady(){loadSum();return api('warp.ready').then(function(d){ready=d.jobs;draw();}).catch(fail);}
-  function loadArchived(){loadSum();return api('warp.archived').then(function(d){archived=d.jobs;draw();}).catch(fail);}
-  function loadBoard(){loadSum();return api('warp.board').then(function(d){board=d.jobs;draw();}).catch(fail);}
-  function refresh(){loadSum();return tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
+  function loadReady(){loadSum();var v=ver;return api('warp.ready').then(function(d){if(v===ver)ready=d.jobs;draw();}).catch(fail);}
+  function loadArchived(){loadSum();var v=ver;return api('warp.archived').then(function(d){if(v===ver)archived=d.jobs;draw();}).catch(fail);}
+  function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=d.jobs;draw();}).catch(fail);}
+  function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
   function open(){if(!canP()&&!canE())return;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},60000);}
   function save(){
-    if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
-    api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Added to plan';sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
-    .catch(function(e){busy=false;var b2=$('wpSave');if(b2){b2.disabled=false;b2.textContent='Add to planning';}var e2=$('wpErr');if(e2)e2.textContent=e.message;});
+    var g=function(i){return $(i).value;},er=$('wpErr');er.textContent='';
+    var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
+    var bb=cn(g('wpBB')),bm=cn(g('wpBM')),db=cn(g('wpDB')),dm=cn(g('wpDM')),bad=function(t){er.textContent=t;};
+    if([bb,bm,db,dm].some(isNaN))return bad('Beams and meters must be whole numbers');
+    if(bb>999||db>999)return bad('That is too many beams. Check the number.');
+    if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
+    if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
+    if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
+    var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm};
+    var args={tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')};
+    ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
+    msg='Added to plan';sel=null;vr=null;qs='';draw();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},3000);
+    bg('warp.add',args);
   }
-  function setStatus(id,st){if(busy)return;busy=true;api('warp.setStatus',{id:id,status:st}).then(function(){busy=false;return loadExec();}).catch(function(e){busy=false;fail(e);loadExec();});}
+  function setStatus(id,st){
+    if(String(id).indexOf('tmp')===0)return;
+    var j=find(id);if(!j)return;ver++;var was=j.status;
+    patch(id,function(x){if(st==='Started'){x.status='Started';x.started=x.started||nowStamp();x.startedBy=x.startedBy||(ME?ME.name:'');}else if(st==='Hold')x.status='On hold';else if(st==='Done'){x.status='Done';x.done=nowStamp();x.doneBy=ME?ME.name:'';}});
+    if(st==='Hold')bump('hold',1);else if(st==='Started'&&was==='On hold')bump('hold',-1);
+    if(st==='Done'){bump('execute',-1);bump('doneToday',1);if(was==='On hold')bump('hold',-1);if(exec)exec=exec.filter(function(x){return x.id!==id;});if(ready)ready=[j].concat(ready.filter(function(x){return x.id!==id;}));}
+    askId=null;draw();bg('warp.setStatus',{id:id,status:st});
+  }
   function eSave(id){
-    if(busy)return;var g=function(i){return $(i).value;},er=$('wpEErr'),b=$('wpESave');er.textContent='';busy=true;b.disabled=true;b.textContent='Saving…';
-    api('warp.edit',{id:id,baseBeams:g('wpEBB'),baseMeters:g('wpEBM'),designBeams:g('wpEDB'),designMeters:g('wpEDM')}).then(function(){busy=false;editId=null;msg='Plan updated';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel&&!editId)draw();},3000);})
-    .catch(function(e){busy=false;var b2=$('wpESave'),e2=$('wpEErr');if(b2){b2.disabled=false;b2.textContent='Save changes';}if(e2)e2.textContent=e.message;});
+    var g=function(i){return $(i).value;},er=$('wpEErr');er.textContent='';
+    var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
+    var bb=cn(g('wpEBB')),bm=cn(g('wpEBM')),db=cn(g('wpEDB')),dm=cn(g('wpEDM')),bad=function(t){er.textContent=t;};
+    if([bb,bm,db,dm].some(isNaN))return bad('Beams and meters must be whole numbers');
+    if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
+    if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
+    if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
+    ver++;patch(id,function(x){x.baseBeams=bb;x.baseMeters=bm;x.designBeams=db;x.designMeters=dm;});
+    var args={id:id,baseBeams:g('wpEBB'),baseMeters:g('wpEBM'),designBeams:g('wpEDB'),designMeters:g('wpEDM')};
+    editId=null;msg='Plan updated';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel&&!editId)draw();},3000);
+    bg('warp.edit',args);
   }
-  function arch(id,back){if(busy)return;busy=true;api(back?'warp.unarchive':'warp.archive',{id:id}).then(function(){busy=false;msg=back?'Restored to Beams ready':'Sent to Archive';return refresh();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&(tab==='ready'||tab==='archive'))draw();},2500);}).catch(function(e){busy=false;fail(e);});}
-  function toExec(id){if(busy)return;busy=true;api('warp.toExecute',{id:id}).then(function(){busy=false;msg='Sent to Execute';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);}).catch(function(e){busy=false;fail(e);loadPlan();});}
-  function del(id){if(busy||!confirm('Delete this plan? It will be removed from the planning list.'))return;busy=true;api('warp.remove',{id:id}).then(function(){busy=false;msg='Plan deleted';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);}).catch(function(e){busy=false;fail(e);loadPlan();});}
-  function cancel(id){if(busy||!confirm('Cancel this job?'))return;busy=true;api('warp.cancel',{id:id}).then(function(){busy=false;return refresh();}).catch(function(e){busy=false;fail(e);});}
+  function arch(id,back){
+    var j=find(id);if(!j)return;ver++;
+    patch(id,function(x){x.status=back?'Done':'Archived';});
+    if(back){if(archived)archived=archived.filter(function(x){return x.id!==id;});if(ready)ready=[j].concat(ready.filter(function(x){return x.id!==id;}));}
+    else{if(ready)ready=ready.filter(function(x){return x.id!==id;});if(archived)archived=[j].concat(archived.filter(function(x){return x.id!==id;}));}
+    msg=back?'Restored to Beams ready':'Sent to Archive';draw();setTimeout(function(){msg='';if(current==='warp'&&(tab==='ready'||tab==='archive'))draw();},2500);
+    bg(back?'warp.unarchive':'warp.archive',{id:id});
+  }
+  function toExec(id){
+    if(String(id).indexOf('tmp')===0)return;
+    var j=find(id);if(!j)return;ver++;
+    patch(id,function(x){x.status='Ready';});bump('planning',-1);bump('execute',1);
+    if(exec&&!exec.some(function(x){return x.id===id;}))exec=exec.concat([j]);
+    msg='Sent to Execute';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
+    bg('warp.toExecute',{id:id});
+  }
+  function del(id){
+    if(String(id).indexOf('tmp')===0||!confirm('Delete this plan? It will be removed from the planning list.'))return;
+    ver++;gone(id);bump('planning',-1);msg='Plan deleted';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
+    bg('warp.remove',{id:id});
+  }
+  function cancel(id){
+    if(!confirm('Cancel this job?'))return;
+    var j=find(id);ver++;if(j){bump('execute',-1);if(j.status==='On hold')bump('hold',-1);}gone(id);draw();
+    bg('warp.cancel',{id:id});
+  }
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||!t.closest('#v-warp'))return;
     if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt==='archive'&&tab==='archive')?'dash':nt;addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
@@ -3390,7 +3446,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-ask]'))){askId=x.getAttribute('data-wp-ask');return draw();}
     if(t.closest('[data-wp-back]')){askId=null;return draw();}
     if((x=t.closest('[data-wp-set]'))){askId=null;var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1]);}
-    if((x=t.closest('[data-wp-edit]'))){editId=x.getAttribute('data-wp-edit');msg='';return draw();}
+    if((x=t.closest('[data-wp-edit]'))&&x.getAttribute('data-wp-edit').indexOf('tmp')!==0){editId=x.getAttribute('data-wp-edit');msg='';return draw();}
     if(t.closest('[data-wp-ecancel]')){editId=null;return draw();}
     if((x=t.closest('[data-wp-esave]')))return eSave(x.getAttribute('data-wp-esave'));
     if((x=t.closest('[data-wp-del]')))return del(x.getAttribute('data-wp-del'));
