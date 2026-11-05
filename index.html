@@ -1332,7 +1332,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v173</span>
+    <span class="app-ver" id="appVer" title="App version">v174</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3343,7 +3343,9 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
   var tab='dash',bf='All',askAct='',ana=null,anaPin='',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
-  var ver=0,pend=0,q=Promise.resolve();
+  var ver=0,pend=0,q=Promise.resolve(),ov={};
+  function hold(j){ov[j.id]={s:j.status,a:j.started,b:j.startedBy,d:j.done,e:j.doneBy,t:Date.now()+45000};}
+  function ovr(l){var now=Date.now();return (l||[]).map(function(j){var o=ov[j.id];if(!o)return j;if(o.t<now){delete ov[j.id];return j;}j.status=o.s;if(o.a)j.started=o.a;if(o.b)j.startedBy=o.b;if(o.d)j.done=o.d;if(o.e)j.doneBy=o.e;return j;});}
   function nowStamp(){return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date()).replace(',','');}
   function lists(){return [jobs,exec,ready,archived,board].filter(Boolean);}
   function find(id){var r=null;lists().forEach(function(l){l.forEach(function(j){if(!r&&j.id===id)r=j;});});return r;}
@@ -3528,13 +3530,13 @@ var WP=(function(){
     var cards=box.querySelectorAll('.wp-job[data-jid]');
     for(var i=0;i<cards.length;i++){var id=cards[i].getAttribute('data-jid'),st=cards[i].getAttribute('data-jst');if(seen[id]&&seen[id]!==st)cards[i].classList.add('wp-flash');seen[id]=st;}
   }
-  function loadPlan(){loadSum();var v=ver;return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){if(v===ver)jobs=d.jobs;})]).then(draw).catch(fail);}
-  function loadExec(){loadSum();var v=ver;return api('warp.execList').then(function(d){if(v===ver)exec=d.jobs;draw();}).catch(fail);}
+  function loadPlan(){loadSum();var v=ver;return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){if(v===ver)jobs=ovr(d.jobs);})]).then(draw).catch(fail);}
+  function loadExec(){loadSum();var v=ver;return api('warp.execList').then(function(d){if(v===ver)exec=ovr(d.jobs).filter(function(j){return ['Ready','Started','On hold'].indexOf(j.status)>=0;});draw();}).catch(fail);}
   function friendly(m){return /429|quota|too many/i.test(m||'')?'Google is busy for a moment. Wait a minute and tap the tab again.':m;}
   function fail(e){e=new Error(friendly(e.message));var b=$('wpView');if(!(tab==='ana'?ana:tab==='archive'?archived:tab==='dash'?board:tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
-  function loadReady(){loadSum();var v=ver;return api('warp.ready').then(function(d){if(v===ver)ready=d.jobs;draw();}).catch(fail);}
+  function loadReady(){loadSum();var v=ver;return api('warp.ready').then(function(d){if(v===ver)ready=ovr(d.jobs).filter(function(j){return j.status==='Done';});draw();}).catch(fail);}
   function loadArchived(){loadSum();var v=ver;return api('warp.archived').then(function(d){if(v===ver)archived=d.jobs;draw();}).catch(fail);}
-  function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=d.jobs;draw();}).catch(fail);}
+  function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=ovr(d.jobs);draw();}).catch(fail);}
   function loadAna(){var v=ver;return api('warp.analytics',{pin:anaPin}).then(function(d){if(v===ver)ana=d;draw();}).catch(fail);}
   function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='ana'?(anaPin?loadAna():Promise.resolve()):tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
   function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},60000);}
@@ -3560,7 +3562,7 @@ var WP=(function(){
     patch(id,function(x){if(st==='Started'){x.status='Started';x.started=x.started||nowStamp();x.startedBy=x.startedBy||(ME?ME.name:'');}else if(st==='Hold')x.status='On hold';else if(st==='Done'){x.status='Done';x.done=nowStamp();x.doneBy=ME?ME.name:'';}});
     if(st==='Hold')bump('hold',1);else if(st==='Started'&&was==='On hold')bump('hold',-1);
     if(st==='Done'){bump('execute',-1);bump('doneToday',1);if(was==='On hold')bump('hold',-1);if(exec)exec=exec.filter(function(x){return x.id!==id;});if(ready)ready=[j].concat(ready.filter(function(x){return x.id!==id;}));}
-    askId=null;draw();if(st==='Done')bigDone();else showToast(st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
+    hold(find(id)||j);askId=null;draw();if(st==='Done')bigDone();else showToast(st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
   }
   function eSave(id){
     var g=function(i){return $(i).value;},er=$('wpEErr');er.textContent='';
@@ -3588,7 +3590,7 @@ var WP=(function(){
     var j=find(id);if(!j)return;ver++;
     patch(id,function(x){x.status='Ready';});bump('planning',-1);bump('execute',1);
     if(exec&&!exec.some(function(x){return x.id===id;}))exec=exec.concat([j]);
-    msg='Sent for execution';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
+    hold(j);msg='Sent for execution';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
     bg('warp.toExecute',{id:id});
   }
   function del(id){
