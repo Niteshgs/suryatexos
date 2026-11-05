@@ -105,22 +105,24 @@ async function sendToExecute(a, who) {
 }
 async function setStatus(a, who) {
   const want = str(a.status), id = str(a.id);
-  if (!['Started', 'Done', 'Ready'].includes(want)) throw new Error('Bad status');
+  if (!['Started', 'Done', 'Ready', 'Hold'].includes(want)) throw new Error('Bad status');
   const job = (await readPlan()).find((j) => j.id === id);
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Cancelled') throw new Error('That job was cancelled');
   if (job.status === 'Done') throw new Error('That job is already done');
   if (job.status === 'Planned') throw new Error('That job has not been sent to Execute yet');
-  const ok = (job.status === 'Ready' && want === 'Started') || (job.status === 'Started' && (want === 'Done' || want === 'Ready'));
-  if (!ok) throw new Error(job.status === want ? 'Already ' + want.toLowerCase() : 'Start the job first');
-  const at = stamp(), name = safe(who);
-  const upd = want === 'Started' ? ['Started', at, name, '', ''] : want === 'Done' ? ['Done', job.started, job.startedBy, at, name] : ['Ready', '', '', '', ''];
+  const next = { Ready: ['Started'], Started: ['Done', 'Hold', 'Ready'], 'On hold': ['Started'] }[job.status] || [];
+  if (!next.includes(want)) throw new Error(job.status === want || (job.status === 'On hold' && want === 'Hold') ? 'Already ' + job.status.toLowerCase() : job.status === 'Ready' ? 'Start the job first' : 'That is not possible right now');
+  const at = stamp(), name = safe(who), resume = job.status === 'On hold';
+  const upd = want === 'Started' ? ['Started', resume && job.started ? job.started : at, resume && job.startedBy ? job.startedBy : name, '', '']
+    : want === 'Done' ? ['Done', job.started, job.startedBy, at, name]
+    : want === 'Hold' ? ['On hold', job.started, job.startedBy, '', ''] : ['Ready', '', '', '', ''];
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'S' + job.row), values: [upd] }]);
   const ex = (await readExec()).find((j) => j.id === id);
   if (want === 'Done') { if (ex) await deleteRow(EXEC, ex.row); }
-  else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[want, upd[1], upd[2]]] }]);
-  await log(id, want === 'Ready' ? 'Reset to Ready' : want, who, job.tape, '');
-  return { status: want };
+  else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[upd[0], upd[1], upd[2]]] }]);
+  await log(id, want === 'Ready' ? 'Reset to Ready' : want === 'Hold' ? 'Put on hold' : resume ? 'Resumed' : want, who, job.tape, '');
+  return { status: upd[0] };
 }
 async function edit(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
