@@ -53,7 +53,7 @@ const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: str(r[1]), by: 
   designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: Number(r[13]) || 0,
   status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
-  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Planned', started: str(r[12]), startedBy: str(r[13]) });
+  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: str(r[12]), startedBy: str(r[13]) });
 async function readPlan() { const [rows] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A2', L(PLAN_HEAD.length))]); return rows.map(planObj).filter((j) => j.id); }
 async function readExec() { const [rows] = await G.batchGet(SHEET_ID(), [range(EXEC, 'A2', L(EXEC_HEAD.length))]); return rows.map(execObj).filter((j) => j.id); }
 
@@ -82,7 +82,6 @@ async function add(a, who) {
   const bEnds = f.baseBeams ? v.baseEnds : '', bYarn = f.baseBeams ? v.baseYarn : '', dEnds = f.designBeams ? v.designEnds : '', dYarn = f.designBeams ? v.designYarn : '';
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(v.category), safe(v.stand), bEnds, safe(bYarn), f.baseBeams || '', f.baseMeters || '',
     dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '']]);
-  await G.append(SHEET_ID(), range(EXEC, 'A', L(EXEC_HEAD.length)), [[id, safe(name), safe(v.stand), safe(bYarn), bEnds, f.baseBeams || '', f.baseMeters || '', safe(dYarn), dEnds, f.designBeams || '', f.designMeters || '', 'Planned', '', '']]);
   await log(id, 'Planned', who, name, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : '') + (v.stand !== 'Not Relevant' ? ' (' + v.stand + ')' : ''));
   return { id };
 }
@@ -92,22 +91,35 @@ async function deleteExecRow(row) {
   if (!p) return;
   await G.format(SHEET_ID(), [{ deleteDimension: { range: { sheetId: p.sheetId, dimension: 'ROWS', startIndex: row - 1, endIndex: row } } }]);
 }
+async function sendToExecute(a, who) {
+  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  if (job.status !== 'Planned') throw new Error(job.status === 'Cancelled' ? 'That job was cancelled' : 'Already sent to Execute');
+  await ensureTabs();
+  const blank = (x) => (x ? x : '');
+  await G.append(SHEET_ID(), range(EXEC, 'A', L(EXEC_HEAD.length)), [[job.id, safe(job.tape), safe(job.stand), safe(job.baseYarn), blank(job.baseEnds), blank(job.baseBeams), blank(job.baseMeters),
+    safe(job.designYarn), blank(job.designEnds), blank(job.designBeams), blank(job.designMeters), 'Ready', '', '']]);
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Ready']] }]);
+  await log(job.id, 'Sent to Execute', who, job.tape, '');
+  return { status: 'Ready' };
+}
 async function setStatus(a, who) {
   const want = str(a.status), id = str(a.id);
-  if (!['Planned', 'Started', 'Done'].includes(want)) throw new Error('Bad status');
+  if (!['Started', 'Done', 'Ready'].includes(want)) throw new Error('Bad status');
   const job = (await readPlan()).find((j) => j.id === id);
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Cancelled') throw new Error('That job was cancelled');
   if (job.status === 'Done') throw new Error('That job is already done');
-  const ok = (job.status === 'Planned' && want === 'Started') || (job.status === 'Started' && (want === 'Done' || want === 'Planned'));
+  if (job.status === 'Planned') throw new Error('That job has not been sent to Execute yet');
+  const ok = (job.status === 'Ready' && want === 'Started') || (job.status === 'Started' && (want === 'Done' || want === 'Ready'));
   if (!ok) throw new Error(job.status === want ? 'Already ' + want.toLowerCase() : 'Start the job first');
   const at = stamp(), name = safe(who);
-  const upd = want === 'Started' ? ['Started', at, name, '', ''] : want === 'Done' ? ['Done', job.started, job.startedBy, at, name] : ['Planned', '', '', '', ''];
+  const upd = want === 'Started' ? ['Started', at, name, '', ''] : want === 'Done' ? ['Done', job.started, job.startedBy, at, name] : ['Ready', '', '', '', ''];
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'S' + job.row), values: [upd] }]);
   const ex = (await readExec()).find((j) => j.id === id);
   if (want === 'Done') { if (ex) await deleteExecRow(ex.row); }
   else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[want, upd[1], upd[2]]] }]);
-  await log(id, want === 'Planned' ? 'Reset to Planned' : want, who, job.tape, '');
+  await log(id, want === 'Ready' ? 'Reset to Ready' : want, who, job.tape, '');
   return { status: want };
 }
 async function cancel(a, who) {
@@ -126,6 +138,7 @@ const ROUTES = {
   'warp.catalog': () => wrap(catalog),
   'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.add': (a, who) => wrap(() => add(a, who)),
+  'warp.toExecute': (a, who) => wrap(() => sendToExecute(a, who)),
   'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),

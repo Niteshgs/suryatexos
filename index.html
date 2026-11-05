@@ -587,7 +587,7 @@ a.app-tile{display:block;text-decoration:none}
 .dc-facts div{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;min-width:0}
 .dc-facts span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}.dc-facts b{font-size:14px;overflow-wrap:anywhere}
 .wp-tabs{grid-template-columns:repeat(2,1fr)}
-.wp-pick{display:grid;gap:8px;margin-bottom:6px}
+.wp-pickx{display:grid;gap:8px;margin-bottom:6px}
 .wp-pick button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:13px 14px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
 .wp-pick small{font-size:12px;color:var(--text-muted);font-weight:600}
 .wp-sel,.wp-job{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
@@ -605,7 +605,7 @@ a.app-tile{display:block;text-decoration:none}
 .wp-h{font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;margin:20px 0 8px}
 .wp-part{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-top:8px;font-size:14px}.wp-part b{min-width:52px}.wp-y{color:var(--text-muted)}
 .wp-st{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);white-space:nowrap}
-.wp-started{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}.wp-done{color:var(--ok,#1a7f4b);border-color:var(--ok,#1a7f4b)}
+.wp-started{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}.wp-done{color:var(--ok,#1a7f4b);border-color:var(--ok,#1a7f4b)}.wp-ready{color:var(--accent);border-color:var(--accent)}
 .wp-big{width:100%;margin-top:12px;padding:18px;border-radius:var(--radius);border:none;background:var(--accent);color:var(--on-accent,#fff);font:inherit;font-size:19px;font-weight:800;cursor:pointer}
 .wp-big.done{background:var(--ok,#1a7f4b)}
 .wp-ok{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-weight:700;margin-bottom:12px}
@@ -1270,7 +1270,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v120</span>
+    <span class="app-ver" id="appVer" title="App version">v121</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3179,12 +3179,12 @@ var WP=(function(){
       +part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn);
     if(j.started)s+='<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>';
     if(j.done)s+='<div class="wp-sub">Done '+esc(j.done)+(j.doneBy?' by '+esc(j.doneBy):'')+'</div>';
-    if(x){s+=j.status==='Planned'?'<button type="button" class="wp-big" data-wp-set="'+esc(j.id)+'|Started">Start</button>':'<button type="button" class="wp-big done" data-wp-set="'+esc(j.id)+'|Done">Mark done</button>';}
-    else if(j.status!=='Done'){s+='<button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button>';}
+    if(x){s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+esc(j.id)+'|Started">Start</button>':'<button type="button" class="wp-big done" data-wp-set="'+esc(j.id)+'|Done">Mark done</button>';}
+    else{if(j.status==='Planned')s+='<button type="button" class="wp-big" data-wp-exec="'+esc(j.id)+'">Execute</button>';if(j.status!=='Done')s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button></div>';}
     return s+'</div>';
   }
-  function matches(){var q=qs.trim().toLowerCase();return cat.tapes.filter(function(t){return !q||t.name.toLowerCase().indexOf(q)>=0;}).slice(0,30);}
-  function tapeList(){var l=matches();if(!l.length)return '<div class="empty-state">No tape matches.</div>';return '<div class="wp-pick">'+l.map(function(t){return '<button type="button" data-wp-tape="'+esc(t.name)+'">'+esc(t.name)+(t.variants.length>1?'<small>Single / Double stand</small>':t.variants[0].category?'<small>'+esc(t.variants[0].category)+'</small>':'')+'</button>';}).join('')+'</div>';}
+  function tapeBox(){return '<input class="dc-q" id="wpQ" list="wpDL" type="search" placeholder="Choose or type a tape name" aria-label="Tape name" value="'+esc(qs)+'" autocomplete="off"><datalist id="wpDL">'+cat.tapes.map(function(t){return '<option value="'+esc(t.name)+'"></option>';}).join('')+'</datalist>';}
+  function pickTape(nm){var t=cat.tapes.filter(function(a){return a.name.toLowerCase()===nm.trim().toLowerCase();})[0];if(!t)return false;sel=t;vr=t.variants.length===1?t.variants[0]:null;msg='';qs='';draw();return true;}
   function form(){
     var t=sel,h='<div class="wp-sel"><div class="wp-top"><b>'+esc(t.name)+'</b><button type="button" class="wp-x" data-wp-clear="1">Change</button></div>';
     if(t.variants.length>1){h+='<div class="wp-stand">'+t.variants.map(function(v,i){return '<button type="button" class="'+(vr===v?'on':'')+'" data-wp-var="'+i+'">'+esc(v.stand)+'</button>';}).join('')+'</div>';if(!vr)return h+'<p class="wp-hint">Choose the stand to continue.</p></div>';}
@@ -3192,7 +3192,7 @@ var WP=(function(){
     h+='<div class="dc-facts"><div><span>Category</span><b>'+esc(v.category||'—')+'</b></div><div><span>Stand</span><b>'+esc(v.stand)+'</b></div><div><span>Base ends</span><b>'+n(v.baseEnds)+'</b></div><div><span>Design ends</span><b>'+n(v.designEnds)+'</b></div><div><span>Base yarn</span><b>'+esc(v.baseYarn||'—')+'</b></div><div><span>Design yarn</span><b>'+esc(v.designYarn||'—')+'</b></div></div>'
       +'<div class="wp-grid"><div><h4>Base</h4><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
-      +'<div class="wp-tot" id="wpTot"></div><div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Send to warping</button></div>';
+      +'<div class="wp-tot" id="wpTot"></div><div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
     return h;
   }
   function total(){var g=function(i){return Number(($(i)||{}).value)||0;},b=g('wpBB')*g('wpBM'),d=g('wpDB')*g('wpDM'),e=$('wpTot');if(!e)return;e.textContent=(b||d)?'Total meters: '+(b?'Base '+n(b):'')+(b&&d?' · ':'')+(d?'Design '+n(d):''):'';}
@@ -3200,8 +3200,8 @@ var WP=(function(){
     var h=(msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'');
     if(!cat)return h+'<div class="loading"><div class="spinner"></div>Loading tapes…</div>';
     if(sel)h+=form();
-    else h+='<input class="dc-q" id="wpQ" type="search" placeholder="Search tape name" aria-label="Search tape name" value="'+esc(qs)+'" autocomplete="off"><div id="wpTapes">'+tapeList()+'</div>';
-    h+='<h3 class="wp-h">Warping queue</h3>';
+    else h+=tapeBox();
+    h+='<h3 class="wp-h">Planning</h3>';
     if(!jobs)return h+'<div class="loading"><div class="spinner"></div></div>';
     var l=jobs.slice().reverse();
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
@@ -3214,7 +3214,7 @@ var WP=(function(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
     box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='plan'?'Plan a warping program':'Programs for the machine')+'</p></div></div>'+tabs()+(tab==='plan'?drawPlan():drawExec());
-    if(keep){var q=$('wpQ');q.focus();q.setSelectionRange(q.value.length,q.value.length);}
+    if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
   }
   function loadPlan(){return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){jobs=d.jobs;})]).then(draw).catch(fail);}
@@ -3224,15 +3224,16 @@ var WP=(function(){
   function open(){if(!canP()&&!canE())return;if(tab==='plan'&&!canP())tab='exec';if(tab==='exec'&&!canE())tab='plan';draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel)refresh();},30000);}
   function save(){
     if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
-    api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Sent to warping as '+d.id;sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
-    .catch(function(e){busy=false;var b2=$('wpSave');if(b2){b2.disabled=false;b2.textContent='Send to warping';}var e2=$('wpErr');if(e2)e2.textContent=e.message;});
+    api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Added to planning as '+d.id+'. Tap Execute below when it is ready for the machine.';sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
+    .catch(function(e){busy=false;var b2=$('wpSave');if(b2){b2.disabled=false;b2.textContent='Add to planning';}var e2=$('wpErr');if(e2)e2.textContent=e.message;});
   }
   function setStatus(id,st){if(busy)return;busy=true;api('warp.setStatus',{id:id,status:st}).then(function(){busy=false;return loadExec();}).catch(function(e){busy=false;fail(e);loadExec();});}
+  function toExec(id){if(busy)return;busy=true;api('warp.toExecute',{id:id}).then(function(){busy=false;msg='Sent to Execute';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);}).catch(function(e){busy=false;fail(e);loadPlan();});}
   function cancel(id){if(busy||!confirm('Cancel this job?'))return;busy=true;api('warp.cancel',{id:id}).then(function(){busy=false;return loadPlan();}).catch(function(e){busy=false;fail(e);});}
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||!t.closest('#v-warp'))return;
     if((x=t.closest('[data-wp-tab]'))){tab=x.getAttribute('data-wp-tab');sel=null;vr=null;msg='';draw();return refresh();}
-    if((x=t.closest('[data-wp-tape]'))){var nm=x.getAttribute('data-wp-tape');sel=cat.tapes.filter(function(a){return a.name===nm;})[0]||null;vr=sel&&sel.variants.length===1?sel.variants[0]:null;msg='';return draw();}
+    if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}
     if(t.closest('[data-wp-clear]')){sel=null;vr=null;return draw();}
     if(t.closest('[data-wp-save]'))return save();
@@ -3240,7 +3241,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-cancel]')))return cancel(x.getAttribute('data-wp-cancel'));
   });
   document.addEventListener('input',function(e){
-    var t=e.target;if(t.id==='wpQ'){qs=t.value;var l=$('wpTapes');if(l)l.innerHTML=tapeList();}
+    var t=e.target;if(t.id==='wpQ'){qs=t.value;if(pickTape(t.value)){var q=$('wpBB');if(q&&sel.variants.length===1)q.focus();}}
     else if(/^wp[BD][BM]$/.test(t.id||''))total();
   });
   return {open:open};

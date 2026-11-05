@@ -63,7 +63,7 @@ const ROUTE_PERMS = {
   },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
-    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.cancel': ['warping.plan'],
+    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.plan'],
     'warp.execList': ['warping.execute'], 'warp.setStatus': ['warping.execute'],
   },
 };
