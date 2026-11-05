@@ -638,6 +638,7 @@ button.wp-sbox{cursor:pointer}
 .wp-bdet{padding:0 14px 14px;border-top:1px solid var(--border)}
 .wp-planning{color:var(--text-muted)}
 .wp-wide{display:block;width:100%;margin-top:12px;padding:14px}
+.wp-addrow{display:flex;justify-content:flex-end;margin:0 0 10px}.wp-add{min-height:36px;padding:0 14px;font-size:13px}
 .wp-arch{display:block;width:33.333%;min-height:44px;margin:12px 0 0 auto;padding:6px 8px;font-size:13px;line-height:1.2}
 .wp-archived{color:var(--text-muted)}
 .wp-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:30px;margin-top:4px}
@@ -1317,7 +1318,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v154</span>
+    <span class="app-ver" id="appVer" title="App version">v155</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3324,7 +3325,7 @@ var WP=(function(){
   function drawBoard(){
     if(addT)return tapeForm();
     var mb=msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'';
-    var ab=can('warping.tapes')?'<button type="button" class="wp-sm wp-wide" style="margin:0 0 10px" data-wp-tnew="1">+ Add new tape</button>':'';
+    var ab=can('warping.tapes')?'<div class="wp-addrow"><button type="button" class="wp-sm wp-add" data-wp-tnew="1">Add New Tape</button></div>':'';
     if(!board)return mb+ab+'<div class="loading"><div class="spinner"></div>Loading…</div>';
     if(!board.length)return mb+ab+'<div class="empty-state">No warping jobs yet.</div>';
     return mb+ab+'<div class="wp-board">'+board.map(function(j){var st=stageOf(j),op=openJ===j.id;

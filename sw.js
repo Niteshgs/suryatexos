@@ -1,5 +1,5 @@
 // Suryatex OS service worker: fast shell, offline fallback. Never touches /api/*.
-const V = 'sx-v108';
+const V = 'sx-v109';
 const SHELL = ['/', '/logo.svg', '/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
