@@ -621,6 +621,9 @@ a.app-tile{display:block;text-decoration:none}
 .wp-part{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:4px;align-items:center;margin-top:10px}.wp-part .wp-y{grid-column:2;font-size:14px;font-weight:700;color:var(--text-muted)}.wp-part>b{grid-column:1;text-align:center;min-width:56px}.wp-part .wp-nums{grid-column:2}
 .wp-ends{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:8px}.wp-ends b{color:var(--text);font-size:17px}
 .wp-yarns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}.wp-yarns span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}.wp-yarns b{font-size:14px;overflow-wrap:anywhere}
+.wp-flash{animation:wpflash 1.4s ease-out}
+@keyframes wpflash{0%{box-shadow:0 0 0 3px var(--accent);background:var(--accent-soft)}100%{box-shadow:0 0 0 0 transparent}}
+@media(prefers-reduced-motion:reduce){.wp-flash{animation:none}}
 .wp-ok{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-weight:700;margin-bottom:12px}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1283,7 +1286,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v133</span>
+    <span class="app-ver" id="appVer" title="App version">v134</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3178,7 +3181,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='plan',editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='plan',seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
@@ -3196,7 +3199,7 @@ var WP=(function(){
   }
   function jobCard(j,x){
     if(!x&&editId===j.id)return editCard(j);
-    var s='<div class="wp-job"><div class="wp-top"><b>'+esc(j.tape)+'</b>'+pill(j.status)+'</div>'+(standPill(j.stand)?'<div style="margin-top:6px">'+standPill(j.stand)+'</div>':'')+(j.status==='Done'&&j.done?'<div class="wp-stamp">'+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'<div class="wp-sub">'+esc(j.id)+(j.created&&!x&&j.status!=='Done'?' · '+esc(j.created):'')+'</div>'
+    var s='<div class="wp-job" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'"><div class="wp-top"><b>'+esc(j.tape)+'</b>'+pill(j.status)+'</div>'+(standPill(j.stand)?'<div style="margin-top:6px">'+standPill(j.stand)+'</div>':'')+(j.status==='Done'&&j.done?'<div class="wp-stamp">'+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'<div class="wp-sub">'+esc(j.id)+(j.created&&!x&&j.status!=='Done'?' · '+esc(j.created):'')+'</div>'
       +part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn);
     if(j.started)s+='<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>';
     if(x){var sid=esc(j.id);s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<div class="wp-sub">On hold — another job took priority</div><button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':(askId===j.id?'<div class="wp-sub" style="text-align:center;margin-top:10px">Finish this job? This cannot be undone.</div><div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Yes, mark done</button></div>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-ask="'+sid+'">Mark done</button></div>');}
@@ -3243,6 +3246,8 @@ var WP=(function(){
     box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='plan'?'Plan a warping program':tab==='exec'?'Programs for the machine':'Warped and finished')+'</p></div></div>'+tabs()+(tab==='plan'?drawPlan():tab==='exec'?drawExec():drawReady());
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
+    var cards=box.querySelectorAll('.wp-job[data-jid]');
+    for(var i=0;i<cards.length;i++){var id=cards[i].getAttribute('data-jid'),st=cards[i].getAttribute('data-jst');if(seen[id]&&seen[id]!==st)cards[i].classList.add('wp-flash');seen[id]=st;}
   }
   function loadPlan(){return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){jobs=d.jobs;})]).then(draw).catch(fail);}
   function loadExec(){return api('warp.execList').then(function(d){exec=d.jobs;draw();}).catch(fail);}
