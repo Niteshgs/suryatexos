@@ -669,6 +669,7 @@ button.wp-sbox{cursor:pointer}
 .wp-imgbody{display:flex;justify-content:center;padding-top:10px}.wp-imgbody img{max-width:100%;max-height:70vh;border-radius:8px}
 .wp-fl{display:block;font-size:13px;font-weight:700;color:var(--text-muted);margin-top:10px}
 .wp-fl input{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;font:inherit;font-size:16px;color:var(--text)}.wp-fl input:focus{outline:none;border-color:var(--accent)}
+.wp-bigdone{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--accent-strong);border-radius:28px;padding:26px 44px;box-shadow:0 10px 40px rgba(0,0,0,.5);pointer-events:none;animation:wpbd 1.5s forwards}.wp-bigdone svg{width:96px;height:96px;fill:none;stroke:var(--success);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.wp-bigdone b{font-size:40px;font-weight:800;color:var(--text);letter-spacing:.5px}@keyframes wpbd{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
 .wp-ok{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;background:var(--surface);border:2px solid var(--accent-strong);color:var(--text);border-radius:30px;padding:14px 28px;font-weight:700;font-size:16px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.45);pointer-events:none;animation:wpokf 2.6s forwards}@keyframes wpokf{0%,80%{opacity:1}100%{opacity:0}}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1331,7 +1332,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v172</span>
+    <span class="app-ver" id="appVer" title="App version">v173</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3552,13 +3553,14 @@ var WP=(function(){
     msg='';sel=null;vr=null;qs='';draw();showToast('\u2713 Added to plan','success mid');
     bg('warp.add',args);
   }
+  function bigDone(){var o=document.createElement('div');o.className='wp-bigdone';o.setAttribute('role','status');o.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-7"/></svg><b>Done</b>';document.body.appendChild(o);setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o);},1500);}
   function setStatus(id,st){
     if(String(id).indexOf('tmp')===0)return;
     var j=find(id);if(!j)return;ver++;var was=j.status;
     patch(id,function(x){if(st==='Started'){x.status='Started';x.started=x.started||nowStamp();x.startedBy=x.startedBy||(ME?ME.name:'');}else if(st==='Hold')x.status='On hold';else if(st==='Done'){x.status='Done';x.done=nowStamp();x.doneBy=ME?ME.name:'';}});
     if(st==='Hold')bump('hold',1);else if(st==='Started'&&was==='On hold')bump('hold',-1);
     if(st==='Done'){bump('execute',-1);bump('doneToday',1);if(was==='On hold')bump('hold',-1);if(exec)exec=exec.filter(function(x){return x.id!==id;});if(ready)ready=[j].concat(ready.filter(function(x){return x.id!==id;}));}
-    askId=null;draw();showToast(st==='Done'?'\u2713 Done':st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
+    askId=null;draw();if(st==='Done')bigDone();else showToast(st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
   }
   function eSave(id){
     var g=function(i){return $(i).value;},er=$('wpEErr');er.textContent='';
