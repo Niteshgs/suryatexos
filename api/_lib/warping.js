@@ -289,7 +289,7 @@ async function cancel(a, who) {
 
 const ROUTES = {
   'warp.catalog': () => wrap(catalog),
-  'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled' && j.status !== 'Done').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => !j.status || j.status === 'Planned').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.add': (a, who) => wrap(() => mut(add)(a, who)),
   'warp.toExecute': (a, who) => wrap(() => mut(sendToExecute)(a, who)),
   'warp.summary': () => wrap(async () => {

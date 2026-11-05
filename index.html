@@ -1329,7 +1329,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v169</span>
+    <span class="app-ver" id="appVer" title="App version">v170</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3426,7 +3426,7 @@ var WP=(function(){
     else h+=tapeBox();
     h+='<h3 class="wp-h">Planning</h3>';
     if(!jobs)return h+'<div class="loading"><div class="spinner"></div></div>';
-    var l=jobs.slice().reverse();
+    var l=jobs.filter(function(j){return !j.status||j.status==='Planned';}).reverse();
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
   }
   function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Done','done']:j.status==='Archived'?['Archived','archived']:j.status==='On hold'?['Execute · On hold','on-hold']:['Execute','ready'];}
