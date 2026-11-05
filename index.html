@@ -638,6 +638,7 @@ button.wp-sbox{cursor:pointer}
 .wp-bdet{padding:0 14px 14px;border-top:1px solid var(--border)}
 .wp-planning{color:var(--text-muted)}
 .wp-wide{display:block;width:100%;margin-top:12px;padding:14px}
+.wp-arch{display:block;width:33.333%;min-height:44px;margin:12px 0 0 auto;padding:6px 8px;font-size:13px;line-height:1.2}
 .wp-archived{color:var(--text-muted)}
 .wp-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:30px;margin-top:4px}
 .wp-id{font-size:13px;font-weight:700;color:var(--text-muted)}
@@ -1316,7 +1317,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v149</span>
+    <span class="app-ver" id="appVer" title="App version">v150</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3246,7 +3247,7 @@ var WP=(function(){
     var s='',sid=esc(j.id);
     if(x){s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':(askId===j.id?'<div class="wp-sub" style="text-align:center;margin-top:10px">Finish this job? This cannot be undone.</div><div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Yes, mark done</button></div>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-ask="'+sid+'">Mark done</button></div>');}
     else if(j.status==='Planned'&&canP()){s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-del="'+sid+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Execute</button><button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';}
-    if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-arch="'+sid+'">Send to Archive</button>';
+    if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Send to Archive</button>';
     if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
     if(j.status!=='Done'&&j.status!=='Archived'&&can('warping.cancel')&&!(j.status==='Planned'&&!x&&canP()))s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+sid+'">Cancel job</button></div>';
     return s;
