@@ -250,7 +250,7 @@ const ROUTES = {
   'warp.unarchive': (a, who) => wrap(() => mut((x, w) => archive(x, w, true))(a, who)),
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
-  'warp.image': (a) => wrap(() => image(a)),
+  'warp.image': (a) => image(a),
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
