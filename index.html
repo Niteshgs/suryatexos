@@ -1329,7 +1329,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v170</span>
+    <span class="app-ver" id="appVer" title="App version">v171</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3556,7 +3556,7 @@ var WP=(function(){
     patch(id,function(x){if(st==='Started'){x.status='Started';x.started=x.started||nowStamp();x.startedBy=x.startedBy||(ME?ME.name:'');}else if(st==='Hold')x.status='On hold';else if(st==='Done'){x.status='Done';x.done=nowStamp();x.doneBy=ME?ME.name:'';}});
     if(st==='Hold')bump('hold',1);else if(st==='Started'&&was==='On hold')bump('hold',-1);
     if(st==='Done'){bump('execute',-1);bump('doneToday',1);if(was==='On hold')bump('hold',-1);if(exec)exec=exec.filter(function(x){return x.id!==id;});if(ready)ready=[j].concat(ready.filter(function(x){return x.id!==id;}));}
-    askId=null;draw();if(st!=='Done')showToast(st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
+    askId=null;draw();showToast(st==='Done'?'\u2713 Done':st==='Hold'?'On hold':was==='On hold'?'Resumed':'Started','success');bg('warp.setStatus',{id:id,status:st});
   }
   function eSave(id){
     var g=function(i){return $(i).value;},er=$('wpEErr');er.textContent='';
