@@ -1324,7 +1324,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v162</span>
+    <span class="app-ver" id="appVer" title="App version">v163</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3221,7 +3221,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='dash',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='dash',bf='All',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   var ver=0,pend=0,q=Promise.resolve();
   function nowStamp(){return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date()).replace(',','');}
   function lists(){return [jobs,exec,ready,archived,board].filter(Boolean);}
@@ -3339,8 +3339,10 @@ var WP=(function(){
     var mb=msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'';
     var ab='';
     if(!board)return mb+ab+'<div class="loading"><div class="spinner"></div>Loading…</div>';
-    if(!board.length)return mb+ab+'<div class="empty-state">No warping jobs yet.</div>';
-    return mb+ab+'<div class="wp-board">'+board.map(function(j){var st=stageOf(j),op=openJ===j.id;
+    var ft='<div class="dc-tabs wp-bf" role="tablist" aria-label="Filter by type">'+['All','Woven','Knitted'].map(function(k){return '<button type="button" role="tab" aria-selected="'+(bf===k)+'" class="'+(bf===k?'on':'')+'" data-wp-bf="'+k+'">'+k+'</button>';}).join('')+'</div>';
+    var rows=bf==='All'?board:board.filter(function(j){return j.category===bf;});
+    if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(board.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>';
+    return mb+ab+ft+'<div class="wp-board">'+rows.map(function(j){var st=stageOf(j),op=openJ===j.id;
       var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
       if(op)h+='<div class="wp-bdet">'+meta(j)+when(j)+body(j)+'</div>';
         +(j.started?'<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>':'')+(j.done?'<div class="wp-stamp" style="text-align:left">Done '+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'</div>';
@@ -3443,6 +3445,7 @@ var WP=(function(){
   }
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||(!t.closest('#v-warp')&&!t.closest('#wpNav')))return;
+    if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
     if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!=='dash')?'dash':nt;addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
