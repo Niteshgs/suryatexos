@@ -608,6 +608,8 @@ a.app-tile{display:block;text-decoration:none}
 .wp-st{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);white-space:nowrap}
 .wp-started{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}.wp-done{color:var(--ok,#1a7f4b);border-color:var(--ok,#1a7f4b)}.wp-ready{color:var(--accent);border-color:var(--accent)}
 .wp-big{width:100%;margin-top:12px;padding:18px;border-radius:var(--radius);border:none;background:var(--accent);color:var(--on-accent,#fff);font:inherit;font-size:19px;font-weight:800;cursor:pointer}
+.wp-row3{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:stretch;margin-top:12px}.wp-row3 .wp-big{margin-top:0;min-width:0}
+.wp-sm{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:0 14px;font:inherit;font-size:15px;font-weight:800;color:var(--accent);cursor:pointer}.wp-sm.del{color:var(--danger)}
 .wp-two{display:grid;grid-template-columns:1fr 3fr;gap:10px}.wp-two .wp-big{margin-top:12px}.wp-big.hold{background:var(--surface);color:var(--text);border:2px solid var(--border)}
 .wp-on-hold{color:#b45309;border-color:#b45309;background:rgba(180,83,9,.1)}
 .wp-big.done{background:var(--ok,#1a7f4b)}
@@ -1281,7 +1283,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v131</span>
+    <span class="app-ver" id="appVer" title="App version">v132</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3198,8 +3200,8 @@ var WP=(function(){
       +part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn);
     if(j.started)s+='<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>';
     if(x){var sid=esc(j.id);s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Start</button>':j.status==='On hold'?'<div class="wp-sub">On hold — another job took priority</div><button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Mark done</button></div>';}
-    else if(j.status!=='Done'){if(j.status==='Planned'&&canP())s+='<button type="button" class="wp-big" data-wp-exec="'+esc(j.id)+'">Execute</button><div style="text-align:center"><button type="button" class="wp-x" style="padding:12px 0 0" data-wp-edit="'+esc(j.id)+'">Edit plan</button></div>';}
-    if(j.status!=='Done'&&can('warping.cancel'))s+='<div style="text-align:center">'+(j.status==='Planned'&&!x?'<button type="button" class="dc-del" data-wp-del="'+esc(j.id)+'">Delete plan</button>':'<button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button>')+'</div>';
+    else if(j.status==='Planned'&&canP()){s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-del="'+esc(j.id)+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+esc(j.id)+'">Execute</button><button type="button" class="wp-sm" data-wp-edit="'+esc(j.id)+'">Edit</button></div>';}
+    if(j.status!=='Done'&&can('warping.cancel')&&!(j.status==='Planned'&&!x&&canP()))s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button></div>';
     return s+'</div>';
   }
   function sugg(){var q=qs.trim().toLowerCase();if(!q)return '';var w=q.split(/\s+/);var l=cat.tapes.filter(function(t){var n=t.name.toLowerCase();return w.every(function(x){return n.indexOf(x)>=0;});}).slice(0,8);if(!l.length)return '<div class="wp-none">No tape matches</div>';return '<div class="wp-pick">'+l.map(function(t){return '<button type="button" data-wp-tape="'+esc(t.name)+'">'+esc(t.name)+(t.variants.length>1?'<small>Single / Double stand</small>':'')+'</button>';}).join('')+'</div>';}
