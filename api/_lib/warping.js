@@ -170,7 +170,7 @@ async function image(a) {
   const hook = process.env.WARPING_IMG_URL, key = process.env.WARPING_IMG_KEY;
   if (!hook || !key) throw new Error('Tape photos are not connected yet');
   const r = await fetch(hook + (hook.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(key) + '&tape=' + encodeURIComponent(name), { redirect: 'follow' });
-  let j; try { j = await r.json(); } catch (e) { throw new Error('Photo service did not answer properly'); }
+  const tx = await r.text(); let j; try { j = JSON.parse(tx); } catch (e) { throw new Error('Photo service did not answer properly (' + r.status + ': ' + tx.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140) + ')'); }
   if (!j || j.error) throw new Error((j && j.error) || 'Could not load the photo');
   if (!j.src) throw new Error('No photo for this tape in the sheet');
   if (IMG.size > 30) IMG.clear();
