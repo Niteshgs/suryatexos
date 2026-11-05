@@ -178,6 +178,60 @@ async function image(a) {
   return { src: j.src };
 }
 const key0 = (n) => n.toLowerCase();
+/* ---------- analytics: time from Start to Done (hold time taken out) ---------- */
+const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+function parseStamp(t, nowMs) {                       // "5 Nov 9:33 pm" (India time, no year) -> ms; the year is the latest one that is not in the future
+  const m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}):(\d{2})\s*([ap])\.?m/i.exec(str(t).trim());
+  if (!m || MON[m[2].toLowerCase()] === undefined) return NaN;
+  let h = +m[3] % 12 + (m[5].toLowerCase() === 'p' ? 12 : 0);
+  const yNow = new Date(nowMs + 19800000).getUTCFullYear();
+  for (let y = yNow; y >= yNow - 1; y--) {
+    const ms = Date.UTC(y, MON[m[2].toLowerCase()], +m[1], h, +m[4]) - 19800000;
+    if (ms <= nowMs + 86400000) return ms;
+  }
+  return NaN;
+}
+async function analytics() {
+  const now = Date.now();
+  let plan = []; try { plan = await readPlan(); } catch (e) { if (!/parse range|Unable to parse/i.test(e.message)) throw e; }
+  let logRows = []; try { [logRows] = await G.batchGet(SHEET_ID(), [range(LOG, 'A2', 'C')]); } catch (e) { if (!/parse range|Unable to parse/i.test(e.message)) throw e; }
+  const ev = new Map();
+  for (const r of logRows) {
+    const act = str(r[2]); if (act !== 'Put on hold' && act !== 'Resumed') continue;
+    const t = parseStamp(r[0], now); if (Number.isNaN(t)) continue;
+    const id = str(r[1]); if (!ev.has(id)) ev.set(id, []);
+    ev.get(id).push({ t, act });
+  }
+  const jobs = [];
+  for (const j of plan) {
+    if (j.status !== 'Done' && j.status !== 'Archived') continue;
+    const s = parseStamp(j.started, now), d = parseStamp(j.done, now);
+    if (Number.isNaN(s) || Number.isNaN(d) || d < s) continue;
+    let hold = 0, since = null;
+    for (const e of (ev.get(j.id) || []).sort((x, y) => x.t - y.t)) {
+      if (e.t < s || e.t > d) continue;
+      if (e.act === 'Put on hold') { if (since === null) since = e.t; }
+      else if (since !== null) { hold += e.t - since; since = null; }
+    }
+    if (since !== null) hold += d - since;
+    const beams = j.baseBeams + j.designBeams, meters = j.baseBeams * j.baseMeters + j.designBeams * j.designMeters;
+    const elapsed = (d - s) / 60000, held = Math.min(hold / 60000, elapsed), net = elapsed - held;
+    if (!beams) continue;
+    jobs.push({ id: j.id, tape: j.tape, category: j.category, stand: j.stand, beams, meters, started: j.started, done: j.done, doneMs: d,
+      elapsedMin: Math.round(elapsed), holdMin: Math.round(held), netMin: Math.round(net), perBeamMin: Math.round(net / beams), metersPerHour: net > 0 ? Math.round(meters / (net / 60)) : 0 });
+  }
+  const agg = (list) => {
+    const beams = list.reduce((a, j) => a + j.beams, 0), net = list.reduce((a, j) => a + j.netMin, 0), meters = list.reduce((a, j) => a + j.meters, 0);
+    return { jobs: list.length, beams, meters, avgPerBeamMin: beams ? Math.round(net / beams) : 0, avgJobMin: list.length ? Math.round(net / list.length) : 0, metersPerHour: net > 0 ? Math.round(meters / (net / 60)) : 0 };
+  };
+  const groups = (key) => { const m = new Map(); for (const j of jobs) { const k = key(j); if (!k) continue; if (!m.has(k)) m.set(k, []); m.get(k).push(j); } return [...m.entries()].map(([name, l]) => ({ name, ...agg(l) })); };
+  return {
+    overall: agg(jobs),
+    byCategory: groups((j) => j.category).sort((a, b) => a.name.localeCompare(b.name)),
+    byTape: groups((j) => j.tape).sort((a, b) => b.jobs - a.jobs || a.name.localeCompare(b.name)).slice(0, 40),
+    recent: jobs.sort((a, b) => b.doneMs - a.doneMs).slice(0, 30).map(({ doneMs, ...r }) => r),
+  };
+}
 async function addTape(a, who) {
   const name = flat(a.name);
   if (!name) throw new Error('Enter the tape name');
@@ -251,6 +305,7 @@ const ROUTES = {
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.image': (a) => image(a),
+  'warp.analytics': () => wrap(analytics),
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
