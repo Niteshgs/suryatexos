@@ -105,6 +105,8 @@ header{position:sticky;top:0;z-index:99;background:var(--surface);border-bottom:
 .toast.has-act{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 20px}.toast-act{font:inherit;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:20px;padding:6px 14px;min-height:36px;cursor:pointer}
 .toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .3s ease;z-index:1000;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
 .toast.show{transform:translateX(-50%) translateY(0)}
+.toast.mid{bottom:auto;top:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;transition:transform .25s ease,opacity .25s ease;padding:16px 30px;font-size:16px}
+.toast.mid.show{transform:translate(-50%,-50%) scale(1);opacity:1}
 .toast.success{border-color:var(--success);color:var(--success)}
 .toast.danger{border-color:var(--danger);color:var(--danger)}
 
@@ -1329,7 +1331,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v171</span>
+    <span class="app-ver" id="appVer" title="App version">v172</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3547,7 +3549,7 @@ var WP=(function(){
     var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm};
     var args={tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')};
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
-    msg='Added to plan';sel=null;vr=null;qs='';draw();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},3000);
+    msg='';sel=null;vr=null;qs='';draw();showToast('\u2713 Added to plan','success mid');
     bg('warp.add',args);
   }
   function setStatus(id,st){
