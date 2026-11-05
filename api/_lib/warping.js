@@ -164,34 +164,20 @@ async function archive(a, who, back) {
 const IMG = new Map();
 async function image(a) {
   const name = flat(a.tape); if (!name) throw new Error('No tape given');
-  const key = name.toLowerCase(), hit = IMG.get(key);
+  const hit = IMG.get(name.toLowerCase());
   if (hit && Date.now() - hit.at < 600000) return { src: hit.src };
-  const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(SHEET_ID()) + '?includeGridData=true&ranges=' + encodeURIComponent(range(DATA, 'A2', 'B'))
-    + '&fields=' + encodeURIComponent('sheets.data.rowData.values(userEnteredValue,formattedValue)');
-  const tk = await G.token();
-  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + tk } });
-  const j = await r.json();
-  if (!r.ok) throw new Error('Google Sheets error ' + r.status + ': ' + ((j.error && j.error.message) || ''));
-  const rows = (((j.sheets || [])[0] || {}).data || [{}])[0].rowData || [];
-  let src = '', found = false;
-  for (const row of rows) {
-    const v = row.values || []; if (flat(v[1] && v[1].formattedValue).toLowerCase() !== key) continue;
-    found = true;
-    const iv = v[0] && v[0].userEnteredValue && v[0].userEnteredValue.imageValue;
-    const cu = iv && iv.imageProperties && iv.imageProperties.contentUrl;
-    if (cu) { src = cu.replace(/=s\d+(?=\?|$)/, '=s900'); break; }
-  }
-  if (!found) throw new Error('Tape not found in the sheet');
-  if (!src) throw new Error('No photo for this tape in the sheet');
-  let res = await fetch(src, { headers: { Authorization: 'Bearer ' + tk } });
-  if (!res.ok) res = await fetch(src);
-  if (!res.ok) throw new Error('Could not load the photo');
-  const buf = Buffer.from(await res.arrayBuffer());
-  const out = 'data:' + (res.headers.get('content-type') || 'image/jpeg') + ';base64,' + buf.toString('base64');
+  // In-cell pictures are not exposed by the Sheets REST API, so a tiny read-only Apps Script (see the Apps Script given to the owner) hands them over.
+  const hook = process.env.WARPING_IMG_URL, key = process.env.WARPING_IMG_KEY;
+  if (!hook || !key) throw new Error('Tape photos are not connected yet');
+  const r = await fetch(hook + (hook.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(key) + '&tape=' + encodeURIComponent(name), { redirect: 'follow' });
+  let j; try { j = await r.json(); } catch (e) { throw new Error('Photo service did not answer properly'); }
+  if (!j || j.error) throw new Error((j && j.error) || 'Could not load the photo');
+  if (!j.src) throw new Error('No photo for this tape in the sheet');
   if (IMG.size > 30) IMG.clear();
-  IMG.set(key, { src: out, at: Date.now() });
-  return { src: out };
+  IMG.set(key0(name), { src: j.src, at: Date.now() });
+  return { src: j.src };
 }
+const key0 = (n) => n.toLowerCase();
 async function addTape(a, who) {
   const name = flat(a.name);
   if (!name) throw new Error('Enter the tape name');
