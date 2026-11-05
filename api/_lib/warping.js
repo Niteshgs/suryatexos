@@ -122,6 +122,20 @@ async function setStatus(a, who) {
   await log(id, want === 'Ready' ? 'Reset to Ready' : want, who, job.tape, '');
   return { status: want };
 }
+async function edit(a, who) {
+  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  if (job.status !== 'Planned') throw new Error('Only a plan that has not gone to Execute can be edited');
+  const f = planInputs(a);
+  const cat = await catalog(), t = cat.tapes.find((x) => x.name === flat(job.tape));
+  const v = t && (t.variants.find((x) => x.stand === job.stand) || (t.variants.length === 1 ? t.variants[0] : null));
+  if (!v) throw new Error('That tape is no longer in the Warping Data sheet');
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'G' + job.row, 'N' + job.row), values: [[
+    f.baseBeams ? v.baseEnds : '', f.baseBeams ? safe(v.baseYarn) : '', f.baseBeams || '', f.baseMeters || '',
+    f.designBeams ? v.designEnds : '', f.designBeams ? safe(v.designYarn) : '', f.designBeams || '', f.designMeters || '']] }]);
+  await log(job.id, 'Plan edited', who, job.tape, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : ''));
+  return { edited: true };
+}
 async function remove(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
@@ -148,6 +162,7 @@ const ROUTES = {
   'warp.add': (a, who) => wrap(() => add(a, who)),
   'warp.toExecute': (a, who) => wrap(() => sendToExecute(a, who)),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.edit': (a, who) => wrap(() => edit(a, who)),
   'warp.remove': (a, who) => wrap(() => remove(a, who)),
   'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
