@@ -1271,7 +1271,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v124</span>
+    <span class="app-ver" id="appVer" title="App version">v125</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3182,7 +3182,7 @@ var WP=(function(){
     if(j.done)s+='<div class="wp-sub">Done '+esc(j.done)+(j.doneBy?' by '+esc(j.doneBy):'')+'</div>';
     if(x){s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-set="'+esc(j.id)+'|Started">Start</button>':'<button type="button" class="wp-big done" data-wp-set="'+esc(j.id)+'|Done">Mark done</button>';}
     else if(j.status!=='Done'){if(j.status==='Planned'&&canP())s+='<button type="button" class="wp-big" data-wp-exec="'+esc(j.id)+'">Execute</button>';}
-    if(j.status!=='Done'&&can('warping.cancel'))s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button></div>';
+    if(j.status!=='Done'&&can('warping.cancel'))s+='<div style="text-align:center">'+(j.status==='Planned'&&!x?'<button type="button" class="dc-del" data-wp-del="'+esc(j.id)+'">Delete plan</button>':'<button type="button" class="dc-del" data-wp-cancel="'+esc(j.id)+'">Cancel job</button>')+'</div>';
     return s+'</div>';
   }
   function sugg(){var q=qs.trim().toLowerCase();if(!q)return '';var w=q.split(/\s+/);var l=cat.tapes.filter(function(t){var n=t.name.toLowerCase();return w.every(function(x){return n.indexOf(x)>=0;});}).slice(0,8);if(!l.length)return '<div class="wp-none">No tape matches</div>';return '<div class="wp-pick">'+l.map(function(t){return '<button type="button" data-wp-tape="'+esc(t.name)+'">'+esc(t.name)+(t.variants.length>1?'<small>Single / Double stand</small>':'')+'</button>';}).join('')+'</div>';}
@@ -3237,6 +3237,7 @@ var WP=(function(){
   }
   function setStatus(id,st){if(busy)return;busy=true;api('warp.setStatus',{id:id,status:st}).then(function(){busy=false;return loadExec();}).catch(function(e){busy=false;fail(e);loadExec();});}
   function toExec(id){if(busy)return;busy=true;api('warp.toExecute',{id:id}).then(function(){busy=false;msg='Sent to Execute';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);}).catch(function(e){busy=false;fail(e);loadPlan();});}
+  function del(id){if(busy||!confirm('Delete this plan? It will be removed from the planning list.'))return;busy=true;api('warp.remove',{id:id}).then(function(){busy=false;msg='Plan deleted';return loadPlan();}).then(function(){setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);}).catch(function(e){busy=false;fail(e);loadPlan();});}
   function cancel(id){if(busy||!confirm('Cancel this job?'))return;busy=true;api('warp.cancel',{id:id}).then(function(){busy=false;return refresh();}).catch(function(e){busy=false;fail(e);});}
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||!t.closest('#v-warp'))return;
@@ -3247,6 +3248,7 @@ var WP=(function(){
     if(t.closest('[data-wp-clear]')){sel=null;vr=null;return draw();}
     if(t.closest('[data-wp-save]'))return save();
     if((x=t.closest('[data-wp-set]'))){var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1]);}
+    if((x=t.closest('[data-wp-del]')))return del(x.getAttribute('data-wp-del'));
     if((x=t.closest('[data-wp-cancel]')))return cancel(x.getAttribute('data-wp-cancel'));
   });
   document.addEventListener('input',function(e){

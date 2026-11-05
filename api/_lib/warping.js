@@ -86,8 +86,8 @@ async function add(a, who) {
   return { id };
 }
 
-async function deleteExecRow(row) {
-  const props = await G.sheetProps(SHEET_ID()), p = props.find((x) => x.title === EXEC);
+async function deleteRow(tab, row) {
+  const props = await G.sheetProps(SHEET_ID()), p = props.find((x) => x.title === tab);
   if (!p) return;
   await G.format(SHEET_ID(), [{ deleteDimension: { range: { sheetId: p.sheetId, dimension: 'ROWS', startIndex: row - 1, endIndex: row } } }]);
 }
@@ -117,10 +117,18 @@ async function setStatus(a, who) {
   const upd = want === 'Started' ? ['Started', at, name, '', ''] : want === 'Done' ? ['Done', job.started, job.startedBy, at, name] : ['Ready', '', '', '', ''];
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'S' + job.row), values: [upd] }]);
   const ex = (await readExec()).find((j) => j.id === id);
-  if (want === 'Done') { if (ex) await deleteExecRow(ex.row); }
+  if (want === 'Done') { if (ex) await deleteRow(EXEC, ex.row); }
   else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[want, upd[1], upd[2]]] }]);
   await log(id, want === 'Ready' ? 'Reset to Ready' : want, who, job.tape, '');
   return { status: want };
+}
+async function remove(a, who) {
+  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  if (job.status !== 'Planned') throw new Error('Only a plan that has not gone to Execute can be deleted. Cancel it instead.');
+  await deleteRow(PLAN, job.row);
+  await log(job.id, 'Plan deleted', who, job.tape, '');
+  return { removed: true };
 }
 async function cancel(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
@@ -129,7 +137,7 @@ async function cancel(a, who) {
   if (job.status === 'Cancelled') return { status: 'Cancelled' };
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Cancelled']] }]);
   const ex = (await readExec()).find((j) => j.id === job.id);
-  if (ex) await deleteExecRow(ex.row);
+  if (ex) await deleteRow(EXEC, ex.row);
   await log(job.id, 'Cancelled', who, job.tape, '');
   return { status: 'Cancelled' };
 }
@@ -140,6 +148,7 @@ const ROUTES = {
   'warp.add': (a, who) => wrap(() => add(a, who)),
   'warp.toExecute': (a, who) => wrap(() => sendToExecute(a, who)),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.remove': (a, who) => wrap(() => remove(a, who)),
   'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),
