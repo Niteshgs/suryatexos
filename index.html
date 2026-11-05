@@ -1329,7 +1329,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v168</span>
+    <span class="app-ver" id="appVer" title="App version">v169</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2596,9 +2596,7 @@ var KN=(function(){
           +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
         +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th>'+(showC?'<th class="kn-c">Cycle</th>':'')
-        +(showW?'<th class="kn-n">Wt/Mtr (g)</th><th class="kn-n">Wt/Roll (kg)</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>'
-        +'<div class="kn-sum">'+(showC?'<span>Total cycle <b>'+tc+'</b></span>':'<span></span>')
-        +(showW?'<span>Total Wt/Roll <b>'+Math.round(tr*1000)/1000+' kg</b></span>':'')+'</div></div>';
+        +(showW?'<th class="kn-n">Wt/Mtr (g)</th><th class="kn-n">Wt/Roll (kg)</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
     });
     h+='</div>'+(can('knitted.admin')?'<div class="kn-manage-wrap"><button class="kn-manage" data-kn-manage>'+ICON_SHIELD+'Admin</button></div>':'');
     $('knView').innerHTML=h;
