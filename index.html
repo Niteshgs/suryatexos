@@ -1298,7 +1298,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v137</span>
+    <span class="app-ver" id="appVer" title="App version">v138</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3193,7 +3193,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='plan',board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='dash',board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
@@ -3283,7 +3283,7 @@ var WP=(function(){
   function loadReady(){loadSum();return api('warp.ready').then(function(d){ready=d.jobs;draw();}).catch(fail);}
   function loadBoard(){loadSum();return api('warp.board').then(function(d){board=d.jobs;draw();}).catch(fail);}
   function refresh(){loadSum();return tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;if(tab==='plan'&&!canP())tab='exec';if(tab==='exec'&&!canE())tab='plan';draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},30000);}
+  function open(){if(!canP()&&!canE())return;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},30000);}
   function save(){
     if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
     api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Added to planning as '+d.id+'. Tap Execute below when it is ready for the machine.';sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
