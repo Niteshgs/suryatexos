@@ -299,7 +299,7 @@ const ROUTES = {
     const n = (f) => jobs.filter(f).length;
     return { planning: n((j) => j.status === 'Planned'), execute: n((j) => ['Ready', 'Started', 'On hold'].includes(j.status)), hold: n((j) => j.status === 'On hold'), doneToday: n((j) => (j.status === 'Done' || j.status === 'Archived') && str(j.done).startsWith(today)) };
   }),
-  'warp.board': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.board': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled' && j.status !== 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.archive': (a, who) => wrap(() => mut((x, w) => archive(x, w, false))(a, who)),
   'warp.unarchive': (a, who) => wrap(() => mut((x, w) => archive(x, w, true))(a, who)),
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
