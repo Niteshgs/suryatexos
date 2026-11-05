@@ -30,7 +30,7 @@ const CATALOG = [
     { id: 'attendance.edit', name: 'Edit full month & Bulk Mark' }, { id: 'attendance.staff', name: 'Staff list: add, archive, rebuild Register' },
     { id: 'attendance.leave', name: 'Leave Request (apply & see who applied)' } ] },
   { id: 'warping', name: 'Warping', items: [
-    { id: 'warping.plan', name: 'Planner (plan warping programs, see the queue)' }, { id: 'warping.execute', name: 'Execute (machine screen: see programs, mark Started / Done)' } ] },
+    { id: 'warping.plan', name: 'Planner (plan warping programs, see the queue)' }, { id: 'warping.execute', name: 'Execute (machine screen: see programs, mark Started / Done)' }, { id: 'warping.cancel', name: 'Cancel a warping job (Planner and Execute)' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
@@ -63,7 +63,7 @@ const ROUTE_PERMS = {
   },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
-    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.plan'],
+    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.cancel'], 'warp.ready': ['warping.plan', 'warping.execute'],
     'warp.execList': ['warping.execute'], 'warp.setStatus': ['warping.execute'],
   },
 };

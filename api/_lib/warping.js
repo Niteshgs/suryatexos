@@ -136,9 +136,10 @@ async function cancel(a, who) {
 
 const ROUTES = {
   'warp.catalog': () => wrap(catalog),
-  'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled' && j.status !== 'Done').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.add': (a, who) => wrap(() => add(a, who)),
   'warp.toExecute': (a, who) => wrap(() => sendToExecute(a, who)),
+  'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),
