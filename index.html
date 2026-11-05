@@ -1329,7 +1329,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v167</span>
+    <span class="app-ver" id="appVer" title="App version">v168</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1391,6 +1391,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-beam"/></svg></div>
       <div class="app-name">Warping</div>
       <div class="app-sub">Planner · Execute</div>
+    </button>
+    <button class="app-tile" id="tileAna" onclick="openAna()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg></div>
+      <div class="app-name">Analytics</div>
+      <div class="app-sub">Knitted · Warping</div>
     </button>
     <button class="app-tile" id="tileDocs" onclick="openDocs()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></div>
@@ -1479,6 +1484,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 <!-- WARPING -->
 <div class="view" id="v-warp">
   <div class="sp-wrap" id="wpView"></div>
+</div>
+
+<!-- ANALYTICS (admin + password) -->
+<div class="view" id="v-ana">
+  <div class="sp-wrap" id="anView"></div>
 </div>
 
 <!-- DOCUMENTS (admin) -->
@@ -1708,7 +1718,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1727,6 +1737,7 @@ function openView(v,fromPop){
   else if(v==='users')openUsers(fromPop);
   else if(v==='docs')openDocs(fromPop);
   else if(v==='warp')openWarp(fromPop);
+  else if(v==='ana')openAna(fromPop);
   else if(v==='sales')openSales(fromPop);
   else if(v==='exp')openExp(fromPop);
   else if(v==='att')openAtt(fromPop);
@@ -1747,11 +1758,11 @@ function go(v,fromPop){
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
   var isKN=v.indexOf('kn')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
+  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='ana'||v==='sales'||v==='exp'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
   document.getElementById('atNav').style.display=v==='att'?'':'none';
   document.getElementById('wpNav').style.display=v==='warp'?'':'none';
-  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&v!=='leave'&&!isKN);
+  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='ana'&&v!=='sales'&&v!=='exp'&&v!=='calc'&&v!=='leave'&&!isKN);
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
@@ -1797,12 +1808,13 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*',ana:'@ana'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
 function salesAny(){return can('sales.touchA')||can('sales.touchB');}
-function canView(v){var k=VIEW_PERM[v];if(k==='@att')return attAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
+function anaAny(){return can('knitted.admin')||can('warping.analytics');}
+function canView(v){var k=VIEW_PERM[v];if(k==='@ana')return anaAny();if(k==='@att')return attAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
 function authPost(body){return fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
 function clearPrivate(){['sx_cache','sx_fg','sx_kn','sx_sales','sx_exp','sx_att','sx_me','sx_me_email','sx_user_name'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}
 function showSignIn(msg){
@@ -1854,7 +1866,7 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileUsers',can('@admin'));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileAna',anaAny());show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
@@ -1893,6 +1905,7 @@ function bootAuth(){
 
 /* ══ TEAM ACCESS (admin only) ══ */
 var US={list:[],cat:[],roles:['Admin','Partner','Staff'],edit:null,busy:false};
+function openAna(fromPop){if(!anaAny()){go('home');return;}go('ana',fromPop);if(current==='ana')AN.open();}
 function openWarp(fromPop){if(!canAny('warping.')){go('home');return;}go('warp',fromPop);if(current==='warp')WP.open();}
 function openDocs(fromPop){if(!can('@admin')){go('home');return;}go('docs',fromPop);if(current==='docs')DC.open();}
 function openUsers(fromPop){go('users',fromPop);if(current==='users')usersLoad();}
@@ -2891,6 +2904,108 @@ var KN=(function(){
     if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
   window.addEventListener('beforeunload',function(e){if(isOn()&&tab==='entry'&&dirty){e.preventDefault();e.returnValue='';}});
   return {open:open,load:load,guard:guard,isDirty:function(){return isOn()&&tab==='entry'&&dirty;},loaded:function(){return !!D;},since:function(){return lastLoad;}};
+})();
+/* ══ ANALYTICS · one place for Knitted + Warping analytics (data comes from each function's own sheets) ══ */
+var AN=(function(){
+  var tab='',pin='',wd=null,wErr='',kd=null,kErr='',km='',kBusy=false;
+  function $(i){return document.getElementById(i);}
+  function post(url,body){return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;if(r.status===401){showLock(j.error);throw new Error(j.error||'Signed out');}return j;});});}
+  function n(v){return Number(v||0).toLocaleString('en-IN');}
+  function tabs(){var t=[];if(can('knitted.admin'))t.push(['kn','Knitted']);if(can('warping.analytics'))t.push(['wp','Warping']);return t;}
+  function curMonth(){var d=new Date(Date.now()+(330+new Date().getTimezoneOffset())*60000);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  function shiftMonth(m,k){var y=+m.slice(0,4),mo=+m.slice(5,7)-1+k;y+=Math.floor(mo/12);mo=((mo%12)+12)%12;return y+'-'+String(mo+1).padStart(2,'0');}
+  function open(){pin='';wd=null;kd=null;wErr='';kErr='';km=curMonth();var t=tabs();tab=t.length?t[0][0]:'';draw();askPin();}
+  function verify(v){
+    if(can('warping.analytics'))return post('/api/warping',{fn:'warp.analytics',args:{pin:v}}).then(function(j){if(!j.ok)throw new Error(j.error||'Wrong password');wd=j.data;});
+    return post('/api/hub',{fn:'knitted.verifyPin',args:{pin:v},meta:{}}).then(function(j){if(!(j.ok&&j.data))throw new Error(j.ok?'Wrong password':(j.error||'Could not check the password'));});
+  }
+  function askPin(){
+    var o=$('anPinO');if(o)o.remove();
+    o=document.createElement('div');o.id='anPinO';o.className='wp-imgo';o.setAttribute('role','dialog');o.setAttribute('aria-label','Analytics password');
+    o.innerHTML='<div class="wp-imgbox"><div class="wp-top"><b>Analytics</b><button type="button" class="wp-x" data-c="1">Cancel</button></div><label class="wp-fl">Password<input id="anPin" type="password" inputmode="numeric" autocomplete="off" maxlength="12"></label><div class="us-err" id="anPinErr" role="alert"></div><button type="button" class="btn-submit" id="anPinGo" style="margin-top:12px">Open</button></div>';
+    document.body.appendChild(o);var inp=$('anPin'),go=$('anPinGo'),er=$('anPinErr'),bz=false;
+    var submit=function(){if(bz)return;var v=inp.value.trim();if(!v){er.textContent='Enter the password';return;}bz=true;go.disabled=true;go.textContent='Checking…';er.textContent='';
+      verify(v).then(function(){pin=v;o.remove();draw();load();}).catch(function(e){bz=false;go.disabled=false;go.textContent='Open';er.textContent=e.message;inp.value='';inp.focus();});};
+    go.addEventListener('click',submit);inp.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});
+    o.addEventListener('click',function(e){if(e.target===o||e.target.getAttribute('data-c'))o.remove();});
+    setTimeout(function(){inp.focus();},50);
+  }
+  function load(){
+    if(!pin)return;
+    if(tab==='wp'&&!wd)post('/api/warping',{fn:'warp.analytics',args:{pin:pin}}).then(function(j){if(!j.ok)throw new Error(j.error||'Could not load');wd=j.data;wErr='';draw();}).catch(function(e){wErr=e.message;draw();});
+    if(tab==='kn'&&(!kd||kd.month!==km)&&!kBusy){kBusy=true;var m=km;draw();
+      post('/api/hub',{fn:'knitted.activity',args:{month:m},meta:{pin:pin}}).then(function(j){if(m!==km)return;kBusy=false;if(!j.ok)throw new Error(j.error||'Could not load activity');kd=j.data;kErr='';draw();})
+      .catch(function(e){kBusy=false;kErr=e.message;draw();});}
+  }
+  function draw(){
+    var b=$('anView');if(!b)return;var t=tabs();
+    var h='<div class="us-bar wp-bar"><div><p>'+(tab==='kn'?'Knitted machine activity':tab==='wp'?'Warping time per beam':'Analytics')+'</p></div></div>';
+    if(t.length>1)h+='<div class="dc-tabs" role="tablist" style="grid-template-columns:repeat('+t.length+',1fr)">'+t.map(function(a){return '<button type="button" role="tab" aria-selected="'+(tab===a[0])+'" class="'+(tab===a[0]?'on':'')+'" data-an-tab="'+a[0]+'">'+a[1]+'</button>';}).join('')+'</div>';
+    if(!pin)h+='<div class="empty-state">Analytics is locked.<br><br><button type="button" class="wp-sm wp-anabtn" data-an-unlock="1">Enter password</button></div>';
+    else h+=tab==='kn'?knHtml():wpHtml();
+    b.innerHTML=h;
+  }
+  /* ---- Knitted: same view as Knitted › Admin › Machine Activity ---- */
+  function knHtml(){
+    var cm=curMonth(),a=kd&&kd.month===km?kd:null;
+    var h='<div class="kn-mnav"><button class="kn-btn" data-an-month="'+shiftMonth(km,-1)+'" aria-label="Previous month">‹</button><b>'+(a?esc(a.label):km)+'</b>'
+      +'<button class="kn-btn" data-an-month="'+shiftMonth(km,1)+'" aria-label="Next month"'+(km>=cm?' disabled':'')+'>›</button></div>';
+    if(kBusy&&!a)return h+'<div class="kn-state">Calculating…</div>';
+    if(kErr&&!a)return h+'<div class="kn-state err">'+esc(kErr)+'</div>';
+    if(!a)return h;
+    if(!a.trackedDays)return h+'<p class="kn-sub">'+(a.firstTracked?'Tracking started '+esc(a.firstTracked)+'. ':'')+'No tracked days in this month yet.</p>';
+    var ms=a.machines.slice().sort(function(x,y){return y.changes-x.changes||y.changeovers-x.changeovers;});
+    var best=ms[0]&&ms[0].changes?ms[0].changes:0;
+    function dd(x){return x==null?'–':(x<1?'today':Math.round(x)+' day'+(Math.round(x)===1?'':'s'));}
+    h+='<p class="kn-sub">'+(a.firstTracked?'Tracking since '+esc(a.firstTracked)+' · ':'')+'a change = any beam&#39;s cycle or tape changed · each machine learns its own normal gap after 3 changes</p>';
+    h+='<div class="kn-actlist">'+ms.map(function(m,i){
+      var pct=best?Math.round(m.changes/best*100):0;
+      return '<div class="kn-act'+(m.late?' late':'')+'"><div class="kn-act-top"><span class="kn-act-rank">'+(i+1)+'</span><b>'+esc(m.name)+'</b>'
+        +(m.late?'<span class="kn-late">Running late</span>':'')
+        +'<span class="kn-act-co">'+m.changes+'<small> change'+(m.changes===1?'':'s')+'</small></span></div>'
+        +'<div class="kn-act-bar"><i style="width:'+pct+'%"></i></div>'
+        +'<div class="kn-act-st">'
+        +(a.current?'<span>Last change <b'+(m.late?' class="warn"':'')+'>'+(m.daysSince==null?'none yet':dd(m.daysSince)+(m.daysSince>=1?' ago':''))+'</b></span>':'')
+        +'<span>Normal gap <b>'+(m.normalGap==null?'learning '+Math.min(m.historyChanges,3)+'/3':m.normalGap+' days')+'</b></span>'
+        +'<span>Longest gap <b>'+(m.longestGap==null?'–':dd(m.longestGap))+'</b></span>'
+        +'<span>Beam turnaround <b>'+(m.avgDays==null?'–':m.avgDays+' days')+'</b></span>'
+        +'<span><b>'+m.cycleChanges+'</b> cycle · <b>'+m.tapeChanges+'</b> tape</span></div></div>';}).join('')+'</div>';
+    var cols='grid-template-columns:104px repeat('+a.days+',18px)',hd='<div class="kg-row kg-head" style="'+cols+'"><span class="kg-mn">Machine</span>';
+    for(var d=1;d<=a.days;d++)hd+='<span>'+d+'</span>';
+    var LBL={change:'change',run:'running',late:'running late',wait:'no data yet','':'not tracked'};
+    h+='<h3 class="kn-act-h">Day by day</h3><div class="kn-grid-wrap"><div class="kn-grid">'+hd+'</div>'
+      +a.machines.map(function(m){var c='<div class="kg-row" style="'+cols+'"><span class="kg-mn">'+esc(m.name)+'</span>';
+        m.days.forEach(function(st,k){c+='<i class="'+(st||'na')+'" title="'+esc(m.name)+' · '+(k+1)+': '+LBL[st]+'"></i>';});
+        return c+'</div>';}).join('')
+      +'</div></div><div class="kn-legend"><span><i class="change"></i>Change</span><span><i class="run"></i>Running</span><span><i class="late"></i>Running late</span><span><i class="na"></i>Not tracked</span></div>'
+      +'<p class="kn-sub" style="margin-top:12px">Normal gap = typical days between changes on that machine. Running late = current gap is over '+a.lateFactor+'× its normal gap. Beam turnaround = average days between changes on the same beam. Also saved in the sheet tab “Activity '+esc(a.label)+'”.</p>';
+    return h;
+  }
+  /* ---- Warping: same view as Warping › Admin ---- */
+  function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}
+  function fmt(m){m=Math.round(m||0);if(m<1)return '<1 min';if(m<60)return m+' min';if(m<1440){var h=Math.floor(m/60),r=m%60;return h+'h'+(r?' '+r+'m':'');}var d=Math.floor(m/1440),hh=Math.round((m%1440)/60);return d+'d'+(hh?' '+hh+'h':'');}
+  function wpHtml(){
+    if(wErr&&!wd)return '<div class="empty-state">'+esc(wErr)+'</div>';
+    if(!wd)return '<div class="loading"><div class="spinner"></div>Working out the timings…</div>';
+    var o=wd.overall;
+    if(!o.jobs)return '<div class="empty-state">No finished jobs with a start and done time yet. The numbers appear as jobs are started and marked done.</div>';
+    var card=function(v,l){return '<div class="wp-ac"><b>'+v+'</b><span>'+l+'</span></div>';};
+    var h='<div class="wp-acs">'+card(fmt(o.avgPerBeamMin),'Avg per beam')+card(n(o.jobs),'Jobs timed')+card(n(o.metersPerHour),'Meters / hour')+'</div>';
+    h+='<h3 class="wp-h">By type</h3><div class="wp-list">'+wd.byCategory.map(function(c){return '<div class="wp-ar"><span class="wp-bn">'+wk(c.name)+esc(c.name)+'</span><span class="wp-av"><b>'+fmt(c.avgPerBeamMin)+'</b> per beam<small>'+n(c.jobs)+' jobs · '+n(c.beams)+' beams</small></span></div>';}).join('')+'</div>';
+    h+='<h3 class="wp-h">By tape</h3><div class="wp-list">'+wd.byTape.map(function(c){return '<div class="wp-ar"><span class="wp-bn">'+esc(c.name)+'</span><span class="wp-av"><b>'+fmt(c.avgPerBeamMin)+'</b> per beam<small>'+n(c.jobs)+' jobs · '+n(c.beams)+' beams</small></span></div>';}).join('')+'</div>';
+    h+='<h3 class="wp-h">Recent jobs</h3><div class="wp-list">'+wd.recent.map(function(j){return '<div class="wp-job"><div class="wp-top"><b>'+wk(j.category)+esc(j.tape)+'</b><span class="wp-id">'+esc(j.id)+'</span></div>'
+      +'<div class="wp-when"><i>Started</i><b>'+esc(j.started)+'</b></div><div class="wp-when"><i>Done</i><b>'+esc(j.done)+'</b></div>'
+      +'<div class="wp-nums" style="margin-top:8px"><span><i>Running</i>'+fmt(j.netMin)+'</span><span><i>Per beam</i>'+fmt(j.perBeamMin)+'</span><span><i>Beams</i>'+n(j.beams)+'</span></div>'
+      +(j.holdMin?'<div class="wp-sub">On hold for '+fmt(j.holdMin)+' (not counted)</div>':'')+'</div>';}).join('')+'</div>';
+    return h+'<p class="wp-hint">Running time is from Start to Done, leaving out time on hold. Per beam is running time divided by all beams (Base and Design).</p>';
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target,x;if(!t.closest||!t.closest('#v-ana'))return;
+    if(t.closest('[data-an-unlock]'))return askPin();
+    if((x=t.closest('[data-an-tab]'))){tab=x.getAttribute('data-an-tab');draw();return load();}
+    if((x=t.closest('[data-an-month]'))&&!x.disabled){km=x.getAttribute('data-an-month');draw();return load();}
+  });
+  return {open:open};
 })();
 var KN_TABS={kn:'dash',knentry:'entry',kntapes:'tapes',knadmin:'admin',knact:'act',knlogs:'logs'};
 function openKN(v,fromPop){v=v||'knentry';if(!canView(v))v=can('knitted.entry')?'knentry':can('knitted.dash')?'kn':can('knitted.logs')?'knlogs':'';if(!v){go('home');return;}var run=function(){go(v,fromPop);KN.open(KN_TABS[v]);};if(current==='knentry'&&v!=='knentry')KN.guard(run);else run();}
@@ -4174,7 +4289,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileCalc','tileWarp','tileDocs','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAtt','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
