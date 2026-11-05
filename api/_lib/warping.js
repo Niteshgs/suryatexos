@@ -109,7 +109,7 @@ async function setStatus(a, who) {
   const job = (await readPlan()).find((j) => j.id === id);
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Cancelled') throw new Error('That job was cancelled');
-  if (job.status === 'Done') throw new Error('That job is already done');
+  if (job.status === 'Done' || job.status === 'Archived') throw new Error('That job is already done');
   if (job.status === 'Planned') throw new Error('That job has not been sent to Execute yet');
   const next = { Ready: ['Started'], Started: ['Done', 'Hold', 'Ready'], 'On hold': ['Started'] }[job.status] || [];
   if (!next.includes(want)) throw new Error(job.status === want || (job.status === 'On hold' && want === 'Hold') ? 'Already ' + job.status.toLowerCase() : job.status === 'Ready' ? 'Start the job first' : 'That is not possible right now');
@@ -123,6 +123,16 @@ async function setStatus(a, who) {
   else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[upd[0], upd[1], upd[2]]] }]);
   await log(id, want === 'Ready' ? 'Reset to Ready' : want === 'Hold' ? 'Put on hold' : resume ? 'Resumed' : want, who, job.tape, '');
   return { status: upd[0] };
+}
+async function archive(a, who, back) {
+  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  const from = back ? 'Archived' : 'Done', to = back ? 'Done' : 'Archived';
+  if (job.status === to) return { status: to };
+  if (job.status !== from) throw new Error(back ? 'Only an archived job can be restored' : 'Only a finished job can be archived');
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [[to]] }]);
+  await log(job.id, back ? 'Restored from archive' : 'Archived', who, job.tape, '');
+  return { status: to };
 }
 async function edit(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
@@ -149,7 +159,7 @@ async function remove(a, who) {
 async function cancel(a, who) {
   const job = (await readPlan()).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
-  if (job.status === 'Done') throw new Error('A finished job cannot be cancelled');
+  if (job.status === 'Done' || job.status === 'Archived') throw new Error('A finished job cannot be cancelled');
   if (job.status === 'Cancelled') return { status: 'Cancelled' };
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Cancelled']] }]);
   const ex = (await readExec()).find((j) => j.id === job.id);
@@ -168,9 +178,12 @@ const ROUTES = {
     try { jobs = await readPlan(); } catch (e) { if (!/parse range|Unable to parse/i.test(e.message)) throw e; }
     const today = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' }).format(new Date()).replace(',', '') + ' ';
     const n = (f) => jobs.filter(f).length;
-    return { planning: n((j) => j.status === 'Planned'), execute: n((j) => ['Ready', 'Started', 'On hold'].includes(j.status)), hold: n((j) => j.status === 'On hold'), doneToday: n((j) => j.status === 'Done' && str(j.done).startsWith(today)) };
+    return { planning: n((j) => j.status === 'Planned'), execute: n((j) => ['Ready', 'Started', 'On hold'].includes(j.status)), hold: n((j) => j.status === 'On hold'), doneToday: n((j) => (j.status === 'Done' || j.status === 'Archived') && str(j.done).startsWith(today)) };
   }),
   'warp.board': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.archive': (a, who) => wrap(() => archive(a, who, false)),
+  'warp.unarchive': (a, who) => wrap(() => archive(a, who, true)),
+  'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.edit': (a, who) => wrap(() => edit(a, who)),
   'warp.remove': (a, who) => wrap(() => remove(a, who)),
