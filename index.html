@@ -647,6 +647,8 @@ button.wp-sbox{cursor:pointer}
 .wp-when.done,.wp-when.done b{color:var(--ok,#1a7f4b)}.wp-when.done b{font-size:14px}
 .wp-archbtn{flex:none;width:44px;height:44px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer}
 .wp-archbtn .ic{width:22px;height:22px}.wp-archbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.wp-fl{display:block;font-size:13px;font-weight:700;color:var(--text-muted);margin-top:10px}
+.wp-fl input{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;font:inherit;font-size:16px;color:var(--text)}.wp-fl input:focus{outline:none;border-color:var(--accent)}
 .wp-ok{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-weight:700;margin-bottom:12px}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1309,7 +1311,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v144</span>
+    <span class="app-ver" id="appVer" title="App version">v145</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3204,7 +3206,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='dash',archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='dash',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
@@ -3274,10 +3276,31 @@ var WP=(function(){
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
   }
   function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Done','done']:j.status==='Archived'?['Archived','archived']:j.status==='On hold'?['Execute · On hold','on-hold']:['Execute','ready'];}
+  function tapeForm(){
+    var t=addT,w=t.category==='Woven',k=t.category==='Knitted';
+    var seg=function(key,opts,cur){return '<div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:repeat('+opts.length+',1fr)">'+opts.map(function(o){return '<button type="button" class="'+(cur===o?'on':'')+'" data-wp-tset="'+key+'|'+o+'">'+o+'</button>';}).join('')+'</div>';};
+    var f=function(id,l,v,ty,ph){return '<label class="wp-fl">'+l+'<input id="'+id+'" type="'+(ty||'text')+'"'+(ty==='number'?' inputmode="numeric" min="0"':'')+' value="'+esc(v||'')+'" placeholder="'+(ph||'')+'" autocomplete="off"></label>';};
+    return '<div class="wp-sel"><div class="wp-top"><b>New tape</b><button type="button" class="wp-x" data-wp-tclose="1">Cancel</button></div>'
+      +'<p class="wp-hint">This adds a row to the Warping Data sheet, so it appears in the Planner search.</p>'
+      +f('wpTN','Tape name',t.name,'text','e.g. 42MM Black Matrix')
+      +'<div class="wp-fl">Category</div>'+seg('category',['Woven','Knitted'],t.category)
+      +(w?'<div class="wp-fl">Stand</div>'+seg('stand',['Single Stand','Double Stand'],t.stand):'')
+      +(t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpTBE','Ends',t.baseEnds,'number')+f('wpTBY','Yarn',t.baseYarn)+'</div><div><h4>Design</h4>'+f('wpTDE','Ends',t.designEnds,'number')+f('wpTDY','Yarn',t.designYarn)+'</div></div>':'')
+      +'<div class="us-err" id="wpTErr" role="alert"></div><button type="button" class="btn-submit" id="wpTSave" data-wp-tsave="1"'+(t.category?'':' disabled')+'>Add to Warping Data</button></div>';
+  }
+  function tapeVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(addT){addT.name=g('wpTN');addT.baseEnds=g('wpTBE');addT.designEnds=g('wpTDE');addT.baseYarn=g('wpTBY');addT.designYarn=g('wpTDY');}}
+  function tapeSave(){
+    if(busy)return;tapeVals();var b=$('wpTSave'),er=$('wpTErr');er.textContent='';busy=true;b.disabled=true;b.textContent='Adding…';
+    api('warp.addTape',addT).then(function(){busy=false;msg='Added '+addT.name+' to Warping Data';addT=null;cat=null;board=null;draw();loadBoard();setTimeout(function(){msg='';if(current==='warp'&&tab==='dash')draw();},4000);})
+    .catch(function(e){busy=false;var b2=$('wpTSave'),e2=$('wpTErr');if(b2){b2.disabled=false;b2.textContent='Add to Warping Data';}if(e2)e2.textContent=friendly(e.message);});
+  }
   function drawBoard(){
-    if(!board)return '<div class="loading"><div class="spinner"></div>Loading…</div>';
-    if(!board.length)return '<div class="empty-state">No warping jobs yet.</div>';
-    return '<div class="wp-board">'+board.map(function(j){var st=stageOf(j),op=openJ===j.id;
+    if(addT)return tapeForm();
+    var mb=msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'';
+    var ab=can('warping.tapes')?'<button type="button" class="wp-sm wp-wide" style="margin:0 0 10px" data-wp-tnew="1">+ Add new tape</button>':'';
+    if(!board)return mb+ab+'<div class="loading"><div class="spinner"></div>Loading…</div>';
+    if(!board.length)return mb+ab+'<div class="empty-state">No warping jobs yet.</div>';
+    return mb+ab+'<div class="wp-board">'+board.map(function(j){var st=stageOf(j),op=openJ===j.id;
       var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
       if(op)h+='<div class="wp-bdet">'+meta(j)+when(j)+body(j)+'</div>';
         +(j.started?'<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>':'')+(j.done?'<div class="wp-stamp" style="text-align:left">Done '+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'</div>';
@@ -3332,7 +3355,7 @@ var WP=(function(){
   function cancel(id){if(busy||!confirm('Cancel this job?'))return;busy=true;api('warp.cancel',{id:id}).then(function(){busy=false;return refresh();}).catch(function(e){busy=false;fail(e);});}
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||!t.closest('#v-warp'))return;
-    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt==='archive'&&tab==='archive')?'dash':nt;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
+    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt==='archive'&&tab==='archive')?'dash':nt;addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}
@@ -3340,6 +3363,10 @@ var WP=(function(){
     if(t.closest('[data-wp-save]'))return save();
     if((x=t.closest('[data-wp-arch]')))return arch(x.getAttribute('data-wp-arch'),false);
     if((x=t.closest('[data-wp-unarch]')))return arch(x.getAttribute('data-wp-unarch'),true);
+    if(t.closest('[data-wp-tnew]')){addT={category:'',stand:'',name:'',baseEnds:'',designEnds:'',baseYarn:'',designYarn:''};msg='';return draw();}
+    if(t.closest('[data-wp-tclose]')){addT=null;return draw();}
+    if((x=t.closest('[data-wp-tset]'))){tapeVals();var kv=x.getAttribute('data-wp-tset').split('|');addT[kv[0]]=kv[1];if(kv[0]==='category')addT.stand=kv[1]==='Knitted'?'Not Relevant':'';var fe=addT.category;draw();return;}
+    if(t.closest('[data-wp-tsave]'))return tapeSave();
     if((x=t.closest('[data-wp-open]'))){var oid=x.getAttribute('data-wp-open');openJ=openJ===oid?null:oid;return draw();}
     if((x=t.closest('[data-wp-ask]'))){askId=x.getAttribute('data-wp-ask');return draw();}
     if(t.closest('[data-wp-back]')){askId=null;return draw();}

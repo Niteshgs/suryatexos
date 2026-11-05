@@ -160,6 +160,27 @@ async function archive(a, who, back) {
   await log(job.id, back ? 'Restored from archive' : 'Archived', who, job.tape, '');
   return { status: to };
 }
+async function addTape(a, who) {
+  const name = flat(a.name);
+  if (!name) throw new Error('Enter the tape name');
+  if (name.length > 80) throw new Error('That tape name is too long');
+  const category = a.category === 'Knitted' ? 'Knitted' : a.category === 'Woven' ? 'Woven' : '';
+  if (!category) throw new Error('Choose Woven or Knitted');
+  const stand = category === 'Knitted' ? 'Not Relevant' : ['Single Stand', 'Double Stand'].includes(a.stand) ? a.stand : '';
+  if (!stand) throw new Error('Choose Single Stand or Double Stand');
+  const be = count(a.baseEnds), de = count(a.designEnds);
+  if (Number.isNaN(be) || Number.isNaN(de) || be > 100000 || de > 100000) throw new Error('Ends must be whole numbers');
+  if (!be) throw new Error('Enter the Base ends');
+  const by = flat(a.baseYarn).slice(0, 60), dy = flat(a.designYarn).slice(0, 60);
+  const [rows] = await G.batchGet(SHEET_ID(), [range(DATA, 'A2', 'H')]);
+  if (rows.some((r) => flat(r[1]).toLowerCase() === name.toLowerCase() && (flat(r[3]) || 'Not Relevant') === stand)) throw new Error('That tape and stand is already in the sheet');
+  const row = rows.length + 2;
+  await G.batchUpdate(SHEET_ID(), [{ range: range(DATA, 'B' + row, 'H' + row), values: [[safe(name), category, stand, be, de, safe(by), safe(dy)]] }]);
+  CAT = { v: null, at: 0 };
+  await ensureTabs();
+  await log('', 'Tape added', who, name, category + ' · ' + stand + ' · ' + be + '/' + de + ' ends');
+  return { added: true };
+}
 async function edit(a, who) {
   const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
@@ -211,6 +232,7 @@ const ROUTES = {
   'warp.unarchive': (a, who) => wrap(() => mut((x, w) => archive(x, w, true))(a, who)),
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
   'warp.cancel': (a, who) => wrap(() => mut(cancel)(a, who)),
