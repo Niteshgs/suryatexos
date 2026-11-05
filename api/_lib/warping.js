@@ -170,6 +170,7 @@ const ROUTES = {
     const n = (f) => jobs.filter(f).length;
     return { planning: n((j) => j.status === 'Planned'), execute: n((j) => ['Ready', 'Started', 'On hold'].includes(j.status)), hold: n((j) => j.status === 'On hold'), doneToday: n((j) => j.status === 'Done' && str(j.done).startsWith(today)) };
   }),
+  'warp.board': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.edit': (a, who) => wrap(() => edit(a, who)),
   'warp.remove': (a, who) => wrap(() => remove(a, who)),

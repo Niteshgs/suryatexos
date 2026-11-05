@@ -629,6 +629,13 @@ a.app-tile{display:block;text-decoration:none}
 button.wp-sbox{cursor:pointer}
 .wp-sbox b{display:block;font-size:26px;font-weight:800;line-height:1.1}.wp-sbox span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 .wp-sbox em{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--hold,#b45309);margin-top:2px}
+.wp-tabs button{font-size:13px;padding:10px 2px;white-space:nowrap}
+.wp-board{display:grid;gap:8px}.wp-bitem{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.wp-brow{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:14px;font:inherit;color:var(--text);text-align:left;cursor:pointer;min-height:56px}
+.wp-bn{flex:1;min-width:0;font-size:15px;font-weight:800;overflow-wrap:anywhere}
+.wp-brow .ic{width:18px;height:18px;flex:none;color:var(--text-muted);transition:transform .15s}.wp-brow.open .ic{transform:rotate(180deg)}
+.wp-bdet{padding:0 14px 14px;border-top:1px solid var(--border)}.wp-bdet>.wp-standpill{margin-top:10px}
+.wp-planning{color:var(--text-muted)}
 .wp-ok{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-weight:700;margin-bottom:12px}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1291,7 +1298,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v135</span>
+    <span class="app-ver" id="appVer" title="App version">v137</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3186,13 +3193,13 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='plan',sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='plan',board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
   function n(v){return Number(v||0).toLocaleString('en-IN');}
   function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}
-  function tabs(){var t=[];if(canP())t.push(['plan','Planner']);if(canE())t.push(['exec','Execute']);t.push(['ready','Beams ready']);return '<div class="dc-tabs wp-tabs" role="tablist" style="grid-template-columns:repeat('+t.length+',1fr)">'+t.map(function(a){return '<button type="button" role="tab" aria-selected="'+(tab===a[0])+'" class="'+(tab===a[0]?'on':'')+'" data-wp-tab="'+a[0]+'">'+a[1]+'</button>';}).join('')+'</div>';}
+  function tabs(){var t=[['dash','Dashboard']];if(canP())t.push(['plan','Planner']);if(canE())t.push(['exec','Execute']);t.push(['ready','Beams ready']);return '<div class="dc-tabs wp-tabs" role="tablist" style="grid-template-columns:'+t.map(function(a,i){return i===t.length-1?'1.4fr':'1fr';}).join(' ')+'">'+t.map(function(a){return '<button type="button" role="tab" aria-selected="'+(tab===a[0])+'" class="'+(tab===a[0]?'on':'')+'" data-wp-tab="'+a[0]+'">'+a[1]+'</button>';}).join('')+'</div>';}
   function sumHtml(){
     var v=function(k){return sum?n(sum[k]):'–';};
     var box=function(t,k,lab,extra){var h='<b>'+v(k)+'</b><span>'+lab+'</span>'+(extra||'');return (t==='plan'?canP():t==='exec'?canE():true)?'<button type="button" class="wp-sbox" data-wp-tab="'+t+'" aria-label="'+lab+'">'+h+'</button>':'<div class="wp-sbox">'+h+'</div>';};
@@ -3243,6 +3250,16 @@ var WP=(function(){
     var l=jobs.slice().reverse();
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
   }
+  function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Done','done']:j.status==='On hold'?['Execute · On hold','on-hold']:['Execute','ready'];}
+  function drawBoard(){
+    if(!board)return '<div class="loading"><div class="spinner"></div>Loading…</div>';
+    if(!board.length)return '<div class="empty-state">No warping jobs yet.</div>';
+    return '<div class="wp-board">'+board.map(function(j){var st=stageOf(j),op=openJ===j.id;
+      var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
+      if(op)h+='<div class="wp-bdet">'+standPill(j.stand)+'<div class="wp-sub">'+esc(j.id)+' · '+esc(j.status)+(j.created?' · planned '+esc(j.created):'')+'</div>'+part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn)
+        +(j.started?'<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>':'')+(j.done?'<div class="wp-stamp" style="text-align:left">Done '+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'</div>';
+      return '<div class="wp-bitem">'+h+'</div>';}).join('')+'</div>';
+  }
   function drawReady(){
     if(!ready)return '<div class="loading"><div class="spinner"></div>Loading beams…</div>';
     return ready.length?'<div class="wp-list">'+ready.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No beams are ready yet.</div>';
@@ -3254,7 +3271,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='plan'?'Plan a warping program':tab==='exec'?'Programs for the machine':'Warped and finished')+'</p></div></div><div class="wp-sum" id="wpSum">'+sumHtml()+'</div>'+tabs()+(tab==='plan'?drawPlan():tab==='exec'?drawExec():drawReady());
+    box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Programs for the machine':'Warped and finished')+'</p></div></div><div class="wp-sum" id="wpSum">'+sumHtml()+'</div>'+tabs()+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():drawReady());
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
     var cards=box.querySelectorAll('.wp-job[data-jid]');
@@ -3262,9 +3279,10 @@ var WP=(function(){
   }
   function loadPlan(){loadSum();return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){jobs=d.jobs;})]).then(draw).catch(fail);}
   function loadExec(){loadSum();return api('warp.execList').then(function(d){exec=d.jobs;draw();}).catch(fail);}
-  function fail(e){var b=$('wpView');if(!(tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
+  function fail(e){var b=$('wpView');if(!(tab==='dash'?board:tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
   function loadReady(){loadSum();return api('warp.ready').then(function(d){ready=d.jobs;draw();}).catch(fail);}
-  function refresh(){loadSum();return tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
+  function loadBoard(){loadSum();return api('warp.board').then(function(d){board=d.jobs;draw();}).catch(fail);}
+  function refresh(){loadSum();return tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
   function open(){if(!canP()&&!canE())return;if(tab==='plan'&&!canP())tab='exec';if(tab==='exec'&&!canE())tab='plan';draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},30000);}
   function save(){
     if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
@@ -3288,6 +3306,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}
     if(t.closest('[data-wp-clear]')){sel=null;vr=null;return draw();}
     if(t.closest('[data-wp-save]'))return save();
+    if((x=t.closest('[data-wp-open]'))){var oid=x.getAttribute('data-wp-open');openJ=openJ===oid?null:oid;return draw();}
     if((x=t.closest('[data-wp-ask]'))){askId=x.getAttribute('data-wp-ask');return draw();}
     if(t.closest('[data-wp-back]')){askId=null;return draw();}
     if((x=t.closest('[data-wp-set]'))){askId=null;var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1]);}
