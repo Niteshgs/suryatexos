@@ -641,7 +641,7 @@ button.wp-sbox{cursor:pointer}
 .wp-wk{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;color:var(--on);font-size:12px;font-weight:800;line-height:1;margin-right:8px;vertical-align:1px;flex:none}
 .wp-wk-w,.wp-wk-k{background:var(--accent-strong)}
 .wp-bn{display:inline-flex;align-items:center;min-width:0}
-.wp-anarow{margin-top:16px}.wp-anabtn{min-height:44px;padding:0 22px}
+.wp-anarow{margin-top:16px;display:flex;justify-content:flex-end}.wp-anabtn{min-height:44px;padding:0 22px}
 .wp-acs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}.wp-ac{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 6px;text-align:center}.wp-ac b{display:block;font-size:19px;font-weight:800}.wp-ac span{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px}
 .wp-ar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}.wp-av{text-align:right;font-size:13px;color:var(--text-muted);flex:none}.wp-av b{color:var(--text);font-size:15px}.wp-av small{display:block;font-size:11px}
 .wp-home{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);color:var(--accent);font:inherit;font-size:14px;font-weight:800;padding:0 16px;margin:0 0 10px;cursor:pointer;min-height:40px}
@@ -1327,7 +1327,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v165</span>
+    <span class="app-ver" id="appVer" title="App version">v166</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3224,7 +3224,7 @@ function openCalc(fromPop){if(!canAny('calc.')){go('home');return;}go('calc',fro
 
 /* ══ DOCUMENTS · ROLES CLARITY (admin only) ══ */
 var WP=(function(){
-  var tab='dash',bf='All',ana=null,addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
+  var tab='dash',bf='All',ana=null,anaPin='',addT=null,archived=null,board=null,openJ=null,sum=null,seen={},editId=null,askId=null,cat=null,jobs=null,exec=null,ready=null,sel=null,vr=null,qs='',busy=false,msg='',timer=null;
   var ver=0,pend=0,q=Promise.resolve();
   function nowStamp(){return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date()).replace(',','');}
   function lists(){return [jobs,exec,ready,archived,board].filter(Boolean);}
@@ -3344,14 +3344,26 @@ var WP=(function(){
     if(!board)return mb+ab+'<div class="loading"><div class="spinner"></div>Loading…</div>';
     var ft='<div class="dc-tabs wp-bf" role="tablist" aria-label="Filter by type">'+['All','Woven','Knitted'].map(function(k){return '<button type="button" role="tab" aria-selected="'+(bf===k)+'" class="'+(bf===k?'on':'')+'" data-wp-bf="'+k+'">'+k+'</button>';}).join('')+'</div>';
     var live=board.filter(function(j){return j.status!=='Archived';});var rows=bf==='All'?live:live.filter(function(j){return j.category===bf;});
-    if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(live.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>';
+    if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(live.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>'+anaBtn();
     return mb+ab+ft+'<div class="wp-board">'+rows.map(function(j){var st=stageOf(j),op=openJ===j.id;
       var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
       if(op)h+='<div class="wp-bdet">'+meta(j)+when(j)+body(j)+'</div>';
         +(j.started?'<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>':'')+(j.done?'<div class="wp-stamp" style="text-align:left">Done '+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'</div>';
       return '<div class="wp-bitem">'+h+'</div>';}).join('')+'</div>'+anaBtn();
   }
-  function anaBtn(){return can('warping.analytics')?'<div class="wp-anarow"><button type="button" class="wp-sm wp-anabtn" data-wp-tab="ana">Analytics</button></div>':'';}
+  function anaBtn(){return can('warping.analytics')?'<div class="wp-anarow"><button type="button" class="wp-sm wp-anabtn" data-wp-adm="1">Admin</button></div>':'';}
+  function askPin(){
+    var o=document.getElementById('wpPinO');if(o)o.remove();
+    o=document.createElement('div');o.id='wpPinO';o.className='wp-imgo';o.setAttribute('role','dialog');o.setAttribute('aria-label','Admin password');
+    o.innerHTML='<div class="wp-imgbox"><div class="wp-top"><b>Admin</b><button type="button" class="wp-x" data-c="1">Cancel</button></div><label class="wp-fl">Password<input id="wpPin" type="password" inputmode="numeric" autocomplete="off" maxlength="12"></label><div class="us-err" id="wpPinErr" role="alert"></div><button type="button" class="btn-submit" id="wpPinGo" style="margin-top:12px">Open</button></div>';
+    document.body.appendChild(o);var inp=document.getElementById('wpPin'),go=document.getElementById('wpPinGo'),er=document.getElementById('wpPinErr'),bz=false;
+    var submit=function(){if(bz)return;var v=inp.value.trim();if(!v){er.textContent='Enter the password';return;}bz=true;go.disabled=true;go.textContent='Checking…';er.textContent='';
+      api('warp.analytics',{pin:v}).then(function(d){anaPin=v;ana=d;o.remove();tab='ana';addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();})
+      .catch(function(e){bz=false;go.disabled=false;go.textContent='Open';er.textContent=friendly(e.message);inp.value='';inp.focus();});};
+    go.addEventListener('click',submit);inp.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});
+    o.addEventListener('click',function(e){if(e.target===o||e.target.getAttribute('data-c'))o.remove();});
+    setTimeout(function(){inp.focus();},50);
+  }
   function fmt(m){m=Math.round(m||0);if(m<1)return '<1 min';if(m<60)return m+' min';if(m<1440){var h=Math.floor(m/60),r=m%60;return h+'h'+(r?' '+r+'m':'');}var d=Math.floor(m/1440),hh=Math.round((m%1440)/60);return d+'d'+(hh?' '+hh+'h':'');}
   function drawAna(){
     if(!ana)return '<div class="loading"><div class="spinner"></div>Working out the timings…</div>';
@@ -3384,7 +3396,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Warping analytics':tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping execution list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
+    box.innerHTML='<div class="us-bar"><div><h2>Warping</h2><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping execution list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
@@ -3398,9 +3410,9 @@ var WP=(function(){
   function loadReady(){loadSum();var v=ver;return api('warp.ready').then(function(d){if(v===ver)ready=d.jobs;draw();}).catch(fail);}
   function loadArchived(){loadSum();var v=ver;return api('warp.archived').then(function(d){if(v===ver)archived=d.jobs;draw();}).catch(fail);}
   function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=d.jobs;draw();}).catch(fail);}
-  function loadAna(){var v=ver;return api('warp.analytics').then(function(d){if(v===ver)ana=d;draw();}).catch(fail);}
-  function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='ana'?loadAna():tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},60000);}
+  function loadAna(){var v=ver;return api('warp.analytics',{pin:anaPin}).then(function(d){if(v===ver)ana=d;draw();}).catch(fail);}
+  function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='ana'?(anaPin?loadAna():Promise.resolve()):tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
+  function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},60000);}
   function save(){
     var g=function(i){return $(i).value;},er=$('wpErr');er.textContent='';
     var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
@@ -3465,8 +3477,9 @@ var WP=(function(){
   }
   document.addEventListener('click',function(e){
     var t=e.target,x;if(!t.closest||(!t.closest('#v-warp')&&!t.closest('#wpNav')))return;
+    if(t.closest('[data-wp-adm]'))return askPin();
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
-    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!=='dash')?'dash':nt;addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
+    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!=='dash')?'dash':nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}

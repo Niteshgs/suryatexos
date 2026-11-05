@@ -305,7 +305,14 @@ const ROUTES = {
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.image': (a) => image(a),
-  'warp.analytics': () => wrap(analytics),
+  'warp.analytics': async (a) => {                      // admin area: also needs the Admin password (set in Vercel as WARPING_ADMIN_PIN)
+    const want = process.env.WARPING_ADMIN_PIN || '', got = str(a && a.pin);
+    if (!want || got.length !== want.length || !require('crypto').timingSafeEqual(Buffer.from(got), Buffer.from(want))) {
+      await new Promise((z) => setTimeout(z, 800));
+      throw new Error('Wrong password');
+    }
+    return wrap(analytics);
+  },
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
