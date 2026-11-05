@@ -20,7 +20,9 @@ const range = (tab, a, b) => G.q(tab) + '!' + a + ':' + b;
 const NOACCESS = 'The app cannot open the Warping sheet. Share it with the app\'s service account as Editor.';
 const wrap = async (fn) => { try { return await fn(); } catch (e) { if (/permission|403|404|not found/i.test(e.message)) throw new Error(NOACCESS); throw e; } };
 
+let TABS_OK = false;
 async function ensureTabs() {
+  if (TABS_OK) return;
   const titles = await G.sheetTitles(SHEET_ID());
   const adds = [PLAN, EXEC, LOG].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
@@ -30,12 +32,18 @@ async function ensureTabs() {
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
   if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
+  TABS_OK = true;
 }
 // A log line must never block the real work
 const log = (id, action, who, tape, details) => G.append(SHEET_ID(), range(LOG, 'A', L(LOG_HEAD.length)), [[stamp(), id, action, safe(who), safe(tape), safe(details || '')]]).catch(() => {});
 
 /* ---------- tape list ---------- */
+let CAT = { v: null, at: 0 };
 async function catalog() {
+  if (CAT.v && Date.now() - CAT.at < 300000) return CAT.v;
+  try { CAT = { v: await catalogRead(), at: Date.now() }; return CAT.v; } catch (e) { if (quota(e) && CAT.v) return CAT.v; throw e; }
+}
+async function catalogRead() {
   const [rows] = await G.batchGet(SHEET_ID(), [range(DATA, 'A2', 'H')]);
   const by = new Map();
   for (const r of rows) {
@@ -54,7 +62,25 @@ const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: str(r[1]), by: 
   status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
   designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: str(r[12]), startedBy: str(r[13]) });
-async function readPlan() { const [rows] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A2', L(PLAN_HEAD.length))]); return rows.map(planObj).filter((j) => j.id); }
+// Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
+// Changes (add / execute / start / done ...) always read fresh first, and clear the copy afterwards.
+const PC = { rows: null, at: 0, p: null };
+const quota = (e) => /429|quota/i.test(e.message || '');
+function readPlan(fresh) {
+  if (!fresh && PC.rows && Date.now() - PC.at < 12000) return Promise.resolve(PC.rows.slice());
+  if (PC.p) return PC.p.then((r) => r.slice());
+  PC.p = (async () => {
+    try {
+      const [rows] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A2', L(PLAN_HEAD.length))]);
+      PC.rows = rows.map(planObj).filter((j) => j.id); PC.at = Date.now();
+      return PC.rows;
+    } catch (e) { if (quota(e) && PC.rows) return PC.rows; throw e; }   // Google is busy: show the last copy instead of an error
+    finally { PC.p = null; }
+  })();
+  return PC.p.then((r) => r.slice());
+}
+const dirty = () => { PC.at = 0; };
+const mut = (fn) => async (a, who) => { try { return await fn(a, who); } finally { dirty(); } };   // any change clears the shared copy
 async function readExec() { const [rows] = await G.batchGet(SHEET_ID(), [range(EXEC, 'A2', L(EXEC_HEAD.length))]); return rows.map(execObj).filter((j) => j.id); }
 
 const count = (v) => { const n = Number(v); return v === '' || v == null ? 0 : (Number.isInteger(n) && n >= 0 && n <= 1000000 ? n : NaN); };
@@ -92,7 +118,7 @@ async function deleteRow(tab, row) {
   await G.format(SHEET_ID(), [{ deleteDimension: { range: { sheetId: p.sheetId, dimension: 'ROWS', startIndex: row - 1, endIndex: row } } }]);
 }
 async function sendToExecute(a, who) {
-  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status !== 'Planned') throw new Error(job.status === 'Cancelled' ? 'That job was cancelled' : 'Already sent to Execute');
   await ensureTabs();
@@ -106,7 +132,7 @@ async function sendToExecute(a, who) {
 async function setStatus(a, who) {
   const want = str(a.status), id = str(a.id);
   if (!['Started', 'Done', 'Ready', 'Hold'].includes(want)) throw new Error('Bad status');
-  const job = (await readPlan()).find((j) => j.id === id);
+  const job = (await readPlan(true)).find((j) => j.id === id);
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Cancelled') throw new Error('That job was cancelled');
   if (job.status === 'Done' || job.status === 'Archived') throw new Error('That job is already done');
@@ -125,7 +151,7 @@ async function setStatus(a, who) {
   return { status: upd[0] };
 }
 async function archive(a, who, back) {
-  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   const from = back ? 'Archived' : 'Done', to = back ? 'Done' : 'Archived';
   if (job.status === to) return { status: to };
@@ -135,7 +161,7 @@ async function archive(a, who, back) {
   return { status: to };
 }
 async function edit(a, who) {
-  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status !== 'Planned') throw new Error('Only a plan that has not gone to Execute can be edited');
   const f = planInputs(a);
@@ -149,7 +175,7 @@ async function edit(a, who) {
   return { edited: true };
 }
 async function remove(a, who) {
-  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status !== 'Planned') throw new Error('Only a plan that has not gone to Execute can be deleted. Cancel it instead.');
   await deleteRow(PLAN, job.row);
@@ -157,7 +183,7 @@ async function remove(a, who) {
   return { removed: true };
 }
 async function cancel(a, who) {
-  const job = (await readPlan()).find((j) => j.id === str(a.id));
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status === 'Done' || job.status === 'Archived') throw new Error('A finished job cannot be cancelled');
   if (job.status === 'Cancelled') return { status: 'Cancelled' };
@@ -171,8 +197,8 @@ async function cancel(a, who) {
 const ROUTES = {
   'warp.catalog': () => wrap(catalog),
   'warp.list': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled' && j.status !== 'Done').slice(-200) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
-  'warp.add': (a, who) => wrap(() => add(a, who)),
-  'warp.toExecute': (a, who) => wrap(() => sendToExecute(a, who)),
+  'warp.add': (a, who) => wrap(() => mut(add)(a, who)),
+  'warp.toExecute': (a, who) => wrap(() => mut(sendToExecute)(a, who)),
   'warp.summary': () => wrap(async () => {
     let jobs = [];
     try { jobs = await readPlan(); } catch (e) { if (!/parse range|Unable to parse/i.test(e.message)) throw e; }
@@ -181,14 +207,14 @@ const ROUTES = {
     return { planning: n((j) => j.status === 'Planned'), execute: n((j) => ['Ready', 'Started', 'On hold'].includes(j.status)), hold: n((j) => j.status === 'On hold'), doneToday: n((j) => (j.status === 'Done' || j.status === 'Archived') && str(j.done).startsWith(today)) };
   }),
   'warp.board': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status !== 'Cancelled').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
-  'warp.archive': (a, who) => wrap(() => archive(a, who, false)),
-  'warp.unarchive': (a, who) => wrap(() => archive(a, who, true)),
+  'warp.archive': (a, who) => wrap(() => mut((x, w) => archive(x, w, false))(a, who)),
+  'warp.unarchive': (a, who) => wrap(() => mut((x, w) => archive(x, w, true))(a, who)),
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
-  'warp.edit': (a, who) => wrap(() => edit(a, who)),
-  'warp.remove': (a, who) => wrap(() => remove(a, who)),
-  'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
+  'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
+  'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
+  'warp.cancel': (a, who) => wrap(() => mut(cancel)(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
-  'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),
+  'warp.setStatus': (a, who) => wrap(() => mut(setStatus)(a, who)),
 };
 module.exports = { ROUTES, SHEET_ID, _t: { catalog, planInputs } };

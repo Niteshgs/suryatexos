@@ -1309,7 +1309,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v143</span>
+    <span class="app-ver" id="appVer" title="App version">v144</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3308,12 +3308,13 @@ var WP=(function(){
   }
   function loadPlan(){loadSum();return Promise.all([cat?0:api('warp.catalog').then(function(d){cat=d;}),api('warp.list').then(function(d){jobs=d.jobs;})]).then(draw).catch(fail);}
   function loadExec(){loadSum();return api('warp.execList').then(function(d){exec=d.jobs;draw();}).catch(fail);}
-  function fail(e){var b=$('wpView');if(!(tab==='archive'?archived:tab==='dash'?board:tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
+  function friendly(m){return /429|quota|too many/i.test(m||'')?'Google is busy for a moment. Wait a minute and tap the tab again.':m;}
+  function fail(e){e=new Error(friendly(e.message));var b=$('wpView');if(!(tab==='archive'?archived:tab==='dash'?board:tab==='plan'?(cat&&jobs):tab==='exec'?exec:ready))b.innerHTML='<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(e.message)+'</div>';else{msg='';showToast(e.message,'error');}}
   function loadReady(){loadSum();return api('warp.ready').then(function(d){ready=d.jobs;draw();}).catch(fail);}
   function loadArchived(){loadSum();return api('warp.archived').then(function(d){archived=d.jobs;draw();}).catch(fail);}
   function loadBoard(){loadSum();return api('warp.board').then(function(d){board=d.jobs;draw();}).catch(fail);}
   function refresh(){loadSum();return tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},30000);}
+  function open(){if(!canP()&&!canE())return;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId)refresh();},60000);}
   function save(){
     if(busy)return;var g=function(i){return $(i).value;},er=$('wpErr'),b=$('wpSave');er.textContent='';busy=true;b.disabled=true;b.textContent='Sending…';
     api('warp.add',{tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM')}).then(function(d){busy=false;msg='Added to planning as '+d.id+'. Tap Execute below when it is ready for the machine.';sel=null;vr=null;qs='';jobs=null;draw();loadPlan();setTimeout(function(){msg='';if(current==='warp'&&!sel)draw();},4000);})
