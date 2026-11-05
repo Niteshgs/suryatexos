@@ -1270,7 +1270,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v121</span>
+    <span class="app-ver" id="appVer" title="App version">v122</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3192,10 +3192,10 @@ var WP=(function(){
     h+='<div class="dc-facts"><div><span>Category</span><b>'+esc(v.category||'—')+'</b></div><div><span>Stand</span><b>'+esc(v.stand)+'</b></div><div><span>Base ends</span><b>'+n(v.baseEnds)+'</b></div><div><span>Design ends</span><b>'+n(v.designEnds)+'</b></div><div><span>Base yarn</span><b>'+esc(v.baseYarn||'—')+'</b></div><div><span>Design yarn</span><b>'+esc(v.designYarn||'—')+'</b></div></div>'
       +'<div class="wp-grid"><div><h4>Base</h4><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
-      +'<div class="wp-tot" id="wpTot"></div><div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
+      +'<div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
     return h;
   }
-  function total(){var g=function(i){return Number(($(i)||{}).value)||0;},b=g('wpBB')*g('wpBM'),d=g('wpDB')*g('wpDM'),e=$('wpTot');if(!e)return;e.textContent=(b||d)?'Total meters: '+(b?'Base '+n(b):'')+(b&&d?' · ':'')+(d?'Design '+n(d):''):'';}
+  function total(){}
   function drawPlan(){
     var h=(msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'');
     if(!cat)return h+'<div class="loading"><div class="spinner"></div>Loading tapes…</div>';
