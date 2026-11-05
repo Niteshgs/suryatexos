@@ -160,6 +160,38 @@ async function archive(a, who, back) {
   await log(job.id, back ? 'Restored from archive' : 'Archived', who, job.tape, '');
   return { status: to };
 }
+/* ---------- tape photo (Warping Data column A, read only) ---------- */
+const IMG = new Map();
+async function image(a) {
+  const name = flat(a.tape); if (!name) throw new Error('No tape given');
+  const key = name.toLowerCase(), hit = IMG.get(key);
+  if (hit && Date.now() - hit.at < 600000) return { src: hit.src };
+  const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(SHEET_ID()) + '?includeGridData=true&ranges=' + encodeURIComponent(range(DATA, 'A2', 'B'))
+    + '&fields=' + encodeURIComponent('sheets.data.rowData.values(userEnteredValue,formattedValue)');
+  const tk = await G.token();
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + tk } });
+  const j = await r.json();
+  if (!r.ok) throw new Error('Google Sheets error ' + r.status + ': ' + ((j.error && j.error.message) || ''));
+  const rows = (((j.sheets || [])[0] || {}).data || [{}])[0].rowData || [];
+  let src = '', found = false;
+  for (const row of rows) {
+    const v = row.values || []; if (flat(v[1] && v[1].formattedValue).toLowerCase() !== key) continue;
+    found = true;
+    const iv = v[0] && v[0].userEnteredValue && v[0].userEnteredValue.imageValue;
+    const cu = iv && iv.imageProperties && iv.imageProperties.contentUrl;
+    if (cu) { src = cu.replace(/=s\d+(?=\?|$)/, '=s900'); break; }
+  }
+  if (!found) throw new Error('Tape not found in the sheet');
+  if (!src) throw new Error('No photo for this tape in the sheet');
+  let res = await fetch(src, { headers: { Authorization: 'Bearer ' + tk } });
+  if (!res.ok) res = await fetch(src);
+  if (!res.ok) throw new Error('Could not load the photo');
+  const buf = Buffer.from(await res.arrayBuffer());
+  const out = 'data:' + (res.headers.get('content-type') || 'image/jpeg') + ';base64,' + buf.toString('base64');
+  if (IMG.size > 30) IMG.clear();
+  IMG.set(key, { src: out, at: Date.now() });
+  return { src: out };
+}
 async function addTape(a, who) {
   const name = flat(a.name);
   if (!name) throw new Error('Enter the tape name');
@@ -232,6 +264,7 @@ const ROUTES = {
   'warp.unarchive': (a, who) => wrap(() => mut((x, w) => archive(x, w, true))(a, who)),
   'warp.archived': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Archived').reverse().slice(0, 150) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.ready': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => j.status === 'Done').reverse().slice(0, 100) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.image': (a) => wrap(() => image(a)),
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),

@@ -647,6 +647,11 @@ button.wp-sbox{cursor:pointer}
 .wp-when.done,.wp-when.done b{color:var(--ok,#1a7f4b)}.wp-when.done b{font-size:14px}
 .wp-archbtn{flex:none;width:44px;height:44px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer}
 .wp-archbtn .ic{width:22px;height:22px}.wp-archbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.wp-metar{display:inline-flex;align-items:center;gap:8px}
+.wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:28px;cursor:pointer}
+.wp-imgo{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+.wp-imgbox{background:var(--card,var(--bg));color:var(--text);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:14px}
+.wp-imgbody{display:flex;justify-content:center;padding-top:10px}.wp-imgbody img{max-width:100%;max-height:70vh;border-radius:8px}
 .wp-fl{display:block;font-size:13px;font-weight:700;color:var(--text-muted);margin-top:10px}
 .wp-fl input{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;font:inherit;font-size:16px;color:var(--text)}.wp-fl input:focus{outline:none;border-color:var(--accent)}
 .wp-ok{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-weight:700;margin-bottom:12px}
@@ -1311,7 +1316,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v145</span>
+    <span class="app-ver" id="appVer" title="App version">v146</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3224,7 +3229,7 @@ var WP=(function(){
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill">'+esc(st)+'</span>':'';}
   function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return t?'<span class="wp-standpill">'+esc(t)+'</span>':'<span></span>';}
   function head(j){return '<div class="wp-top"><b>'+esc(j.tape)+'</b>'+pill(j.status)+'</div>';}
-  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-id">'+esc(j.id)+'</span></div>';}
+  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+esc(j.id)+'</span></span></div>';}
   function when(j){
     var d=(j.status==='Done'||j.status==='Archived')&&j.done,r=(j.status==='Started'||j.status==='On hold')&&j.started;
     var lab=d?'Done':r?'Started':'Planned',t=d?j.done:r?j.started:j.created,by=d?j.doneBy:r?j.startedBy:j.by;
@@ -3276,6 +3281,18 @@ var WP=(function(){
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
   }
   function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Done','done']:j.status==='Archived'?['Archived','archived']:j.status==='On hold'?['Execute · On hold','on-hold']:['Execute','ready'];}
+  var imgC={};
+  function showImg(name){
+    var o=document.getElementById('wpImgO');if(o)o.remove();
+    o=document.createElement('div');o.id='wpImgO';o.className='wp-imgo';o.setAttribute('role','dialog');o.setAttribute('aria-label','Tape image');
+    o.innerHTML='<div class="wp-imgbox"><div class="wp-top"><b>'+esc(name)+'</b><button type="button" class="wp-x" data-c="1">Close</button></div><div class="wp-imgbody"><div class="spinner"></div></div></div>';
+    o.addEventListener('click',function(e){if(e.target===o||e.target.getAttribute('data-c'))o.remove();});
+    document.body.appendChild(o);
+    var done=function(h){var b=o.querySelector('.wp-imgbody');if(b)b.innerHTML=h;};
+    if(imgC[name])return done('<img src="'+imgC[name]+'" alt="'+esc(name)+'">');
+    api('warp.image',{tape:name}).then(function(d){imgC[name]=d.src;done('<img src="'+d.src+'" alt="'+esc(name)+'">');}).catch(function(e){done('<p class="wp-hint">'+esc(friendly(e.message))+'</p>');});
+  }
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var o=document.getElementById('wpImgO');if(o)o.remove();}});
   function tapeForm(){
     var t=addT,w=t.category==='Woven',k=t.category==='Knitted';
     var seg=function(key,opts,cur){return '<div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:repeat('+opts.length+',1fr)">'+opts.map(function(o){return '<button type="button" class="'+(cur===o?'on':'')+'" data-wp-tset="'+key+'|'+o+'">'+o+'</button>';}).join('')+'</div>';};
@@ -3363,6 +3380,7 @@ var WP=(function(){
     if(t.closest('[data-wp-save]'))return save();
     if((x=t.closest('[data-wp-arch]')))return arch(x.getAttribute('data-wp-arch'),false);
     if((x=t.closest('[data-wp-unarch]')))return arch(x.getAttribute('data-wp-unarch'),true);
+    if((x=t.closest('[data-wp-img]'))){showImg(x.getAttribute('data-wp-img'));return;}
     if(t.closest('[data-wp-tnew]')){addT={category:'',stand:'',name:'',baseEnds:'',designEnds:'',baseYarn:'',designYarn:''};msg='';return draw();}
     if(t.closest('[data-wp-tclose]')){addT=null;return draw();}
     if((x=t.closest('[data-wp-tset]'))){tapeVals();var kv=x.getAttribute('data-wp-tset').split('|');addT[kv[0]]=kv[1];if(kv[0]==='category')addT.stand=kv[1]==='Knitted'?'Not Relevant':'';var fe=addT.category;draw();return;}

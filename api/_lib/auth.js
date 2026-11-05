@@ -63,7 +63,7 @@ const ROUTE_PERMS = {
   },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
-    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.edit': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.cancel'], 'warp.remove': ['warping.cancel'], 'warp.ready': ['warping.plan', 'warping.execute'], 'warp.summary': ['warping.plan', 'warping.execute'], 'warp.addTape': ['warping.tapes'], 'warp.archive': ['warping.archive'], 'warp.unarchive': ['warping.archive'], 'warp.archived': ['warping.archive'], 'warp.board': ['warping.plan', 'warping.execute'],
+    'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.edit': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.cancel'], 'warp.remove': ['warping.cancel'], 'warp.ready': ['warping.plan', 'warping.execute'], 'warp.summary': ['warping.plan', 'warping.execute'], 'warp.addTape': ['warping.tapes'], 'warp.image': ['warping.plan', 'warping.execute'], 'warp.archive': ['warping.archive'], 'warp.unarchive': ['warping.archive'], 'warp.archived': ['warping.archive'], 'warp.board': ['warping.plan', 'warping.execute'],
     'warp.execList': ['warping.execute'], 'warp.setStatus': ['warping.execute'],
   },
 };
