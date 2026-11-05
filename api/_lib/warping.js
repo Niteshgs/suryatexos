@@ -188,7 +188,7 @@ const ROUTES = {
   'warp.edit': (a, who) => wrap(() => edit(a, who)),
   'warp.remove': (a, who) => wrap(() => remove(a, who)),
   'warp.cancel': (a, who) => wrap(() => cancel(a, who)),
-  'warp.execList': () => wrap(async () => { try { return { jobs: (await readExec()).filter((j) => j.status !== 'Done') }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
+  'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => setStatus(a, who)),
 };
 module.exports = { ROUTES, SHEET_ID, _t: { catalog, planInputs } };
