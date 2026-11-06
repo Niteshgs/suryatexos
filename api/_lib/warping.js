@@ -33,6 +33,11 @@ async function ensureTabs() {
   if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
   if (str(((a[0] || [])[0])).trim() && !str(((tn[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'T1', 'T1'), values: [['Note']] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
+  try {   // the Note column (T) must exist in the grid
+    const pp = (await G.sheetProps(SHEET_ID())).find((x) => x.title === PLAN);
+    const have = pp && pp.gridProperties && pp.gridProperties.columnCount;
+    if (pp && have && have < PLAN_HEAD.length) await G.format(SHEET_ID(), [{ appendDimension: { sheetId: pp.sheetId, dimension: 'COLUMNS', length: PLAN_HEAD.length - have } }]);
+  } catch (e) { /* not fatal */ }
   TABS_OK = true;
 }
 // A log line must never block the real work
@@ -269,11 +274,14 @@ async function edit(a, who) {
   return { edited: true };
 }
 async function note(a) {
+  await ensureTabs();
   const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
   if (job.status !== 'Planned') return { note: '' };                       // notes live only in the planning list
   const text = flat(a.note).slice(0, 300);
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(text)]] }]);
+  const [chk] = await G.batchGet(SHEET_ID(), [range(PLAN, 'T' + job.row, 'T' + job.row)]);   // read it back so a failed save is never reported as saved
+  if (flat(((chk[0] || [])[0])) !== text) throw new Error('The note did not save in the sheet');
   return { note: text };
 }
 async function remove(a, who) {
