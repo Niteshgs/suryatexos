@@ -5,6 +5,8 @@ const G = require('./google');
 
 const SHEET_ID = '1P-TyETzmarTEEQCsI_bQlpbWYadxlqdih657L9pLfvw';   // Knitted Production Tracker
 const TRACKER = 'Tracker', PRODUCT = 'Product Description', LOG = 'Entry Log';
+const SPLITS = 'Beam Splits';                 // optional extra tab: remembers split beams (1A/1B/1C). Never read by the Hub.
+const PART_L = ['A', 'B', 'C'];
 const TZ = 'Asia/Kolkata';
 
 const LAYOUT = {
@@ -79,18 +81,31 @@ async function log(meta, rows) {
     await G.append(SHEET_ID, at(LOG, 'A:L'), out, 'USER_ENTERED');
   } catch (e) { console.error('knitted log failed: ' + e.message); }
 }
+// beam label in Entry Log: 1..4, or 1A/1B/1C for a split beam. Only part A follows the Tracker cell.
+const beamPos = (v) => { const m = /^([1-4])([A-C])?$/i.exec(String(v == null ? '' : v).trim()); return m ? { n: +m[1], part: (m[2] || '').toUpperCase() } : null; };
+const cleanParts = (b) => (b && Array.isArray(b.parts) && b.parts.length >= 2 && b.parts.length <= 3) ? b.parts : null;
 const hasData = (b) => [b.cycle, b.weightMtr, b.weightRoll].some((v) => Number(v)) || !!String(b.tape || '').trim();
 
 async function getAll() {
   const [grid, prod] = await G.batchGet(SHEET_ID, [at(TRACKER, 'A1:K80'), at(PRODUCT, 'A2:A')]);
+  let sp = [];
+  try { if ((await G.sheetTitles(SHEET_ID)).includes(SPLITS)) [sp] = await G.batchGet(SHEET_ID, [at(SPLITS, 'A2:H121')]); } catch (e) { sp = []; }
+  const same = (a, b) => norm(a) === norm(b), num = (v) => Number(v) || 0;
   const cycleData = {};
-  for (const id of Object.keys(LAYOUT)) {
+  Object.keys(LAYOUT).forEach((id, mi) => {
     const L = LAYOUT[id];
-    cycleData[id] = L.rows.map((row) => {
+    cycleData[id] = L.rows.map((row, i) => {
       const r = grid[row - 1];
-      return { cycle: cell(r, col(L.cols.cycle)), tape: cell(r, col(L.cols.tape)), weightMtr: cell(r, col(L.cols.weightMtr)), weightRoll: cell(r, col(L.cols.weightRoll)) };
+      const beam = { cycle: cell(r, col(L.cols.cycle)), tape: cell(r, col(L.cols.tape)), weightMtr: cell(r, col(L.cols.weightMtr)), weightRoll: cell(r, col(L.cols.weightRoll)) };
+      const rows = [0, 1, 2].map((k) => sp[mi * 12 + i * 3 + k] || []);
+      // a split is only shown while part A still matches the Tracker (so edits made directly in the sheet win)
+      if (String(cell(rows[0], 1)).trim() && same(cell(rows[0], 2), beam.tape) && num(cell(rows[0], 3)) === num(beam.cycle)
+        && num(cell(rows[0], 4)) === num(beam.weightMtr) && num(cell(rows[0], 5)) === num(beam.weightRoll)) {
+        beam.parts = rows.map((x) => ({ cycle: cell(x, 3), tape: cell(x, 2), weightMtr: cell(x, 4), weightRoll: cell(x, 5) }));
+      }
+      return beam;
     });
-  }
+  });
   return { cycleData, tapeList: prod.map((r) => String(cell(r, 0))).filter((n) => n.trim().length > 0), loaded: nowParts().loaded, lastUpdate: await lastUpdates() };
 }
 
@@ -121,11 +136,14 @@ async function saveBeams(machineId, beams, meta) {
   if (!L) throw new Error('Unknown machine: ' + machineId);
   if (!Array.isArray(beams) || beams.length !== L.rows.length) throw new Error('Expected ' + L.rows.length + ' beams for ' + machineId);
   const list = await tapeList();
-  const tapes = beams.map((b) => resolveTape(b && b.tape, list));   // fail before writing anything
+  const parts = beams.map(cleanParts);
+  const eff = beams.map((b, i) => parts[i] ? (parts[i][0] || {}) : b);          // Tracker always holds the first part (1A)
+  const tapes = eff.map((b) => resolveTape(b && b.tape, list));                  // fail before writing anything
+  const pTapes = parts.map((ps) => ps ? ps.map((p) => resolveTape(p && p.tape, list)) : null);
   const [before] = await G.batchGet(SHEET_ID, [at(TRACKER, 'A1:K80')]);
   const data = [];
   L.rows.forEach((row, i) => {
-    const b = beams[i] || {};
+    const b = eff[i] || {};
     const put = (c, v) => { if (v !== undefined) data.push({ range: at(TRACKER, L.cols[c] + row), values: [[v]] }); };
     put('cycle', writeVal(b.cycle));
     data.push({ range: at(TRACKER, L.cols.tape + row), values: [[tapes[i]]] });   // always written: blank clears the cell (Clear button)
@@ -135,13 +153,34 @@ async function saveBeams(machineId, beams, meta) {
   await G.batchUpdate(SHEET_ID, data, 'RAW');
   const name = MACHINE_NAMES[machineId] || machineId, rows = [];
   beams.forEach((b, i) => {
+    if (parts[i]) {
+      const n0 = rows.length;
+      parts[i].forEach((p, k) => { const r = Object.assign({}, p || {}, { tape: pTapes[i][k], machine: name, beam: (i + 1) + PART_L[k] }); if (hasData(r)) rows.push(Object.assign(r, { action: 'Save' })); });
+      if (rows.length === n0 && String(cell(before[L.rows[i] - 1], col(L.cols.tape))).trim()) rows.push({ machine: name, beam: i + 1, action: 'Cleared' });
+      return;
+    }
     const r = Object.assign({}, b || {}, { tape: tapes[i], machine: name, beam: i + 1 });
     if (hasData(r)) rows.push(Object.assign(r, { action: 'Save' }));
     else if (String(cell(before[L.rows[i] - 1], col(L.cols.tape))).trim()) rows.push({ machine: name, beam: i + 1, action: 'Cleared' });
   });
   await log(meta, rows);
+  await writeSplits(machineId, parts, pTapes, meta);
   await refreshActivity(nowParts().date.slice(0, 7));
   return true;
+}
+// remembers the split parts (fixed slots: 12 rows per machine). Skipped quietly if the tab is not there.
+async function writeSplits(machineId, parts, pTapes, meta) {
+  try {
+    if (!(await G.sheetTitles(SHEET_ID)).includes(SPLITS)) return;
+    const mi = Object.keys(LAYOUT).indexOf(machineId), start = 2 + mi * 12, t = nowParts(), m = meta || {};
+    const nv = (v) => { const w = writeVal(v); return w === undefined ? '' : w; };
+    const out = [];
+    for (let i = 0; i < 4; i++) for (let k = 0; k < 3; k++) {
+      const p = parts[i] && parts[i][k];
+      out.push(parts[i] ? [MACHINE_NAMES[machineId], (i + 1) + PART_L[k], safeText(pTapes[i][k] || ''), nv(p && p.cycle), nv(p && p.weightMtr), nv(p && p.weightRoll), t.date + ' ' + t.time, safeText(m.user || '')] : ['', '', '', '', '', '', '', '']);
+    }
+    await G.batchUpdate(SHEET_ID, [{ range: at(SPLITS, 'A' + start + ':H' + (start + 11)), values: out }], 'RAW');
+  } catch (e) { console.error('knitted splits failed: ' + e.message); }
 }
 
 function verifyPin(pin) { const p = process.env.KN_ADMIN_PIN || '1408'; return String(pin == null ? '' : pin).trim() === p; }
@@ -194,6 +233,12 @@ async function renameTape(oldName, newName, meta) {
       if (norm(cell(grid[row - 1], col(L.cols.tape))) === norm(o)) { data.push({ range: at(TRACKER, L.cols.tape + row), values: [[n]] }); updated++; }
     }
   }
+  try {
+    if ((await G.sheetTitles(SHEET_ID)).includes(SPLITS)) {
+      const [sp] = await G.batchGet(SHEET_ID, [at(SPLITS, 'C2:C121')]);
+      sp.forEach((r, i) => { if (norm(cell(r, 0)) === norm(o)) data.push({ range: at(SPLITS, 'C' + (i + 2)), values: [[n]] }); });
+    }
+  } catch (e) { console.error('knitted splits rename failed: ' + e.message); }
   await G.batchUpdate(SHEET_ID, data, 'RAW');
   await log(meta, [{ machine: 'Tape list', tape: o + ' -> ' + n, action: 'Rename Tape' }]);
   return { tapeList: await tapeList(), updatedBeams: updated };
@@ -228,8 +273,9 @@ async function computeActivity(month) {      // month = 'YYYY-MM'
   const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:J')], 'serial');
   const events = [];
   for (const r of rows) {
-    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], beam = Number(cell(r, 4)), day = serialDay(cell(r, 0));
-    if (!id || !(beam >= 1 && beam <= 4) || day == null) continue;             // skips old-format / team-site rows
+    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], pos = beamPos(cell(r, 4)), day = serialDay(cell(r, 0));
+    if (!id || !pos || (pos.part && pos.part !== 'A') || day == null) continue;   // skips old-format / team-site rows; split parts B/C
+    const beam = pos.n;
     events.push({ id, beam, day, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), action: String(cell(r, 9) || '') });
   }
   events.sort((a, b) => a.t - b.t);
@@ -365,8 +411,9 @@ const avg = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null
 function computeCycles(rows) {
   const events = [];
   for (const r of rows) {
-    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], beam = Number(cell(r, 4)), day = serialDay(cell(r, 0));
-    if (!id || !(beam >= 1 && beam <= 4) || day == null) continue;
+    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], pos = beamPos(cell(r, 4)), day = serialDay(cell(r, 0));
+    if (!id || !pos || (pos.part && pos.part !== 'A') || day == null) continue;
+    const beam = pos.n;
     events.push({ id, beam, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), clear: /^cleared$/i.test(String(cell(r, 9) || '')) });
   }
   events.sort((a, b) => a.t - b.t);
