@@ -5,10 +5,11 @@ const crypto = require('crypto');
 const G = require('./google');
 
 const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9AsuezpGeU4BppoJj6DGlFEd8';
-const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log';   // DATA is read-only: the app never writes to it
+const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log', DONE = 'Done List';   // DATA is read-only: the app never writes to it
 const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
   'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note'];
+const DONE_HEAD = ['Job ID', 'Tape', 'Category', 'Stand', 'Base Beams', 'Base Meters (each beam)', 'Design Beams', 'Design Meters (each beam)', 'Started', 'Started by', 'Done', 'Done by', 'Time taken', 'Note'];
 const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Beams', 'Base Meters (each beam)',
   'Design Yarn', 'Design Ends', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by'];
 const L = (n) => { let s = ''; while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; };
@@ -20,17 +21,28 @@ const range = (tab, a, b) => G.q(tab) + '!' + a + ':' + b;
 const NOACCESS = 'The app cannot open the Warping sheet. Share it with the app\'s service account as Editor.';
 const wrap = async (fn) => { try { return await fn(); } catch (e) { if (/permission|403|404|not found/i.test(e.message)) throw new Error(NOACCESS); throw e; } };
 
+const blankZero = (x) => (x ? x : '');
+function took(from, to) {
+  const a = parseStamp(from, Date.now()), b = parseStamp(to, Date.now());
+  if (Number.isNaN(a) || Number.isNaN(b) || b < a) return '';
+  const m = Math.round((b - a) / 60000), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mi = m % 60;
+  return (d ? d + 'd ' : '') + (h || d ? h + 'h ' : '') + mi + 'm';
+}
+const doneRow = (j) => [safe(j.id), safe(j.tape), safe(j.category), safe(j.stand), blankZero(j.baseBeams), blankZero(j.baseMeters), blankZero(j.designBeams), blankZero(j.designMeters),
+  safe(j.started), safe(j.startedBy), safe(j.done), safe(j.doneBy), took(j.started, j.done), safe(j.note)];
 let TABS_OK = false;
 async function ensureTabs() {
   if (TABS_OK) return;
   const titles = await G.sheetTitles(SHEET_ID());
-  const adds = [PLAN, EXEC, LOG].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
+  const adds = [PLAN, EXEC, LOG, DONE].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
-  const [a, b, c, tn] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1')]);
+  const newDone = !titles.includes(DONE);
+  const [a, b, c, tn, dn] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1'), range(DONE, 'A1', 'A1')]);
   const data = [];
   if (!str(((a[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'A1', L(PLAN_HEAD.length) + '1'), values: [PLAN_HEAD] });
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
   if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
+  if (!str(((dn[0] || [])[0])).trim()) data.push({ range: range(DONE, 'A1', L(DONE_HEAD.length) + '1'), values: [DONE_HEAD] });
   if (str(((a[0] || [])[0])).trim() && !str(((tn[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'T1', 'T1'), values: [['Note']] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
   try {   // the Note column (T) must exist in the grid
@@ -39,6 +51,12 @@ async function ensureTabs() {
     if (pp && have && have < PLAN_HEAD.length) await G.format(SHEET_ID(), [{ appendDimension: { sheetId: pp.sheetId, dimension: 'COLUMNS', length: PLAN_HEAD.length - have } }]);
   } catch (e) { /* not fatal */ }
   TABS_OK = true;
+  if (newDone) {   // the first time the Done List exists, list the jobs that were finished before it
+    try {
+      const old = (await readPlan(true)).filter((j) => j.done && (j.status === 'Done' || j.status === 'Archived'));
+      if (old.length) await G.append(SHEET_ID(), range(DONE, 'A', L(DONE_HEAD.length)), old.map(doneRow));
+    } catch (e) { /* not fatal */ }
+  }
 }
 // A log line must never block the real work
 const log = (id, action, who, tape, details) => G.append(SHEET_ID(), range(LOG, 'A', L(LOG_HEAD.length)), [[stamp(), id, action, safe(who), safe(tape), safe(details || '')]]).catch(() => {});
@@ -153,6 +171,9 @@ async function setStatus(a, who) {
   const ex = (await readExec()).find((j) => j.id === id);
   if (want === 'Done') { if (ex) await deleteRow(EXEC, ex.row); }
   else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[upd[0], upd[1], upd[2]]] }]);
+  if (want === 'Done') {   // the Done List tab; a failure here never blocks the real work
+    try { await ensureTabs(); await G.append(SHEET_ID(), range(DONE, 'A', L(DONE_HEAD.length)), [doneRow({ ...job, done: at, doneBy: name })]); } catch (e) { /* not fatal */ }
+  }
   await log(id, want === 'Ready' ? 'Reset to Ready' : want === 'Hold' ? 'Put on hold' : resume ? 'Resumed' : want, who, job.tape, '');
   return { status: upd[0] };
 }
@@ -338,4 +359,4 @@ const ROUTES = {
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
   'warp.setStatus': (a, who) => wrap(() => mut(setStatus)(a, who)),
 };
-module.exports = { ROUTES, SHEET_ID, _t: { catalog, planInputs } };
+module.exports = { ROUTES, SHEET_ID, _t: { catalog, planInputs, doneRow, took, ensureTabs, setStatus } };
