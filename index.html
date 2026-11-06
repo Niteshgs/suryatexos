@@ -670,6 +670,7 @@ button.wp-sbox{cursor:pointer}
 .wp-fl{display:block;font-size:13px;font-weight:700;color:var(--text-muted);margin-top:10px}
 .wp-fl input{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;font:inherit;font-size:16px;color:var(--text)}.wp-fl input:focus{outline:none;border-color:var(--accent)}
 .wp-bigdone{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--accent-strong);border-radius:28px;padding:26px 44px;box-shadow:0 10px 40px rgba(0,0,0,.5);pointer-events:none;animation:wpbd 1.5s forwards}.wp-bigdone svg{width:96px;height:96px;fill:none;stroke:var(--success);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.wp-bigdone b{font-size:40px;font-weight:800;color:var(--text);letter-spacing:.5px}@keyframes wpbd{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+.cy-list{display:flex;flex-direction:column;gap:10px}.cy-t{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 12px}.cy-t summary{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;cursor:pointer;list-style:none;min-height:44px}.cy-t summary::-webkit-details-marker{display:none}.cy-n{font-weight:700;color:var(--text)}.cy-c{color:var(--text-muted);font-size:13px;text-align:right}.cy-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding-bottom:10px}.cy-g>div{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 10px;display:flex;flex-direction:column}.cy-g span{color:var(--text-muted);font-size:12px}.cy-g b{color:var(--text);font-size:18px}.cy-g small{color:var(--text-muted);font-size:11px}.cy-note{color:var(--text-muted);font-size:12px;margin:0 0 10px}.cy-runs{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}.cy-r{border-top:1px solid var(--border);padding-top:8px}.cy-rt{display:flex;justify-content:space-between;gap:8px;color:var(--text)}.cy-rt span{color:var(--text-muted);font-size:12px}.cy-rs{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--text-muted);font-size:13px;margin-top:4px}.cy-rs b{color:var(--text)}.cy-st{font-size:12px;color:var(--text-muted);margin-top:4px}.cy-st.on{color:var(--success)}
 .wp-ok{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;background:var(--surface);border:2px solid var(--accent-strong);color:var(--text);border-radius:30px;padding:14px 28px;font-weight:700;font-size:16px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.45);pointer-events:none;animation:wpokf 2.6s forwards}@keyframes wpokf{0%,80%{opacity:1}100%{opacity:0}}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1332,7 +1333,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v174</span>
+    <span class="app-ver" id="appVer" title="App version">v175</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2934,53 +2935,37 @@ var AN=(function(){
   function load(){
     if(!pin)return;
     if(tab==='wp'&&!wd)post('/api/warping',{fn:'warp.analytics',args:{pin:pin}}).then(function(j){if(!j.ok)throw new Error(j.error||'Could not load');wd=j.data;wErr='';draw();}).catch(function(e){wErr=e.message;draw();});
-    if(tab==='kn'&&(!kd||kd.month!==km)&&!kBusy){kBusy=true;var m=km;draw();
-      post('/api/hub',{fn:'knitted.activity',args:{month:m},meta:{pin:pin}}).then(function(j){if(m!==km)return;kBusy=false;if(!j.ok)throw new Error(j.error||'Could not load activity');kd=j.data;kErr='';draw();})
+    if(tab==='kn'&&!kd&&!kBusy){kBusy=true;draw();
+      post('/api/hub',{fn:'knitted.cycles',args:{},meta:{pin:pin}}).then(function(j){kBusy=false;if(!j.ok)throw new Error(j.error||'Could not load');kd=j.data;kErr='';draw();})
       .catch(function(e){kBusy=false;kErr=e.message;draw();});}
   }
   function draw(){
     var b=$('anView');if(!b)return;var t=tabs();
-    var h='<div class="us-bar wp-bar"><div><p>'+(tab==='kn'?'Knitted machine activity':tab==='wp'?'Warping time per beam':'Analytics')+'</p></div></div>';
+    var h='<div class="us-bar wp-bar"><div><p>'+(tab==='kn'?'Knitted cycle timeline':tab==='wp'?'Warping time per beam':'Analytics')+'</p></div></div>';
     if(t.length>1)h+='<div class="dc-tabs" role="tablist" style="grid-template-columns:repeat('+t.length+',1fr)">'+t.map(function(a){return '<button type="button" role="tab" aria-selected="'+(tab===a[0])+'" class="'+(tab===a[0]?'on':'')+'" data-an-tab="'+a[0]+'">'+a[1]+'</button>';}).join('')+'</div>';
     if(!pin)h+='<div class="empty-state">Analytics is locked.<br><br><button type="button" class="wp-sm wp-anabtn" data-an-unlock="1">Enter password</button></div>';
     else h+=tab==='kn'?knHtml():wpHtml();
     b.innerHTML=h;
   }
-  /* ---- Knitted: same view as Knitted › Admin › Machine Activity ---- */
+  /* ---- Knitted: time between cycle changes, per tape ---- */
+  function dur(x){if(x==null)return '–';var m=Math.round(x*1440);if(m<1)return '<1m';var d=Math.floor(m/1440),h=Math.floor(m%1440/60),mi=m%60;return d?d+'d '+h+'h':h?h+'h '+(mi?mi+'m':''):mi+'m';}
   function knHtml(){
-    var cm=curMonth(),a=kd&&kd.month===km?kd:null;
-    var h='<div class="kn-mnav"><button class="kn-btn" data-an-month="'+shiftMonth(km,-1)+'" aria-label="Previous month">‹</button><b>'+(a?esc(a.label):km)+'</b>'
-      +'<button class="kn-btn" data-an-month="'+shiftMonth(km,1)+'" aria-label="Next month"'+(km>=cm?' disabled':'')+'>›</button></div>';
-    if(kBusy&&!a)return h+'<div class="kn-state">Calculating…</div>';
-    if(kErr&&!a)return h+'<div class="kn-state err">'+esc(kErr)+'</div>';
-    if(!a)return h;
-    if(!a.trackedDays)return h+'<p class="kn-sub">'+(a.firstTracked?'Tracking started '+esc(a.firstTracked)+'. ':'')+'No tracked days in this month yet.</p>';
-    var ms=a.machines.slice().sort(function(x,y){return y.changes-x.changes||y.changeovers-x.changeovers;});
-    var best=ms[0]&&ms[0].changes?ms[0].changes:0;
-    function dd(x){return x==null?'–':(x<1?'today':Math.round(x)+' day'+(Math.round(x)===1?'':'s'));}
-    h+='<p class="kn-sub">'+(a.firstTracked?'Tracking since '+esc(a.firstTracked)+' · ':'')+'a change = any beam&#39;s cycle or tape changed · each machine learns its own normal gap after 3 changes</p>';
-    h+='<div class="kn-actlist">'+ms.map(function(m,i){
-      var pct=best?Math.round(m.changes/best*100):0;
-      return '<div class="kn-act'+(m.late?' late':'')+'"><div class="kn-act-top"><span class="kn-act-rank">'+(i+1)+'</span><b>'+esc(m.name)+'</b>'
-        +(m.late?'<span class="kn-late">Running late</span>':'')
-        +'<span class="kn-act-co">'+m.changes+'<small> change'+(m.changes===1?'':'s')+'</small></span></div>'
-        +'<div class="kn-act-bar"><i style="width:'+pct+'%"></i></div>'
-        +'<div class="kn-act-st">'
-        +(a.current?'<span>Last change <b'+(m.late?' class="warn"':'')+'>'+(m.daysSince==null?'none yet':dd(m.daysSince)+(m.daysSince>=1?' ago':''))+'</b></span>':'')
-        +'<span>Normal gap <b>'+(m.normalGap==null?'learning '+Math.min(m.historyChanges,3)+'/3':m.normalGap+' days')+'</b></span>'
-        +'<span>Longest gap <b>'+(m.longestGap==null?'–':dd(m.longestGap))+'</b></span>'
-        +'<span>Beam turnaround <b>'+(m.avgDays==null?'–':m.avgDays+' days')+'</b></span>'
-        +'<span><b>'+m.cycleChanges+'</b> cycle · <b>'+m.tapeChanges+'</b> tape</span></div></div>';}).join('')+'</div>';
-    var cols='grid-template-columns:104px repeat('+a.days+',18px)',hd='<div class="kg-row kg-head" style="'+cols+'"><span class="kg-mn">Machine</span>';
-    for(var d=1;d<=a.days;d++)hd+='<span>'+d+'</span>';
-    var LBL={change:'change',run:'running',late:'running late',wait:'no data yet','':'not tracked'};
-    h+='<h3 class="kn-act-h">Day by day</h3><div class="kn-grid-wrap"><div class="kn-grid">'+hd+'</div>'
-      +a.machines.map(function(m){var c='<div class="kg-row" style="'+cols+'"><span class="kg-mn">'+esc(m.name)+'</span>';
-        m.days.forEach(function(st,k){c+='<i class="'+(st||'na')+'" title="'+esc(m.name)+' · '+(k+1)+': '+LBL[st]+'"></i>';});
-        return c+'</div>';}).join('')
-      +'</div></div><div class="kn-legend"><span><i class="change"></i>Change</span><span><i class="run"></i>Running</span><span><i class="late"></i>Running late</span><span><i class="na"></i>Not tracked</span></div>'
-      +'<p class="kn-sub" style="margin-top:12px">Normal gap = typical days between changes on that machine. Running late = current gap is over '+a.lateFactor+'× its normal gap. Beam turnaround = average days between changes on the same beam. Also saved in the sheet tab “Activity '+esc(a.label)+'”.</p>';
-    return h;
+    var a=kd;
+    if(kBusy&&!a)return '<div class="kn-state">Calculating…</div>';
+    if(kErr&&!a)return '<div class="kn-state err">'+esc(kErr)+'</div>';
+    if(!a)return '';
+    if(!a.tapes.length)return '<p class="kn-sub">No tape runs yet. They appear as beams are saved in the Knitted entry.</p>';
+    var h='<p class="kn-sub">Each beam is followed on its own, from the save at cycle 1 until a different tape replaces it. Tracking since '+esc(a.since)+' · '+a.totalRuns+' runs · averages sharpen as data grows.</p><div class="cy-list">';
+    h+=a.tapes.map(function(t){
+      var cell=function(l,v,c){return '<div><span>'+l+'</span><b>'+dur(v)+'</b>'+(c?'<small>'+c+' run'+(c===1?'':'s')+'</small>':'<small>no data</small>')+'</div>';};
+      return '<details class="cy-t"><summary><span class="cy-n">'+esc(t.name)+'</span><span class="cy-c">'+t.runs+' run'+(t.runs===1?'':'s')+(t.running?' · '+t.running+' on now':'')+'</span></summary>'
+        +'<div class="cy-g">'+cell('Cycle 1 → 2',t.avg12,t.n12)+cell('Cycle 2 → 3',t.avg23,t.n23)+cell('Cycle 1 → 3',t.avg13,t.n13)+cell('Cycle 1 → changeover',t.avgRun,t.nRun)+'</div>'
+        +(t.notRecorded?'<p class="cy-note">'+t.notRecorded+' run'+(t.notRecorded===1?'':'s')+' started before cycle 1 was saved, so left out of the averages.</p>':'')
+        +'<div class="cy-runs">'+t.list.map(function(r){
+          return '<div class="cy-r"><div class="cy-rt"><b>'+esc(r.machine)+' · Beam '+r.beam+'</b><span>'+esc(r.start)+'</span></div>'
+            +'<div class="cy-rs"><span>1→2 <b>'+dur(r.d12)+'</b></span><span>2→3 <b>'+dur(r.d23)+'</b></span><span>1→3 <b>'+dur(r.d13)+'</b></span><span>Total <b>'+dur(r.run)+'</b></span></div>'
+            +'<div class="cy-st'+(r.status==='Running'?' on':'')+'">'+esc(r.status)+(r.startKnown?'':' · start not recorded')+'</div></div>';}).join('')+'</div></details>';}).join('');
+    return h+'</div><p class="kn-sub" style="margin-top:12px">Times are between app saves, so they follow when your team saves each cycle. Total = cycle 1 until another tape takes the beam.</p>';
   }
   /* ---- Warping: same view as Warping › Admin ---- */
   function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}

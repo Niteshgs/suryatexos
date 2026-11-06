@@ -333,6 +333,58 @@ async function recentLogs() {
   return { logs };
 }
 
+
+/* ---------- Cycle timeline per tape (read from Entry Log) ---------- */
+// Each beam is followed on its own. A run starts when a tape is saved on a beam, and ends when a different
+// tape replaces it (changeover) or the beam is cleared. Time between cycle changes is kept against the tape name.
+const stampOf = (t) => { const d = Math.floor(t), f = t - d, sec = Math.round(f * 86400), h = Math.floor(sec / 3600) % 24, m = Math.floor((sec % 3600) / 60), dt = new Date(DAY0 + d * 864e5);
+  return dt.getUTCDate() + ' ' + MON3[dt.getUTCMonth()] + ' ' + ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm'); };
+const avg = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+function computeCycles(rows) {
+  const events = [];
+  for (const r of rows) {
+    const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], beam = Number(cell(r, 4)), day = serialDay(cell(r, 0));
+    if (!id || !(beam >= 1 && beam <= 4) || day == null) continue;
+    events.push({ id, beam, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), clear: /^cleared$/i.test(String(cell(r, 9) || '')) });
+  }
+  events.sort((a, b) => a.t - b.t);
+  const runs = [], open = {};
+  const close = (k, t, why, next) => { const r = open[k]; if (!r) return; r.end = t; r.why = why; r.next = next || ''; delete open[k]; };
+  for (const e of events) {
+    const k = e.id + '|' + e.beam, r = open[k];
+    if (e.clear) { close(k, e.t, 'cleared'); continue; }
+    if (!e.tape || e.cycle == null) continue;
+    const same = r && norm(r.tape) === norm(e.tape);
+    if (same && e.cycle > r.last) { r.marks[e.cycle] = e.t; r.last = e.cycle; continue; }
+    if (same && !(e.cycle === 1 && r.last > 1)) continue;                       // repeat save or a correction
+    if (r) close(k, e.t, same ? 'restart' : 'changeover', same ? '' : e.tape);   // tape changed, or same tape began again at cycle 1
+    const nr = { tape: e.tape, machine: MACHINE_NAMES[e.id], beam: e.beam, start: e.t, startKnown: e.cycle === 1, first: e.cycle, last: e.cycle, marks: {}, end: null, why: '', next: '' };
+    nr.marks[e.cycle] = e.t; open[k] = nr; runs.push(nr);
+  }
+  const by = {};
+  for (const r of runs) {
+    const m = r.marks, step = (a, b) => (m[a] != null && m[b] != null) ? m[b] - m[a] : null;
+    const o = { machine: r.machine, beam: r.beam, start: stampOf(r.start), startKnown: r.startKnown, lastCycle: r.last, ts: r.start,
+      d12: step(1, 2), d23: step(2, 3), d13: step(1, 3), run: (r.startKnown && r.end != null && r.why === 'changeover') ? r.end - r.start : null,
+      status: r.end == null ? 'Running' : r.why === 'changeover' ? 'Changed to ' + r.next : r.why === 'cleared' ? 'Beam cleared' : 'Started again' };
+    const key = norm(r.tape);
+    (by[key] = by[key] || { name: r.tape, list: [] }).list.push(o);
+  }
+  const tapes = Object.values(by).map((g) => {
+    const L = g.list.sort((a, b) => b.ts - a.ts), pick = (f) => L.map((x) => x[f]).filter((v) => v != null);
+    const a12 = pick('d12'), a23 = pick('d23'), a13 = pick('d13'), ar = pick('run');
+    return { name: g.name, runs: L.length, running: L.filter((x) => x.status === 'Running').length,
+      avg12: avg(a12), n12: a12.length, avg23: avg(a23), n23: a23.length, avg13: avg(a13), n13: a13.length, avgRun: avg(ar), nRun: ar.length,
+      notRecorded: L.filter((x) => !x.startKnown).length, list: L.slice(0, 30) };
+  }).sort((a, b) => b.runs - a.runs || a.name.localeCompare(b.name));
+  return { tapes, totalRuns: runs.length, since: events.length ? stampOf(events[0].t) : '' };
+}
+async function cycles(meta) {
+  requireAdmin(meta);
+  const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:J')], 'serial');
+  return computeCycles(rows || []);
+}
+
 const ROUTES = {
   'knitted.getAll': () => getAll(),
   'knitted.saveBeams': (a, m) => saveBeams(a.machineId, a.beams, m),
@@ -341,7 +393,8 @@ const ROUTES = {
   'knitted.removeTape': (a, m) => removeTape(a.name, m),
   'knitted.renameTape': (a, m) => renameTape(a.oldName, a.newName, m),
   'knitted.activity': (a, m) => activity(a.month, m),
+  'knitted.cycles': (a, m) => cycles(m),
   'knitted.recentLogs': () => recentLogs(),
 };
 
-module.exports = { ROUTES, SHEET_ID };
+module.exports = { ROUTES, SHEET_ID, _t: { computeCycles } };

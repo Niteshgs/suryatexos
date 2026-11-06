@@ -48,7 +48,7 @@ const ROUTE_PERMS = {
     'knitted.getAll': ['knitted.entry', 'knitted.dash', 'knitted.admin'],
     'knitted.saveBeams': ['knitted.entry'],
     'knitted.verifyPin': ['knitted.admin'], 'knitted.addTape': ['knitted.admin'], 'knitted.removeTape': ['knitted.admin'],
-    'knitted.renameTape': ['knitted.admin'], 'knitted.activity': ['knitted.admin'],
+    'knitted.renameTape': ['knitted.admin'], 'knitted.activity': ['knitted.admin'], 'knitted.cycles': ['knitted.admin'],
     'knitted.recentLogs': ['knitted.logs'],
   },
   sales: {
