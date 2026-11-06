@@ -482,7 +482,6 @@ a.app-tile{display:block;text-decoration:none}
 #homeGridMore.as-list .app-tile::after{content:"\203A";grid-column:3;grid-row:1/3;font-size:26px;color:var(--text-muted)}
 .home-tg{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .home-tg .ic{width:22px;height:22px}
-.home-tg.on{background:var(--accent-soft);border-color:var(--accent)}
 #homeGrid.as-compact,#homeGridMore.as-compact{grid-template-columns:repeat(4,minmax(0,1fr));justify-content:stretch;gap:8px}
 .as-compact .app-tile{padding:12px 3px 10px;border-radius:14px;min-width:0}
 .as-compact .app-ico{width:46px;height:46px;margin:0 auto 6px;border-radius:13px}
@@ -1351,7 +1350,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v193</span>
+    <span class="app-ver" id="appVer" title="App version">v194</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1372,7 +1371,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <!-- HOME -->
 <div class="view" id="v-home">
-  <div class="home-bar"><button type="button" class="home-tg" id="homeCustBtn" style="display:none" onclick="toggleCust()" aria-label="Choose which apps to show on Home" title="Customize Home" aria-expanded="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button><button type="button" class="home-tg" id="homeTg4" onclick="toggleHomeCompact()" aria-label="Show four apps in a row" title="Four in a row" aria-pressed="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="3" y="4" width="4" height="4" rx="1"/><rect x="10" y="4" width="4" height="4" rx="1"/><rect x="17" y="4" width="4" height="4" rx="1"/><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><rect x="3" y="16" width="4" height="4" rx="1"/><rect x="10" y="16" width="4" height="4" rx="1"/><rect x="17" y="16" width="4" height="4" rx="1"/></svg></button><button type="button" class="prof-btn" id="profBtn" onclick="openProfile()" aria-label="Your profile and theme" aria-haspopup="dialog" title="Profile &amp; theme">?</button></div>
+  <div class="home-bar"><button type="button" class="home-tg" id="homeCustBtn" style="display:none" onclick="toggleCust()" aria-label="Choose which apps to show on Home" title="Customize Home" aria-expanded="false"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button type="button" class="home-tg" id="homeTg" onclick="toggleHomeView()" aria-label="Switch to list view" title="Switch view"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g id="tgList"><path d="M4 6h16M4 12h16M4 18h16"/></g><g id="tg4" style="display:none"><path fill="currentColor" stroke="none" d="M3 4h4v4H3zM10 4h4v4h-4zM17 4h4v4h-4zM3 10h4v4H3zM10 10h4v4h-4zM17 10h4v4h-4zM3 16h4v4H3zM10 16h4v4h-4zM17 16h4v4h-4z"/></g><g id="tgGrid" style="display:none"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></g></svg></button><button type="button" class="prof-btn" id="profBtn" onclick="openProfile()" aria-label="Your profile and theme" aria-haspopup="dialog" title="Profile &amp; theme">?</button></div>
   <div class="app-grid" id="homeGrid">
     <button class="app-tile" id="tileYarn" onclick="openYarn()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-spool"/></svg></div>
@@ -4423,14 +4422,13 @@ function arrangeHome(){var admin=!!(ME&&ME.isAdmin),hid=homeHidden(),main=docume
 function drawCust(){var hid=homeHidden(),h='';HOME_TILES.forEach(function(id){var el=document.getElementById(id);if(!el||el.style.display==='none')return;var nm=el.querySelector('.app-name').textContent;h+='<label class="hc-r"><input type="checkbox" data-hc="'+id+'"'+(hid.indexOf(id)<0?' checked':'')+'><span>'+nm+'</span></label>';});document.getElementById('homeCustList').innerHTML=h;}
 function toggleCust(){var c=document.getElementById('homeCust'),on=c.style.display==='none';c.style.display=on?'':'none';document.getElementById('homeCustBtn').setAttribute('aria-expanded',on?'true':'false');if(on)drawCust();}
 document.addEventListener('change',function(e){var id=e.target&&e.target.getAttribute&&e.target.getAttribute('data-hc');if(!id||!ME||!ME.isAdmin)return;var hid=homeHidden().filter(function(x){return x!==id;});if(!e.target.checked)hid.push(id);saveHome(hid);arrangeHome();});
-function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg'),c=document.getElementById('homeTg4');if(!g||!b)return;var l=m==='list',k=m==='compact';
-  [g,document.getElementById('homeGridMore')].forEach(function(e){e.classList.toggle('as-list',l);e.classList.toggle('as-compact',k);});
-  b.setAttribute('aria-label',l?'Switch to icon view':'Switch to list view');b.title=l?'Icon view':'List view';document.getElementById('tgList').style.display=l?'none':'';document.getElementById('tgGrid').style.display=l?'':'none';
-  if(c){c.setAttribute('aria-pressed',k?'true':'false');c.classList.toggle('on',k);c.setAttribute('aria-label',k?'Show larger icons':'Show four apps in a row');c.title=k?'Larger icons':'Four in a row';}}
-function homeMode(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}return m;}
-function setHomeMode(m){try{localStorage.setItem('homeView',m);}catch(e){}applyHomeView(m);}
-function toggleHomeView(){setHomeMode(homeMode()==='list'?'icons':'list');}
-function toggleHomeCompact(){setHomeMode(homeMode()==='compact'?'icons':'compact');}
+var HOME_NEXT={list:'icons',icons:'compact',compact:'list'},HOME_NAME={list:'list view',icons:'two-in-a-row view',compact:'four-in-a-row view'};
+function applyHomeView(m){var g=document.getElementById('homeGrid'),b=document.getElementById('homeTg');if(!g||!b)return;if(!HOME_NEXT[m])m='icons';
+  [g,document.getElementById('homeGridMore')].forEach(function(e){e.classList.toggle('as-list',m==='list');e.classList.toggle('as-compact',m==='compact');});
+  var nx=HOME_NEXT[m];b.setAttribute('aria-label','Now '+HOME_NAME[m]+'. Switch to '+HOME_NAME[nx]);b.title='Switch to '+HOME_NAME[nx];
+  document.getElementById('tgList').style.display=nx==='list'?'':'none';document.getElementById('tgGrid').style.display=nx==='icons'?'':'none';document.getElementById('tg4').style.display=nx==='compact'?'':'none';}
+function homeMode(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}return HOME_NEXT[m]?m:'icons';}
+function toggleHomeView(){var m=HOME_NEXT[homeMode()];try{localStorage.setItem('homeView',m);}catch(e){}applyHomeView(m);}
 (function(){var m='icons';try{m=localStorage.getItem('homeView')||'icons';}catch(e){}applyHomeView(m);})();
 </script>
 </body>
