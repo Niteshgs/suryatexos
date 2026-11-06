@@ -674,6 +674,7 @@ button.wp-sbox{cursor:pointer}
 .wp-note{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font:inherit;font-size:17px;font-weight:600;line-height:1.35;resize:vertical;min-height:60px}.wp-note::placeholder{color:var(--text-muted);font-weight:500}.wp-note:focus{outline:none;border-color:var(--accent)}
 .wp-noterow{display:flex;gap:8px;align-items:stretch;margin-top:10px}.wp-noterow .wp-note{margin-top:0;flex:1;min-width:0}.wp-notesave{flex:none;width:48px;border-radius:var(--radius-sm);border:1px solid var(--accent-strong);background:var(--accent-strong);color:var(--on);display:grid;place-items:center;cursor:pointer}.wp-notesave .ic{width:24px;height:24px;stroke:var(--on)}.wp-notesave:disabled{opacity:.5}
 .wp-notev{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;margin-top:10px;padding:10px 12px;border-radius:var(--radius);background:var(--accent-soft)}.wp-nvt{min-width:0;flex:1}.wp-nvt span{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}.wp-nvt .ic{width:14px;height:14px;stroke:var(--success)}.wp-nvt p{margin:4px 0 0;font-size:17px;font-weight:600;line-height:1.35;color:var(--text);overflow-wrap:anywhere;white-space:pre-wrap}.wp-nved{flex:none;min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--accent-strong);font:inherit;font-weight:700;cursor:pointer}
+.wp-noteadd{margin-top:10px}.wp-addnote{display:block;width:100%;min-height:48px;border:2px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--accent-strong);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .wp-ok{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;background:var(--surface);border:2px solid var(--accent-strong);color:var(--text);border-radius:30px;padding:14px 28px;font-weight:700;font-size:16px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.45);pointer-events:none;animation:wpokf 2.6s forwards}@keyframes wpokf{0%,80%{opacity:1}100%{opacity:0}}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
 .dc-del{background:none;border:none;color:var(--danger);font:inherit;font-weight:700;padding:12px 0 0;cursor:pointer}
@@ -1336,7 +1337,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v184</span>
+    <span class="app-ver" id="appVer" title="App version">v185</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3398,6 +3399,7 @@ var WP=(function(){
   }
   var noteEd=null;
   function noteBox(j){
+    if(!j.note&&noteEd!==j.id)return '<div class="wp-noteadd" data-wp-nrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-noteedit="'+esc(j.id)+'">+ Add note</button></div>';
     if(j.note&&noteEd!==j.id)return '<div class="wp-notev" data-wp-nrow="'+esc(j.id)+'"><div class="wp-nvt"><span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Note saved</span><p>'+esc(j.note)+'</p></div><button type="button" class="wp-nved" data-wp-noteedit="'+esc(j.id)+'">Edit</button></div>';
     return '<div class="wp-noterow" data-wp-nrow="'+esc(j.id)+'"><textarea class="wp-note" rows="2" maxlength="300" data-wp-note="'+esc(j.id)+'" placeholder="Add a note" aria-label="Note for '+esc(j.tape)+'">'+esc(j.note||'')+'</textarea><button type="button" class="wp-notesave" data-wp-notesave="'+esc(j.id)+'" aria-label="Save note"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button></div>';
   }
@@ -3413,7 +3415,7 @@ var WP=(function(){
       +'<div class="wp-yarns"><div><span>Base yarn</span><b>'+esc(v.baseYarn||'—')+'</b></div><div><span>Design yarn</span><b>'+esc(v.designYarn||'—')+'</b></div></div>'
       +'<div class="wp-grid"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+n(v.baseEnds)+'</b></div><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><div class="wp-ends">Ends <b>'+n(v.designEnds)+'</b></div><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
-      +'<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Add a note" aria-label="Note"></textarea>'
+      +'<div id="wpNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addnote="1">+ Add note</button></div>'
       +'<div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
     return h;
   }
@@ -3544,7 +3546,7 @@ var WP=(function(){
     if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
     if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
-    var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm,note:g('wpNote').trim().replace(/\s+/g,' ')};
+    var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm,note:($('wpNote')?$('wpNote').value:'').trim().replace(/\s+/g,' ')};
     var args={tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM'),note:t.note};
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
     msg='';sel=null;vr=null;qs='';draw();showToast('\u2713 Added to plan','success mid');
@@ -3609,6 +3611,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
     if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!=='dash')?'dash':nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
+    if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Add a note" aria-label="Note"></textarea>';$('wpNote').focus();}return;}
     if((x=t.closest('[data-wp-noteedit]')))return swapNote(x.getAttribute('data-wp-noteedit'),true);
     if((x=t.closest('[data-wp-notesave]')))return saveNote(x.getAttribute('data-wp-notesave'),x);
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
