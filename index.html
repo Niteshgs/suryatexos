@@ -611,7 +611,7 @@ a.app-tile{display:block;text-decoration:none}
 .wp-started{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}.wp-done{color:var(--success);border-color:var(--success)}.wp-ready{color:var(--accent);border-color:var(--accent)}
 .wp-big{width:100%;margin-top:12px;padding:18px;border-radius:var(--radius);border:none;background:var(--accent-strong);color:var(--on);font:inherit;font-size:19px;font-weight:800;cursor:pointer}
 .wp-row3{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:stretch;margin-top:12px}.wp-row3 .wp-big{margin-top:0;min-width:0}
-.wp-sm{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:0 14px;font:inherit;font-size:15px;font-weight:800;color:var(--accent);cursor:pointer}.wp-sm.del{color:var(--danger)}
+.wp-sm{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:0 14px;font:inherit;font-size:15px;font-weight:800;color:var(--accent);cursor:pointer}.wp-sm.del{color:var(--danger)}.wp-cancelbtn{display:block;width:100%;min-height:48px;margin-top:10px;border-color:var(--danger)}
 .wp-two{display:grid;grid-template-columns:1fr 3fr;gap:10px}.wp-two .wp-big{margin-top:12px}.wp-big.hold{background:var(--surface);color:var(--text);border:2px solid var(--border)}
 .wp-on-hold{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
 .wp-big.done{background:var(--success);color:var(--on)}
@@ -1336,7 +1336,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v183</span>
+    <span class="app-ver" id="appVer" title="App version">v184</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3389,7 +3389,7 @@ var WP=(function(){
     }
     if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
     if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
-    if(x&&j.status!=='Done'&&j.status!=='Archived'&&can('warping.cancel')&&ask!=='done')s+='<div style="text-align:center"><button type="button" class="dc-del" data-wp-askcan="'+sid+'">Cancel job</button></div>';
+    if(x&&j.status!=='Done'&&j.status!=='Archived'&&can('warping.cancel')&&ask!=='done')s+='<button type="button" class="wp-sm del wp-cancelbtn" data-wp-askcan="'+sid+'">Cancel job</button>';
     return s;
   }
   function jobCard(j,x){
