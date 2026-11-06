@@ -33,6 +33,8 @@ const CATALOG = [
     { id: 'warping.plan', name: 'Planner (plan warping programs, see the queue)' }, { id: 'warping.execute', name: 'Execute (machine screen: see programs, mark Started / Done)' }, { id: 'warping.archive', name: 'Archive finished beams (send from Beams ready to Archive, restore)' }, { id: 'warping.analytics', name: 'See Warping Analytics (time per beam)' }, { id: 'warping.tapes', name: 'Add tapes to the Warping Data sheet (Dashboard)' }, { id: 'warping.cancel', name: 'Cancel a job / delete a plan (Planner and Execute)' } ] },
   { id: 'advances', name: 'Advances', items: [
     { id: 'advances.add', name: 'Add an advance (name, date, amount)' }, { id: 'advances.view', name: 'See the advances list' } ] },
+  { id: 'payroll', name: 'Payroll System (staff profiles, commitment, pay, bank details)', items: [
+    { id: 'payroll.view', name: 'See staff profiles & payroll details' }, { id: 'payroll.edit', name: 'Edit profiles (commitment, pay scale, bank details, increments)' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
@@ -63,6 +65,7 @@ const ROUTE_PERMS = {
     'att.addWorker': ['attendance.staff'], 'att.setStatus': ['attendance.staff'], 'att.rebuild': ['attendance.staff'],
     'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],
   },
+  payroll: { 'payroll.list': ['payroll.view', 'payroll.edit'], 'payroll.get': ['payroll.view', 'payroll.edit'], 'payroll.setCommit': ['payroll.edit'], 'payroll.setPay': ['payroll.edit'], 'payroll.setBank': ['payroll.edit'], 'payroll.setIncrements': ['payroll.edit'], 'payroll.setPerf': ['payroll.edit'] },
   advances: { 'advances.add': ['advances.add'], 'advances.list': ['advances.view'] },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
@@ -148,7 +151,7 @@ function keysOf(v) {
   });
   return [...seen];
 }
-const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileAdv', 'tileAtt', 'tileLeave', 'tileCalc', 'tileWarp', 'tileAna', 'tileDocs', 'tileUsers'];
+const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileAdv', 'tilePay', 'tileAtt', 'tileLeave', 'tileCalc', 'tileWarp', 'tileAna', 'tileDocs', 'tileUsers'];
 function homeOf(v) { const seen = new Set(); String(v || '').split(/[\s,;]+/).forEach((k) => { if (HOME_IDS.includes(k)) seen.add(k); }); return [...seen]; }
 // each person's own icon order on Home (column H of the users sheet); order is kept, unknown ids dropped
 function orderOf(v) { const seen = []; String(v || '').split(/[\s,;]+/).forEach((k) => { if (HOME_IDS.includes(k) && !seen.includes(k)) seen.push(k); }); return seen; }

@@ -898,6 +898,29 @@ button.wp-sbox{cursor:pointer}
 .ex-tot{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);font-size:15px;font-weight:600}
 .ex-tot:last-child{border-bottom:none}
 .ex-tot b{font-size:19px;color:var(--accent)}
+.pay-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.pay-card h3{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.pay-p{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;min-height:56px}
+.pay-p:active{background:var(--accent-soft)}
+.pay-pn{font-size:15px;font-weight:800}.pay-ps{font-size:12px;color:var(--text-muted);margin-top:2px}
+.pay-sc{font-size:17px;font-weight:800;color:var(--accent);white-space:nowrap}.pay-sc small{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-align:right}
+.pay-chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--accent-soft);color:var(--accent);margin-left:6px;vertical-align:1px}
+.pay-back{font:inherit;font-size:13px;font-weight:700;color:var(--accent);background:transparent;border:1px solid var(--border);border-radius:20px;padding:6px 14px;min-height:34px;cursor:pointer;margin-bottom:12px}
+.pay-sum{display:flex;gap:10px;margin-bottom:12px}.pay-sum>div{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.pay-sum span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase}.pay-sum b{font-size:20px;color:var(--accent)}
+.pay-yrs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.pay-yr{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;min-height:34px}
+.pay-yr.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pay-mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pay-m{font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer}
+.pay-m small{font-size:11px;font-weight:700;letter-spacing:.5px}.pay-m b{font-size:18px;line-height:1}
+.pay-m.v1{border-color:var(--success);color:var(--success)}.pay-m.vh{border-color:var(--accent);color:var(--accent)}.pay-m.v0{border-color:var(--danger);color:var(--danger)}
+.pay-m[disabled]{cursor:default}
+.pay-leg{font-size:12px;color:var(--text-muted);margin-top:10px}
+.pay-inc{display:flex;gap:8px;align-items:center;margin-bottom:8px}.pay-inc input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;min-height:44px}
+.pay-sm{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;min-height:36px}
+.pay-save{font:inherit;font-size:14px;font-weight:700;padding:8px 22px;border-radius:20px;border:none;background:var(--accent-strong);color:var(--on);cursor:pointer;min-height:40px;margin-top:4px}
+.pay-save:disabled{opacity:.5}
 .ex-empty{padding:22px 0;text-align:center;font-size:13px;color:var(--text-muted)}
 
 /* ENTRY SUMMARY */
@@ -1354,7 +1377,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v195</span>
+    <span class="app-ver" id="appVer" title="App version">v196</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1407,6 +1430,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-name">Advances</div>
       <div class="app-sub">Record staff advances</div>
     </button>
+    <button class="app-tile" id="tilePay" onclick="openPay()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
+      <div class="app-name">Payroll System</div>
+      <div class="app-sub">Profiles · Commitment · Pay</div>
+    </button>
     <button class="app-tile" id="tileAtt" onclick="openAtt()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
       <div class="app-name">Attendance</div>
@@ -1456,6 +1484,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 <!-- CASH EXPENSES -->
 <div class="view" id="v-exp">
   <div class="sp-wrap" id="exView"></div>
+</div>
+
+<div class="view" id="v-pay">
+  <div class="sp-wrap" id="payView"></div>
 </div>
 
 <div class="view" id="v-adv">
@@ -1741,7 +1773,7 @@ function fmtD(d){if(!d)return '';var p=String(d).split('-');if(p.length!==3)retu
 function netRate(r){var m=String(r||'').replace(/[₹,\s]/g,'').match(/^([\d.]+)(?:-([\d.]+)%)?/);if(!m)return null;var g=parseFloat(m[1]);if(isNaN(g))return null;return g*(1-(m[2]?parseFloat(m[2]):0)/100);}
 
 /* ══ NAV / SHELL ══ */
-function refreshCur(){if(current==='att')AT.refresh();else if(current==='leave')LV.refresh();else if(current==='exp')EX.refresh();else if(current==='adv')AD.refresh();else if(current==='sales')SP.load(true);else if(current.indexOf('fg')===0)FG.load(true);else if(current.indexOf('kn')===0)KN.load(true);else loadData(true);}
+function refreshCur(){if(current==='att')AT.refresh();else if(current==='leave')LV.refresh();else if(current==='exp')EX.refresh();else if(current==='adv')AD.refresh();else if(current==='pay')PAY.refresh();else if(current==='sales')SP.load(true);else if(current.indexOf('fg')===0)FG.load(true);else if(current.indexOf('kn')===0)KN.load(true);else loadData(true);}
 var lastLoad=0;
 function readCache(){try{return JSON.parse(localStorage.getItem('sx_cache')||'null');}catch(e){return null;}}
 function renderData(d){allData=d.stock||[];allOrders=d.orders||[];updateStats();if(mainTab==='orders')renderOrderCards();else renderCards();}
@@ -1752,7 +1784,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1775,6 +1807,7 @@ function openView(v,fromPop){
   else if(v==='sales')openSales(fromPop);
   else if(v==='exp')openExp(fromPop);
   else if(v==='adv')openAdv(fromPop);
+  else if(v==='pay')openPay(fromPop);
   else if(v==='att')openAtt(fromPop);
   else if(v==='leave')openLeave(fromPop);
   else if(v==='calc')openCalc(fromPop);
@@ -1789,15 +1822,15 @@ function go(v,fromPop){
   document.getElementById('hTitle').textContent=HEAD[v][0];
   document.getElementById('hSub').textContent=(v==='att'&&can('attendance.markToday')&&!['attendance.mark','attendance.view','attendance.edit','attendance.staff'].some(can))?'Mark today':HEAD[v][1];
   document.getElementById('appVer').style.display=(v==='home')?'':'none';
-  document.getElementById('refreshBtn').style.display=(v==='dash'||v==='sales'||v==='exp'||v==='adv'||v==='att'||v==='leave'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
+  document.getElementById('refreshBtn').style.display=(v==='dash'||v==='sales'||v==='exp'||v==='adv'||v==='pay'||v==='att'||v==='leave'||v.indexOf('fg')===0||v.indexOf('kn')===0)?'flex':'none';
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
   var isKN=v.indexOf('kn')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='ana'||v==='sales'||v==='exp'||v==='adv'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
+  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='ana'||v==='sales'||v==='exp'||v==='adv'||v==='pay'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
   document.getElementById('atNav').style.display=v==='att'?'':'none';
   document.getElementById('wpNav').style.display=v==='warp'?'':'none';
-  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='ana'&&v!=='sales'&&v!=='exp'&&v!=='adv'&&v!=='calc'&&v!=='leave'&&!isKN);
+  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='ana'&&v!=='sales'&&v!=='exp'&&v!=='adv'&&v!=='pay'&&v!=='calc'&&v!=='leave'&&!isKN);
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
@@ -1843,7 +1876,7 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',adv:'advances.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*',ana:'@ana'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',adv:'advances.*',pay:'payroll.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*',ana:'@ana'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
@@ -1901,8 +1934,8 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAdv',canAny('advances.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileAna',anaAny());show('tileUsers',can('@admin'));
-  show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('advances.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAdv',canAny('advances.'));show('tilePay',canAny('payroll.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileAna',anaAny());show('tileUsers',can('@admin'));
+  show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('advances.')||canAny('payroll.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
   fit(document.getElementById('yarnNav'),{dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc'});
@@ -3349,6 +3382,144 @@ var AD=(function(){
 })();
 function openAdv(fromPop){if(!canAny('advances.')){go('home');return;}go('adv',fromPop);AD.open();}
 
+var PAY=(function(){
+  var LST=null,PR=null,yr=null,q='',queue=Promise.resolve();
+  function $(id){return document.getElementById(id);}
+  function call(fn,args){return fetch('/api/payroll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
+    .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
+  function pct(n){return n==null?'–':(Math.round(n*1000)/10)+'%';}
+  function inr(n){return n==null?'–':'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2});}
+  function ed(){return can('payroll.edit');}
+  var MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  function open(){
+    if(!LST){try{LST=JSON.parse(localStorage.getItem('sx_pay')||'null');}catch(e){}}
+    if(PR)profile();else{list();fetchList(false,!!LST);}
+  }
+  function err(msg){return '<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(msg)+'</div>';}
+  function list(){
+    var el=$('payView');
+    var h='<div class="sp-head"><div><h2>Payroll System</h2><p>Tap a name to view &amp; manage the profile &middot; saved to the Payroll sheet</p></div></div>'
+      +'<div class="ex-f"><input type="search" id="payQ" placeholder="Search name" value="'+esc(q)+'" autocomplete="off"></div><div id="payList">';
+    if(!LST)h+='<div class="loading"><div class="spinner"></div>Loading profiles…</div>';
+    else h+=cards();
+    el.innerHTML=h+'</div>';
+  }
+  function cards(){
+    var rows=(LST.people||[]).filter(function(p){return !q||p.name.toLowerCase().indexOf(q.toLowerCase())>=0;});
+    if(!rows.length)return '<div class="ex-empty">No one found</div>';
+    return rows.map(function(p){
+      return '<button class="pay-p" data-pay-open="'+esc(p.key)+'"><div><div class="pay-pn">'+esc(p.name)+(p.missingBank?'<span class="pay-chip">bank incomplete</span>':'')+'</div>'
+        +'<div class="pay-ps">Basic '+inr(p.basic)+' &middot; '+p.increments+' increment'+(p.increments===1?'':'s')+'</div></div>'
+        +'<div class="pay-sc">'+pct(p.final)+'<small>'+(p.year||'')+': '+pct(p.yearScore)+'</small></div></button>';
+    }).join('');
+  }
+  function fetchList(manual,quiet){
+    var btn=$('refreshBtn'),icon=$('refreshIcon');if(!quiet){btn.disabled=true;icon.classList.add('spin');}
+    return call('payroll.list').then(function(j){
+      btn.disabled=false;icon.classList.remove('spin');
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok)throw new Error(j.error||'Could not load');
+      LST=j.data;try{localStorage.setItem('sx_pay',JSON.stringify(LST));}catch(e){}
+      if(!PR&&$('payList'))$('payList').innerHTML=cards();
+      if(manual)showToast('Updated','success');
+    }).catch(function(e){
+      btn.disabled=false;icon.classList.remove('spin');
+      if(!PR&&!LST&&$('payList'))$('payList').innerHTML=err(e&&e.message?e.message:'Could not load');
+      else if(!quiet)showToast(navigator.onLine===false?'Offline — showing last saved data':'Sync failed','danger');
+    });
+  }
+  function loadProfile(key,manual){
+    PR=PR&&PR.key===key?PR:{key:key,loading:true};profile();
+    var btn=$('refreshBtn'),icon=$('refreshIcon');btn.disabled=true;icon.classList.add('spin');
+    return call('payroll.get',{key:key}).then(function(j){
+      btn.disabled=false;icon.classList.remove('spin');
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok)throw new Error(j.error||'Could not load');
+      PR=j.data;if(!yr||!PR.years.some(function(y){return y.year===yr;}))yr=PR.currentYear||(PR.years.length?PR.years[PR.years.length-1].year:null);
+      profile();if(manual)showToast('Updated','success');
+    }).catch(function(e){btn.disabled=false;icon.classList.remove('spin');$('payView').innerHTML='<button class="pay-back" data-pay-back>‹ All people</button>'+err(e&&e.message?e.message:'Could not load');});
+  }
+  function curYear(){return PR.years.filter(function(y){return y.year===yr;})[0];}
+  function mval(v){return v===1?['v1','✓']:v===0.5?['vh','½']:v===0?['v0','✗']:['','–'];}
+  function months(){
+    var y=curYear();if(!y)return '<div class="ex-empty">No year columns in this profile</div>';
+    return '<div class="pay-mg">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+'" data-pay-m="'+i+'"'+(ed()?'':' disabled')+'><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>'
+      +'<div class="pay-leg">'+(ed()?'Tap to change: blank → ✓ full (1) → ½ half (0.5) → ✗ absent (0) → blank. ':'')+'Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
+  }
+  function fld(id,label,val,extra){return '<div class="ex-f"><label for="'+id+'">'+label+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'" maxlength="120" autocomplete="off" '+(extra||'')+(ed()?'':' readonly')+'></div>';}
+  function incRow(x){
+    return '<div class="pay-inc"><input type="month" data-inc-ym value="'+esc(x.ym||'')+'"'+(ed()?'':' disabled')+'><input type="number" data-inc-amt inputmode="decimal" min="1" placeholder="Amount ₹" value="'+(x.amount==null?'':x.amount)+'"'+(ed()?'':' disabled')+'>'+(ed()?'<button class="pay-sm" data-inc-del aria-label="Remove">✕</button>':'')+'</div>';
+  }
+  function profile(){
+    var el=$('payView');
+    if(!PR||PR.loading){el.innerHTML='<button class="pay-back" data-pay-back>‹ All people</button><div class="loading"><div class="spinner"></div>Loading profile…</div>';return;}
+    var b=PR.bank,h='<button class="pay-back" data-pay-back>‹ All people</button><div class="sp-head"><div><h2>'+esc(PR.name)+'</h2><p>'+(ed()?'Changes save straight to the sheet':'View only')+'</p></div></div>'
+      +'<div class="pay-sum"><div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div></div>'
+      +'<div class="pay-card"><h3>Commitment</h3><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
+      +'<div class="pay-card"><h3>Pay scale</h3>'+fld('payBasic','Basic salary (₹)',PR.basic,'inputmode="decimal"')+fld('payOT','Basic for OT (₹)',PR.ot,'inputmode="decimal"')
+      +(ed()?'<button class="pay-save" data-pay-save="pay">Save pay scale</button>':'')+'<div class="ex-msg" id="msg_pay" role="status"></div></div>'
+      +'<div class="pay-card"><h3>Bank details</h3>'+fld('bkHolder','Account holder',b.holder)+fld('bkBank','Bank name',b.bank)+fld('bkAcct','Account no',b.acct,'inputmode="numeric"')+fld('bkIfsc','IFSC code',b.ifsc,'autocapitalize="characters"')
+      +fld('bkN0','Notes',b.notes[0])+fld('bkN1','Notes (more)',b.notes[1])+fld('bkN2','Notes (more)',b.notes[2])
+      +(ed()?'<button class="pay-save" data-pay-save="bank">Save bank details</button>':'')+'<div class="ex-msg" id="msg_bank" role="status"></div></div>'
+      +'<div class="pay-card"><h3>Increment trend</h3><div id="incList">'+(PR.increments.length?PR.increments.map(incRow).join(''):'<div class="ex-empty" id="incEmpty">No increments yet</div>')+'</div>'
+      +(ed()?'<button class="pay-sm" data-inc-add>+ Add increment</button><div class="ex-f" style="margin:12px 0 0"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px"><input type="checkbox" id="incBasic" style="width:auto;min-height:0"> Also set the latest increment as the current basic salary</label></div><button class="pay-save" data-pay-save="inc">Save increments</button>':'')
+      +'<div class="ex-msg" id="msg_inc" role="status"></div></div>';
+    if(PR.perf.length){
+      h+='<div class="pay-card"><h3>Performance notes</h3>'+PR.perf.map(function(x){return '<div class="ex-f"><label for="pf_'+x.key+'">'+esc(x.label)+'</label><textarea id="pf_'+x.key+'" rows="2" maxlength="500"'+(ed()?'':' readonly')+'>'+esc(x.text)+'</textarea></div>';}).join('')
+        +(ed()?'<button class="pay-save" data-pay-save="perf">Save notes</button>':'')+'<div class="ex-msg" id="msg_perf" role="status"></div></div>';
+    }
+    el.innerHTML=h;
+  }
+  function setMsg(k,t,ok){var m=$('msg_'+k);if(m){m.className='ex-msg '+(ok?'ok':'err');m.textContent=t;if(ok)setTimeout(function(){if($('msg_'+k))$('msg_'+k).textContent='';},3000);}}
+  function afterSave(j,k,okText){
+    if(j._status===401)return showLock(j.error);
+    if(!j.ok){setMsg(k,'Error: '+(j.error||'could not save'),false);return false;}
+    PR=j.data;LST=null;setMsg(k,okText,true);showToast(okText,'success');return true;
+  }
+  function saveBtn(k,on){var b=document.querySelector('[data-pay-save="'+k+'"]');if(b){b.disabled=!on;b.textContent=on?b.getAttribute('data-t'):'Saving…';}}
+  function save(k){
+    if(navigator.onLine===false){setMsg(k,"You're offline — not saved",false);return;}
+    var key=PR.key,fn,args={key:key},b=document.querySelector('[data-pay-save="'+k+'"]');b.setAttribute('data-t',b.textContent);
+    if(k==='pay'){fn='payroll.setPay';args.basic=$('payBasic').value.trim();args.ot=$('payOT').value.trim();}
+    else if(k==='bank'){fn='payroll.setBank';args.bank={holder:$('bkHolder').value,bank:$('bkBank').value,acct:$('bkAcct').value,ifsc:$('bkIfsc').value,notes:[$('bkN0').value,$('bkN1').value,$('bkN2').value]};}
+    else if(k==='inc'){
+      fn='payroll.setIncrements';var items=[],bad=false;
+      document.querySelectorAll('#incList .pay-inc').forEach(function(r){var ym=r.querySelector('[data-inc-ym]').value,a=r.querySelector('[data-inc-amt]').value;if(!ym&&!a)return;if(!ym||!(Number(a)>0))bad=true;items.push({ym:ym,amount:a});});
+      if(bad){setMsg(k,'Each increment needs a month and an amount.',false);return;}
+      args.items=items;args.setBasic=!!($('incBasic')&&$('incBasic').checked);
+    }else{fn='payroll.setPerf';args.perf={};PR.perf.forEach(function(x){args.perf[x.key]=$('pf_'+x.key).value;});}
+    saveBtn(k,false);
+    call(fn,args).then(function(j){var ok=afterSave(j,k,'Saved');if(PR&&PR.key===key&&ok)profile();else saveBtn(k,true);}).catch(function(){saveBtn(k,true);setMsg(k,'No connection. Please try again.',false);});
+  }
+  function cycle(i){
+    if(!ed()||!PR||PR.loading)return;var y=curYear(),v=y.months[i];
+    var nv=v==null?1:v===1?0.5:v===0.5?0:null;y.months[i]=nv;$('payMonths').innerHTML=months();
+    var key=PR.key,year=y.year;
+    queue=queue.then(function(){return call('payroll.setCommit',{key:key,year:year,month:i+1,value:nv});}).then(function(j){
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok){showToast('Not saved: '+(j.error||'error'),'danger');if(PR&&PR.key===key)loadProfile(key);return;}
+      LST=null;if(PR&&PR.key===key){var mine=PR.years.filter(function(x){return x.year===year;})[0],sv=j.data.years.filter(function(x){return x.year===year;})[0];
+        PR.yearly=j.data.yearly;PR.final=j.data.final;if(mine&&sv)mine.months=sv.months;
+        var s=document.querySelector('.pay-sum');if(s)s.innerHTML='<div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div>';
+        if($('payMonths'))$('payMonths').innerHTML=months();}
+    }).catch(function(){showToast('No connection — change not saved','danger');if(PR&&PR.key===key)loadProfile(key);});
+  }
+  document.addEventListener('input',function(ev){if(ev.target&&ev.target.id==='payQ'){q=ev.target.value;if($('payList')&&LST)$('payList').innerHTML=cards();}});
+  document.addEventListener('click',function(ev){
+    var t=ev.target,x;if(!t.closest||!t.closest('#v-pay'))return;
+    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;loadProfile(x.getAttribute('data-pay-open'));return;}
+    if(t.closest('[data-pay-back]')){PR=null;list();fetchList(false,true);return;}
+    if((x=t.closest('[data-pay-yr]'))){yr=Number(x.getAttribute('data-pay-yr'));profile();return;}
+    if((x=t.closest('[data-pay-m]'))){cycle(Number(x.getAttribute('data-pay-m')));return;}
+    if((x=t.closest('[data-pay-save]'))){save(x.getAttribute('data-pay-save'));return;}
+    if(t.closest('[data-inc-add]')){var l=$('incList'),e=$('incEmpty');if(e)e.remove();l.insertAdjacentHTML('beforeend',incRow({ym:'',amount:null}));return;}
+    if((x=t.closest('[data-inc-del]'))){x.parentNode.remove();return;}
+  });
+  return {open:open,refresh:function(){if(PR&&!PR.loading)loadProfile(PR.key,true);else fetchList(true);}};
+})();
+function openPay(fromPop){if(!canAny('payroll.')){go('home');return;}go('pay',fromPop);PAY.open();}
+
+
 /* ══ CALCULATORS (run entirely in the browser; nothing is saved) ══ */
 var CL=(function(){
   var tab='pay';
@@ -4410,7 +4581,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAdv','tileAtt','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAdv','tilePay','tileAtt','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
