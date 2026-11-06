@@ -1383,7 +1383,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v202</span>
+    <span class="app-ver" id="appVer" title="App version">v203</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3482,7 +3482,7 @@ var PAY=(function(){
     var el=$('payView');
     if(!PR||PR.loading){el.innerHTML='<button class="pay-back" data-pay-back>‹ All people</button><div class="loading"><div class="spinner"></div>Loading profile…</div>';return;}
     var b=PR.bank,h='<button class="pay-back" data-pay-back>‹ All people</button><div class="sp-head"><div><h2>'+esc(PR.name)+'</h2><p>'+(ed()?'Tap Edit on a block to change it, then Save':'View only')+'</p></div></div>'
-      +'<div class="pay-sum"><div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div></div>'
+      +'<div class="pay-sum"><div><span>'+(yr||'')+' Commitment Score</span><b>'+pct(PR.yearly[yr])+'</b></div><div><span>3 Years\u2019 Commitment Score</span><b>'+pct(PR.final)+'</b></div></div>'
       +'<div class="pay-card"><div class="pay-ch"><h3>Commitment</h3>'+(ed()?'<button class="pay-sm" data-pay-edit aria-pressed="'+editMode+'">'+(editMode?'✓ Done':'✎ Edit')+'</button>':'')+'</div><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
       +'<div class="pay-card">'+hdr('Pay scale','pay')+fld('payBasic','Basic salary (₹)',PR.basic,'inputmode="decimal"','pay')+fld('payOT','Basic for OT (₹)',PR.ot,'inputmode="decimal"','pay')
       +'<div class="ex-msg" id="msg_pay" role="status"></div></div>'
@@ -3537,7 +3537,7 @@ var PAY=(function(){
       if(!j.ok){showToast('Not saved: '+(j.error||'error'),'danger');if(PR&&PR.key===key)loadProfile(key);return;}
       LST=null;if(PR&&PR.key===key){var mine=PR.years.filter(function(x){return x.year===year;})[0],sv=j.data.years.filter(function(x){return x.year===year;})[0];
         PR.yearly=j.data.yearly;PR.final=j.data.final;if(mine&&sv){mine.months=sv.months;if(sv.marks)mine.marks=sv.marks;}
-        var s=document.querySelector('.pay-sum');if(s)s.innerHTML='<div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div>';
+        var s=document.querySelector('.pay-sum');if(s)s.innerHTML='<div><span>'+(yr||'')+' Commitment Score</span><b>'+pct(PR.yearly[yr])+'</b></div><div><span>3 Years\u2019 Commitment Score</span><b>'+pct(PR.final)+'</b></div>';
         if($('payMonths'))$('payMonths').innerHTML=months();}
     }).catch(function(){showToast('No connection — change not saved','danger');if(PR&&PR.key===key)loadProfile(key);});
   }
