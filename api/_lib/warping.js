@@ -131,7 +131,7 @@ async function sendToExecute(a, who) {
   const blank = (x) => (x ? x : '');
   await G.append(SHEET_ID(), range(EXEC, 'A', L(EXEC_HEAD.length)), [[job.id, safe(job.tape), safe(job.stand), safe(job.baseYarn), blank(job.baseEnds), blank(job.baseBeams), blank(job.baseMeters),
     safe(job.designYarn), blank(job.designEnds), blank(job.designBeams), blank(job.designMeters), 'Ready', '', '']]);
-  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Ready']] }, { range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [['']] }]);   // the planning note is removed once the job is sent
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Ready']] }]);   // the planning note stays in column T of the Planning Queue
   await log(job.id, 'Sent to Execute', who, job.tape, '');
   return { status: 'Ready' };
 }
@@ -277,7 +277,7 @@ async function note(a) {
   await ensureTabs();
   const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
-  if (job.status !== 'Planned') return { note: '' };                       // notes live only in the planning list
+  if (job.status !== 'Planned') return { note: job.note };                 // notes are edited only while the job is in the planning list
   const text = flat(a.note).slice(0, 300);
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(text)]] }]);
   const [chk] = await G.batchGet(SHEET_ID(), [range(PLAN, 'T' + job.row, 'T' + job.row)]);   // read it back so a failed save is never reported as saved
