@@ -8,7 +8,7 @@ const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9Asue
 const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log';   // DATA is read-only: the app never writes to it
 const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
-  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by'];
+  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note'];
 const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Beams', 'Base Meters (each beam)',
   'Design Yarn', 'Design Ends', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by'];
 const L = (n) => { let s = ''; while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; };
@@ -26,11 +26,12 @@ async function ensureTabs() {
   const titles = await G.sheetTitles(SHEET_ID());
   const adds = [PLAN, EXEC, LOG].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
-  const [a, b, c] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1')]);
+  const [a, b, c, tn] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1')]);
   const data = [];
   if (!str(((a[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'A1', L(PLAN_HEAD.length) + '1'), values: [PLAN_HEAD] });
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
   if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
+  if (str(((a[0] || [])[0])).trim() && !str(((tn[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'T1', 'T1'), values: [['Note']] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
   TABS_OK = true;
 }
@@ -59,7 +60,7 @@ async function catalogRead() {
 const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: str(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
   baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: Number(r[9]) || 0,
   designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: Number(r[13]) || 0,
-  status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]) });
+  status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]), note: str(r[19]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
   designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: str(r[12]), startedBy: str(r[13]) });
 // Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
@@ -107,7 +108,7 @@ async function add(a, who) {
   const id = 'W-' + String(max + 1).padStart(4, '0');
   const bEnds = f.baseBeams ? v.baseEnds : '', bYarn = f.baseBeams ? v.baseYarn : '', dEnds = f.designBeams ? v.designEnds : '', dYarn = f.designBeams ? v.designYarn : '';
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(v.category), safe(v.stand), bEnds, safe(bYarn), f.baseBeams || '', f.baseMeters || '',
-    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '']]);
+    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300))]]);
   await log(id, 'Planned', who, name, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : '') + (v.stand !== 'Not Relevant' ? ' (' + v.stand + ')' : ''));
   return { id };
 }
@@ -125,7 +126,7 @@ async function sendToExecute(a, who) {
   const blank = (x) => (x ? x : '');
   await G.append(SHEET_ID(), range(EXEC, 'A', L(EXEC_HEAD.length)), [[job.id, safe(job.tape), safe(job.stand), safe(job.baseYarn), blank(job.baseEnds), blank(job.baseBeams), blank(job.baseMeters),
     safe(job.designYarn), blank(job.designEnds), blank(job.designBeams), blank(job.designMeters), 'Ready', '', '']]);
-  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Ready']] }]);
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'O' + job.row), values: [['Ready']] }, { range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [['']] }]);   // the planning note is removed once the job is sent
   await log(job.id, 'Sent to Execute', who, job.tape, '');
   return { status: 'Ready' };
 }
@@ -267,6 +268,14 @@ async function edit(a, who) {
   await log(job.id, 'Plan edited', who, job.tape, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : ''));
   return { edited: true };
 }
+async function note(a) {
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  if (job.status !== 'Planned') return { note: '' };                       // notes live only in the planning list
+  const text = flat(a.note).slice(0, 300);
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(text)]] }]);
+  return { note: text };
+}
 async function remove(a, who) {
   const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
@@ -315,6 +324,7 @@ const ROUTES = {
   },
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
+  'warp.note': (a) => wrap(() => mut(note)(a)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
   'warp.cancel': (a, who) => wrap(() => mut(cancel)(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),
