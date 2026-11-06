@@ -8,10 +8,11 @@ const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9Asue
 const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log', DONE = 'Done List';   // DATA is read-only: the app never writes to it
 const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
-  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note'];
-const DONE_HEAD = ['Job ID', 'Tape', 'Category', 'Stand', 'Base Beams', 'Base Meters (each beam)', 'Design Beams', 'Design Meters (each beam)', 'Started', 'Started by', 'Done', 'Done by', 'Time taken', 'Note'];
+  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note', 'Machine'];
+const MACHINES = ['Warping 1', 'Warping 2', 'Warping 3'];
+const DONE_HEAD = ['Job ID', 'Tape', 'Category', 'Stand', 'Base Beams', 'Base Meters (each beam)', 'Design Beams', 'Design Meters (each beam)', 'Started', 'Started by', 'Done', 'Done by', 'Time taken', 'Note', 'Machine'];
 const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Beams', 'Base Meters (each beam)',
-  'Design Yarn', 'Design Ends', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by'];
+  'Design Yarn', 'Design Ends', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Machine'];
 const L = (n) => { let s = ''; while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; };
 const str = (v) => (v == null ? '' : String(v));
 const flat = (v) => str(v).replace(/\s+/g, ' ').trim();            // tape names in the sheet contain line breaks
@@ -29,7 +30,7 @@ function took(from, to) {
   return (d ? d + 'd ' : '') + (h || d ? h + 'h ' : '') + mi + 'm';
 }
 const doneRow = (j) => [safe(j.id), safe(j.tape), safe(j.category), safe(j.stand), blankZero(j.baseBeams), blankZero(j.baseMeters), blankZero(j.designBeams), blankZero(j.designMeters),
-  safe(j.started), safe(j.startedBy), safe(j.done), safe(j.doneBy), took(j.started, j.done), safe(j.note)];
+  safe(j.started), safe(j.startedBy), safe(j.done), safe(j.doneBy), took(j.started, j.done), safe(j.note), safe(j.machine)];
 let TABS_OK = false;
 async function ensureTabs() {
   if (TABS_OK) return;
@@ -37,15 +38,19 @@ async function ensureTabs() {
   const adds = [PLAN, EXEC, LOG, DONE].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
   const newDone = !titles.includes(DONE);
-  const [a, b, c, tn, dn] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1'), range(DONE, 'A1', 'A1')]);
+  const [a, b, c, tn, dn, um, om, dm] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1'), range(DONE, 'A1', 'A1'), range(PLAN, 'U1', 'U1'), range(EXEC, 'O1', 'O1'), range(DONE, 'O1', 'O1')]);
   const data = [];
   if (!str(((a[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'A1', L(PLAN_HEAD.length) + '1'), values: [PLAN_HEAD] });
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
   if (!str(((c[0] || [])[0])).trim()) data.push({ range: range(LOG, 'A1', L(LOG_HEAD.length) + '1'), values: [LOG_HEAD] });
   if (!str(((dn[0] || [])[0])).trim()) data.push({ range: range(DONE, 'A1', L(DONE_HEAD.length) + '1'), values: [DONE_HEAD] });
   if (str(((a[0] || [])[0])).trim() && !str(((tn[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'T1', 'T1'), values: [['Note']] });
+  const has = (x) => !!str(((x[0] || [])[0])).trim();
+  if (has(a) && !has(um)) data.push({ range: range(PLAN, 'U1', 'U1'), values: [['Machine']] });        // which warping machine ran the job
+  if (has(b) && !has(om)) data.push({ range: range(EXEC, 'O1', 'O1'), values: [['Machine']] });
+  if (has(dn) && !has(dm)) data.push({ range: range(DONE, 'O1', 'O1'), values: [['Machine']] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
-  try {   // the Note column (T) must exist in the grid
+  try {   // the Note and Machine columns (T) must exist in the grid
     const pp = (await G.sheetProps(SHEET_ID())).find((x) => x.title === PLAN);
     const have = pp && pp.gridProperties && pp.gridProperties.columnCount;
     if (pp && have && have < PLAN_HEAD.length) await G.format(SHEET_ID(), [{ appendDimension: { sheetId: pp.sheetId, dimension: 'COLUMNS', length: PLAN_HEAD.length - have } }]);
@@ -83,7 +88,7 @@ async function catalogRead() {
 const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: str(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
   baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: Number(r[9]) || 0,
   designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: Number(r[13]) || 0,
-  status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]), note: str(r[19]) });
+  status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
   designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: str(r[12]), startedBy: str(r[13]) });
 // Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
@@ -131,7 +136,7 @@ async function add(a, who) {
   const id = 'W-' + String(max + 1).padStart(4, '0');
   const bEnds = f.baseBeams ? v.baseEnds : '', bYarn = f.baseBeams ? v.baseYarn : '', dEnds = f.designBeams ? v.designEnds : '', dYarn = f.designBeams ? v.designYarn : '';
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(v.category), safe(v.stand), bEnds, safe(bYarn), f.baseBeams || '', f.baseMeters || '',
-    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300))]]);
+    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '']]);
   await log(id, 'Planned', who, name, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : '') + (v.stand !== 'Not Relevant' ? ' (' + v.stand + ')' : ''));
   return { id };
 }
@@ -164,17 +169,20 @@ async function setStatus(a, who) {
   const next = { Ready: ['Started'], Started: ['Done', 'Hold', 'Ready'], 'On hold': ['Started'] }[job.status] || [];
   if (!next.includes(want)) throw new Error(job.status === want || (job.status === 'On hold' && want === 'Hold') ? 'Already ' + job.status.toLowerCase() : job.status === 'Ready' ? 'Start the job first' : 'That is not possible right now');
   const at = stamp(), name = safe(who), resume = job.status === 'On hold';
+  const mach = flat(a.machine);
+  if (want === 'Started' && !resume && !MACHINES.includes(mach)) throw new Error('Choose the warping machine');
+  const mval = want === 'Started' && !resume ? mach : want === 'Ready' ? '' : job.machine;
   const upd = want === 'Started' ? ['Started', resume && job.started ? job.started : at, resume && job.startedBy ? job.startedBy : name, '', '']
     : want === 'Done' ? ['Done', job.started, job.startedBy, at, name]
     : want === 'Hold' ? ['On hold', job.started, job.startedBy, '', ''] : ['Ready', '', '', '', ''];
-  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'S' + job.row), values: [upd] }]);
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'O' + job.row, 'S' + job.row), values: [upd] }, { range: range(PLAN, 'U' + job.row, 'U' + job.row), values: [[safe(mval)]] }]);
   const ex = (await readExec()).find((j) => j.id === id);
   if (want === 'Done') { if (ex) await deleteRow(EXEC, ex.row); }
-  else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'N' + ex.row), values: [[upd[0], upd[1], upd[2]]] }]);
+  else if (ex) await G.batchUpdate(SHEET_ID(), [{ range: range(EXEC, 'L' + ex.row, 'O' + ex.row), values: [[upd[0], upd[1], upd[2], safe(mval)]] }]);
   if (want === 'Done') {   // the Done List tab; a failure here never blocks the real work
-    try { await ensureTabs(); await G.append(SHEET_ID(), range(DONE, 'A', L(DONE_HEAD.length)), [doneRow({ ...job, done: at, doneBy: name })]); } catch (e) { /* not fatal */ }
+    try { await ensureTabs(); await G.append(SHEET_ID(), range(DONE, 'A', L(DONE_HEAD.length)), [doneRow({ ...job, done: at, doneBy: name, machine: mval })]); } catch (e) { /* not fatal */ }
   }
-  await log(id, want === 'Ready' ? 'Reset to Ready' : want === 'Hold' ? 'Put on hold' : resume ? 'Resumed' : want, who, job.tape, '');
+  await log(id, want === 'Ready' ? 'Reset to Ready' : want === 'Hold' ? 'Put on hold' : resume ? 'Resumed' : want, who, job.tape, want === 'Started' && !resume ? 'On ' + mach : '');
   return { status: upd[0] };
 }
 async function archive(a, who, back) {
@@ -244,7 +252,7 @@ async function analytics() {
     const beams = j.baseBeams + j.designBeams, meters = j.baseBeams * j.baseMeters + j.designBeams * j.designMeters;
     const elapsed = (d - s) / 60000, held = Math.min(hold / 60000, elapsed), net = elapsed - held;
     if (!beams) continue;
-    jobs.push({ id: j.id, tape: j.tape, category: j.category, stand: j.stand, beams, meters, started: j.started, done: j.done, doneMs: d,
+    jobs.push({ id: j.id, tape: j.tape, category: j.category, stand: j.stand, machine: j.machine, beams, meters, started: j.started, done: j.done, doneMs: d,
       elapsedMin: Math.round(elapsed), holdMin: Math.round(held), netMin: Math.round(net), perBeamMin: Math.round(net / beams), metersPerHour: net > 0 ? Math.round(meters / (net / 60)) : 0 });
   }
   const agg = (list) => {
@@ -255,6 +263,7 @@ async function analytics() {
   return {
     overall: agg(jobs),
     byCategory: groups((j) => j.category).sort((a, b) => a.name.localeCompare(b.name)),
+    byMachine: groups((j) => j.machine).sort((a, b) => a.name.localeCompare(b.name)),
     byTape: groups((j) => j.tape).sort((a, b) => b.jobs - a.jobs || a.name.localeCompare(b.name)).slice(0, 40),
     recent: jobs.sort((a, b) => b.doneMs - a.doneMs).slice(0, 30).map(({ doneMs, ...r }) => r),
   };
