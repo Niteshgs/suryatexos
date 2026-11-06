@@ -42,6 +42,12 @@ module.exports = async (req, res) => {
       catch (e) { return res.status(200).json({ ok: false, error: e.message }); }
     }
 
+    if (body.action === 'saveOrder') {
+      const me = await A.guard(req, res); if (!me) return;
+      try { return res.status(200).json({ ok: true, homeOrder: await A.saveOrder(me, body.order) }); }
+      catch (e) { return res.status(200).json({ ok: false, error: e.message }); }
+    }
+
     if (body.action === 'users' || body.action === 'saveUser') {
       const me = await A.guard(req, res); if (!me) return;
       if (!A.allow(me, res, 'admin')) return;
