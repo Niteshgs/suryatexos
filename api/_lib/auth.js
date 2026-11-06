@@ -151,7 +151,7 @@ function keysOf(v) {
   });
   return [...seen];
 }
-const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileAdv', 'tilePay', 'tileAtt', 'tileLeave', 'tileCalc', 'tileWarp', 'tileAna', 'tileDocs', 'tileUsers'];
+const HOME_IDS = ['tileYarn', 'tileFG', 'tileKN', 'tileSales', 'tileExp', 'tileHR', 'tileLeave', 'tileCalc', 'tileWarp', 'tileAna', 'tileDocs', 'tileUsers'];
 function homeOf(v) { const seen = new Set(); String(v || '').split(/[\s,;]+/).forEach((k) => { if (HOME_IDS.includes(k)) seen.add(k); }); return [...seen]; }
 // each person's own icon order on Home (column H of the users sheet); order is kept, unknown ids dropped
 function orderOf(v) { const seen = []; String(v || '').split(/[\s,;]+/).forEach((k) => { if (HOME_IDS.includes(k) && !seen.includes(k)) seen.push(k); }); return seen; }

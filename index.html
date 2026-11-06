@@ -1382,7 +1382,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v198</span>
+    <span class="app-ver" id="appVer" title="App version">v199</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1430,20 +1430,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-name">Cash Expenses</div>
       <div class="app-sub">Daily cash spend</div>
     </button>
-    <button class="app-tile" id="tileAdv" onclick="openAdv()" style="display:none">
-      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-wallet"/></svg></div>
-      <div class="app-name">Advances</div>
-      <div class="app-sub">Record staff advances</div>
-    </button>
-    <button class="app-tile" id="tilePay" onclick="openPay()" style="display:none">
+    <button class="app-tile" id="tileHR" onclick="openHR()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
-      <div class="app-name">Payroll System</div>
-      <div class="app-sub">Profiles · Commitment · Pay</div>
-    </button>
-    <button class="app-tile" id="tileAtt" onclick="openAtt()" style="display:none">
-      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
-      <div class="app-name">Attendance</div>
-      <div class="app-sub">Daily · Register · Profiles</div>
+      <div class="app-name">Human Resource</div>
+      <div class="app-sub">Attendance · Payroll · Advances</div>
     </button>
     <button class="app-tile" id="tileCalc" onclick="openCalc()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg></div>
@@ -1489,6 +1479,29 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 <!-- CASH EXPENSES -->
 <div class="view" id="v-exp">
   <div class="sp-wrap" id="exView"></div>
+</div>
+
+<div class="view" id="v-hr">
+  <div class="sp-wrap">
+    <div class="sp-head"><div><h2>Human Resource</h2><p>Attendance &middot; Payroll &middot; Advances</p></div></div>
+    <div class="app-grid" id="hrGrid">
+    <button class="app-tile" id="tileAtt" onclick="openAtt()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
+      <div class="app-name">Attendance</div>
+      <div class="app-sub">Daily · Register · Profiles</div>
+    </button>
+    <button class="app-tile" id="tilePay" onclick="openPay()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg></div>
+      <div class="app-name">Payroll System</div>
+      <div class="app-sub">Profiles · Commitment</div>
+    </button>
+    <button class="app-tile" id="tileAdv" onclick="openAdv()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-wallet"/></svg></div>
+      <div class="app-name">Advances</div>
+      <div class="app-sub">Record staff advances</div>
+    </button>
+    </div>
+  </div>
 </div>
 
 <div class="view" id="v-pay">
@@ -1789,7 +1802,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],hr:['Human Resource','Attendance · Payroll · Advances'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1812,6 +1825,7 @@ function openView(v,fromPop){
   else if(v==='sales')openSales(fromPop);
   else if(v==='exp')openExp(fromPop);
   else if(v==='adv')openAdv(fromPop);
+  else if(v==='hr')openHR(fromPop);
   else if(v==='pay')openPay(fromPop);
   else if(v==='att')openAtt(fromPop);
   else if(v==='leave')openLeave(fromPop);
@@ -1831,11 +1845,11 @@ function go(v,fromPop){
   document.getElementById('backBtn').style.display=(v==='home')?'none':'flex';
   var isFG=v.indexOf('fg')===0;
   var isKN=v.indexOf('kn')===0;
-  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='ana'||v==='sales'||v==='exp'||v==='adv'||v==='pay'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
+  document.getElementById('yarnNav').style.display=(v==='home'||v==='users'||v==='docs'||v==='warp'||v==='ana'||v==='sales'||v==='exp'||v==='adv'||v==='pay'||v==='hr'||v==='att'||v==='leave'||v==='calc'||isFG||isKN)?'none':'';
   document.getElementById('fgNav').style.display=isFG?'':'none';
   document.getElementById('atNav').style.display=v==='att'?'':'none';
   document.getElementById('wpNav').style.display=v==='warp'?'':'none';
-  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='ana'&&v!=='sales'&&v!=='exp'&&v!=='adv'&&v!=='pay'&&v!=='calc'&&v!=='leave'&&!isKN);
+  document.body.classList.toggle('nav-on',v!=='home'&&v!=='users'&&v!=='docs'&&v!=='ana'&&v!=='sales'&&v!=='exp'&&v!=='adv'&&v!=='pay'&&v!=='hr'&&v!=='calc'&&v!=='leave'&&!isKN);
   document.body.classList.toggle('kn-on',isKN);
   var kt=document.getElementById('knToggle'); kt.style.display=isKN?'':'none';
   kt.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.kt===(v==='knentry'?'knentry':'kn'));});
@@ -1881,13 +1895,14 @@ function showToastAction(msg,label,fn,ms){var t=document.getElementById('toast')
 /* ══ SIGN-IN & ACCESS ══ */
 var GOOGLE_CLIENT_ID='788054844958-g97rekd42omi2rpe0r671l0ehh766un1.apps.googleusercontent.com';
 var ME=null, GSI_STATE='';
-var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',adv:'advances.*',pay:'payroll.*',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*',ana:'@ana'};
+var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.status',fgpo:'fg.po',fgsw:'fg.sweep',kn:'knitted.dash',knentry:'knitted.entry',kntapes:'knitted.admin',knadmin:'knitted.admin',knact:'knitted.admin',knlogs:'knitted.logs',sales:'@sales',exp:'expenses.*',adv:'advances.*',pay:'payroll.*',hr:'@hr',att:'@att',leave:'attendance.leave',calc:'calc.*',users:'@admin',docs:'@admin',warp:'warping.*',ana:'@ana'};
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
+function hrAny(){return canAny('advances.')||canAny('payroll.')||attAny()||can('attendance.leave');}
 function salesAny(){return can('sales.touchA')||can('sales.touchB');}
 function anaAny(){return can('knitted.admin')||can('warping.analytics');}
-function canView(v){var k=VIEW_PERM[v];if(k==='@ana')return anaAny();if(k==='@att')return attAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
+function canView(v){var k=VIEW_PERM[v];if(k==='@ana')return anaAny();if(k==='@att')return attAny();if(k==='@hr')return hrAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
 function authPost(body){return fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
 function clearPrivate(){['sx_cache','sx_fg','sx_kn','sx_sales','sx_exp','sx_att','sx_me','sx_me_email','sx_user_name'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}
 function showSignIn(msg){
@@ -1939,7 +1954,7 @@ function enterApp(me,offline){
 }
 function applyAccess(){
   var show=function(id,on){document.getElementById(id).style.display=on?'':'none';};
-  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAdv',canAny('advances.'));show('tilePay',canAny('payroll.'));show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileAna',anaAny());show('tileUsers',can('@admin'));
+  show('tileYarn',canAny('yarn.'));show('tileFG',canAny('fg.'));show('tileKN',canAny('knitted.'));show('tileSales',salesAny());show('tileExp',canAny('expenses.'));show('tileAdv',canAny('advances.'));show('tilePay',canAny('payroll.'));show('tileHR',hrAny());show('tileAtt',attAny()||can('attendance.leave'));show('tileCalc',canAny('calc.'));show('tileDocs',can('@admin'));show('tileWarp',canAny('warping.'));show('tileAna',anaAny());show('tileUsers',can('@admin'));
   show('noAcc',!(canAny('yarn.')||canAny('fg.')||canAny('knitted.')||salesAny()||canAny('expenses.')||canAny('advances.')||canAny('payroll.')||canAny('attendance.')||canAny('calc.')||can('@admin')));
   syncHomeOld();arrangeHome();
   var fit=function(nav,keys){var n=0;nav.querySelectorAll('button').forEach(function(b){var on=can(keys[b.dataset.v]);b.style.display=on?'':'none';if(on)n++;});nav.style.gridTemplateColumns='repeat('+Math.max(n,1)+',1fr)';};
@@ -3536,6 +3551,7 @@ var PAY=(function(){
   });
   return {open:open,refresh:function(){if(PR&&!PR.loading)loadProfile(PR.key,true);else fetchList(true);}};
 })();
+function openHR(fromPop){if(!hrAny()){go('home');return;}go('hr',fromPop);}
 function openPay(fromPop){if(!canAny('payroll.')){go('home');return;}go('pay',fromPop);PAY.open();}
 
 
@@ -4600,7 +4616,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileAdv','tilePay','tileAtt','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileHR','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
