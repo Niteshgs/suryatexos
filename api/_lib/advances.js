@@ -26,7 +26,17 @@ async function add(a, who) {
   const titles = await G.sheetTitles(SHEET_ID());
   if (!titles.includes(TAB())) throw new Error('The ADVANCES tab was not found in the sheet');
   const amt = Math.round(amount * 100) / 100;
-  await G.append(SHEET_ID(), G.q(TAB()) + '!A:E', [[serialOf(t.y, t.m, t.d), name, amt, str(who), nowIST()]], 'RAW');
+  const range = await G.append(SHEET_ID(), G.q(TAB()) + '!A:E', [[serialOf(t.y, t.m, t.d), name, amt, str(who), nowIST()]], 'RAW');
+  // an appended row can arrive unformatted, so set the date and rupee formats on exactly that row
+  try {
+    const m = /!A(\d+):/.exec(range || ''), props = (await G.sheetProps(SHEET_ID())).filter((p) => p.title === TAB())[0];
+    if (m && props) {
+      const row = +m[1];
+      const fm = (c0, type, pattern, align) => ({ repeatCell: { range: { sheetId: props.sheetId, startRowIndex: row - 1, endRowIndex: row, startColumnIndex: c0, endColumnIndex: c0 + 1 },
+        cell: { userEnteredFormat: { numberFormat: { type, pattern }, horizontalAlignment: align } }, fields: 'userEnteredFormat.numberFormat,userEnteredFormat.horizontalAlignment' } });
+      await G.format(SHEET_ID(), [fm(0, 'DATE', 'dd mmm yyyy', 'LEFT'), fm(2, 'CURRENCY', '[$\u20b9]#,##0', 'RIGHT')]);
+    }
+  } catch (e) { console.error('advances format failed: ' + e.message); }
   return { saved: true, name, amount: amt, date: fmtDay(t) };
 }
 
