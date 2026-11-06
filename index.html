@@ -915,7 +915,9 @@ button.wp-sbox{cursor:pointer}
 .pay-m{font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer}
 .pay-m small{font-size:11px;font-weight:700;letter-spacing:.5px}.pay-m b{font-size:18px;line-height:1}
 .pay-m.v1{border-color:var(--success);color:var(--success)}.pay-m.vh{border-color:var(--accent);color:var(--accent)}.pay-m.v0{border-color:var(--danger);color:var(--danger)}
+.pay-m.mk{background:rgba(111,168,220,.28);box-shadow:inset 0 0 0 2px #6FA8DC}
 .pay-m[disabled]{cursor:default}
+.pay-sm[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .pay-leg{font-size:12px;color:var(--text-muted);margin-top:10px}
 .pay-inc{display:flex;gap:8px;align-items:center;margin-bottom:8px}.pay-inc input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;min-height:44px}
 .pay-sm{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;min-height:36px}
@@ -1377,7 +1379,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v196</span>
+    <span class="app-ver" id="appVer" title="App version">v197</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3383,7 +3385,7 @@ var AD=(function(){
 function openAdv(fromPop){if(!canAny('advances.')){go('home');return;}go('adv',fromPop);AD.open();}
 
 var PAY=(function(){
-  var LST=null,PR=null,yr=null,q='',queue=Promise.resolve();
+  var LST=null,PR=null,yr=null,q='',queue=Promise.resolve(),markMode=false;
   function $(id){return document.getElementById(id);}
   function call(fn,args){return fetch('/api/payroll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
@@ -3443,8 +3445,9 @@ var PAY=(function(){
   function mval(v){return v===1?['v1','✓']:v===0.5?['vh','½']:v===0?['v0','✗']:['','–'];}
   function months(){
     var y=curYear();if(!y)return '<div class="ex-empty">No year columns in this profile</div>';
-    return '<div class="pay-mg">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+'" data-pay-m="'+i+'"'+(ed()?'':' disabled')+'><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>'
-      +'<div class="pay-leg">'+(ed()?'Tap to change: blank → ✓ full (1) → ½ half (0.5) → ✗ absent (0) → blank. ':'')+'Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
+    return '<div class="pay-mg">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+(y.marks&&y.marks[i]?' mk':'')+'" data-pay-m="'+i+'"'+(ed()?'':' disabled')+'><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>'
+      +(ed()?'<div style="margin-top:10px"><button class="pay-sm" data-pay-mode aria-pressed="'+markMode+'">'+(markMode?'Done highlighting':'Highlight increment month')+'</button></div>':'')
+      +'<div class="pay-leg">Blue month = increment received that month. '+(markMode?'Tap a month to add or remove the blue highlight (it also shows in the sheet). ':'')+(ed()&&!markMode?'Tap to change: blank → ✓ full (1) → ½ half (0.5) → ✗ absent (0) → blank. ':'')+'Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
   }
   function fld(id,label,val,extra){return '<div class="ex-f"><label for="'+id+'">'+label+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'" maxlength="120" autocomplete="off" '+(extra||'')+(ed()?'':' readonly')+'></div>';}
   function incRow(x){
@@ -3462,7 +3465,7 @@ var PAY=(function(){
       +fld('bkN0','Notes',b.notes[0])+fld('bkN1','Notes (more)',b.notes[1])+fld('bkN2','Notes (more)',b.notes[2])
       +(ed()?'<button class="pay-save" data-pay-save="bank">Save bank details</button>':'')+'<div class="ex-msg" id="msg_bank" role="status"></div></div>'
       +'<div class="pay-card"><h3>Increment trend</h3><div id="incList">'+(PR.increments.length?PR.increments.map(incRow).join(''):'<div class="ex-empty" id="incEmpty">No increments yet</div>')+'</div>'
-      +(ed()?'<button class="pay-sm" data-inc-add>+ Add increment</button><div class="ex-f" style="margin:12px 0 0"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px"><input type="checkbox" id="incBasic" style="width:auto;min-height:0"> Also set the latest increment as the current basic salary</label></div><button class="pay-save" data-pay-save="inc">Save increments</button>':'')
+      +(ed()?'<button class="pay-sm" data-inc-add>+ Add increment</button><div class="ex-f" style="margin:12px 0 0"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px"><input type="checkbox" id="incBasic" style="width:auto;min-height:0"> Also set the latest increment as the current basic salary</label><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;margin-top:8px"><input type="checkbox" id="incMark" checked style="width:auto;min-height:0"> Highlight each increment month in blue in the commitment table</label></div><button class="pay-save" data-pay-save="inc">Save increments</button>':'')
       +'<div class="ex-msg" id="msg_inc" role="status"></div></div>';
     if(PR.perf.length){
       h+='<div class="pay-card"><h3>Performance notes</h3>'+PR.perf.map(function(x){return '<div class="ex-f"><label for="pf_'+x.key+'">'+esc(x.label)+'</label><textarea id="pf_'+x.key+'" rows="2" maxlength="500"'+(ed()?'':' readonly')+'>'+esc(x.text)+'</textarea></div>';}).join('')
@@ -3486,20 +3489,31 @@ var PAY=(function(){
       fn='payroll.setIncrements';var items=[],bad=false;
       document.querySelectorAll('#incList .pay-inc').forEach(function(r){var ym=r.querySelector('[data-inc-ym]').value,a=r.querySelector('[data-inc-amt]').value;if(!ym&&!a)return;if(!ym||!(Number(a)>0))bad=true;items.push({ym:ym,amount:a});});
       if(bad){setMsg(k,'Each increment needs a month and an amount.',false);return;}
-      args.items=items;args.setBasic=!!($('incBasic')&&$('incBasic').checked);
+      args.items=items;args.setBasic=!!($('incBasic')&&$('incBasic').checked);args.mark=!!($('incMark')&&$('incMark').checked);
     }else{fn='payroll.setPerf';args.perf={};PR.perf.forEach(function(x){args.perf[x.key]=$('pf_'+x.key).value;});}
     saveBtn(k,false);
     call(fn,args).then(function(j){var ok=afterSave(j,k,'Saved');if(PR&&PR.key===key&&ok)profile();else saveBtn(k,true);}).catch(function(){saveBtn(k,true);setMsg(k,'No connection. Please try again.',false);});
   }
+  function toggleMark(i){
+    var y=curYear();if(!y.marks)y.marks=[];var on=!y.marks[i];y.marks[i]=on;$('payMonths').innerHTML=months();
+    var key=PR.key,year=y.year;
+    queue=queue.then(function(){return call('payroll.setMark',{key:key,year:year,month:i+1,on:on});}).then(function(j){
+      if(j._status===401)return showLock(j.error);
+      if(!j.ok){showToast('Not saved: '+(j.error||'error'),'danger');if(PR&&PR.key===key)loadProfile(key);return;}
+      if(PR&&PR.key===key){var mine=PR.years.filter(function(x){return x.year===year;})[0],sv=j.data.years.filter(function(x){return x.year===year;})[0];if(mine&&sv&&sv.marks)mine.marks=sv.marks;if($('payMonths'))$('payMonths').innerHTML=months();}
+      showToast(on?'Month highlighted':'Highlight removed','success');
+    }).catch(function(){showToast('No connection \u2014 change not saved','danger');if(PR&&PR.key===key)loadProfile(key);});
+  }
   function cycle(i){
     if(!ed()||!PR||PR.loading)return;var y=curYear(),v=y.months[i];
+    if(markMode){toggleMark(i);return;}
     var nv=v==null?1:v===1?0.5:v===0.5?0:null;y.months[i]=nv;$('payMonths').innerHTML=months();
     var key=PR.key,year=y.year;
     queue=queue.then(function(){return call('payroll.setCommit',{key:key,year:year,month:i+1,value:nv});}).then(function(j){
       if(j._status===401)return showLock(j.error);
       if(!j.ok){showToast('Not saved: '+(j.error||'error'),'danger');if(PR&&PR.key===key)loadProfile(key);return;}
       LST=null;if(PR&&PR.key===key){var mine=PR.years.filter(function(x){return x.year===year;})[0],sv=j.data.years.filter(function(x){return x.year===year;})[0];
-        PR.yearly=j.data.yearly;PR.final=j.data.final;if(mine&&sv)mine.months=sv.months;
+        PR.yearly=j.data.yearly;PR.final=j.data.final;if(mine&&sv){mine.months=sv.months;if(sv.marks)mine.marks=sv.marks;}
         var s=document.querySelector('.pay-sum');if(s)s.innerHTML='<div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div>';
         if($('payMonths'))$('payMonths').innerHTML=months();}
     }).catch(function(){showToast('No connection — change not saved','danger');if(PR&&PR.key===key)loadProfile(key);});
@@ -3507,9 +3521,10 @@ var PAY=(function(){
   document.addEventListener('input',function(ev){if(ev.target&&ev.target.id==='payQ'){q=ev.target.value;if($('payList')&&LST)$('payList').innerHTML=cards();}});
   document.addEventListener('click',function(ev){
     var t=ev.target,x;if(!t.closest||!t.closest('#v-pay'))return;
-    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;loadProfile(x.getAttribute('data-pay-open'));return;}
+    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;markMode=false;loadProfile(x.getAttribute('data-pay-open'));return;}
     if(t.closest('[data-pay-back]')){PR=null;list();fetchList(false,true);return;}
     if((x=t.closest('[data-pay-yr]'))){yr=Number(x.getAttribute('data-pay-yr'));profile();return;}
+    if(t.closest('[data-pay-mode]')){markMode=!markMode;$('payMonths').innerHTML=months();return;}
     if((x=t.closest('[data-pay-m]'))){cycle(Number(x.getAttribute('data-pay-m')));return;}
     if((x=t.closest('[data-pay-save]'))){save(x.getAttribute('data-pay-save'));return;}
     if(t.closest('[data-inc-add]')){var l=$('incList'),e=$('incEmpty');if(e)e.remove();l.insertAdjacentHTML('beforeend',incRow({ym:'',amount:null}));return;}

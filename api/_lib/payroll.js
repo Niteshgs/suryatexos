@@ -90,7 +90,30 @@ function parse(rows) {
   });
   return out;
 }
-const read = async (tab) => parse((await G.batchGet(SHEET_ID(), [G.q(tab.title) + '!A1:O90'], 'serial'))[0] || []);
+// Light-blue fill on a month cell = "increment received this month" (set by hand in the sheet, or from the app).
+const MARK = { red: 0.6235294, green: 0.77254903, blue: 0.9098039 }, WHITE = { red: 1, green: 1, blue: 1 };
+const isBlue = (c) => { if (!c) return false; const r = c.red || 0, b = c.blue || 0; return b - r >= 0.1 && r < 0.95; };
+async function marksGrid(tab, p) {
+  if (p.at.monthsRow === undefined) return;
+  const r0 = p.at.monthsRow + 2, rng = G.q(tab.title) + '!C' + r0 + ':O' + (r0 + 11);
+  const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(SHEET_ID()) + '?ranges=' + encodeURIComponent(rng) + '&fields=' + encodeURIComponent('sheets.data.rowData.values.userEnteredFormat.backgroundColor');
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + (await G.token()) } });
+  if (!r.ok) return;
+  const rows = ((((await r.json()).sheets || [])[0] || {}).data || [])[0];
+  const rd = (rows && rows.rowData) || [];
+  p.years.forEach((y) => { y.marks = []; for (let m = 0; m < 12; m++) { const v = ((rd[m] || {}).values || [])[y.col - 2]; y.marks.push(isBlue(v && v.userEnteredFormat && v.userEnteredFormat.backgroundColor)); } });
+}
+const read = async (tab) => {
+  const p = parse((await G.batchGet(SHEET_ID(), [G.q(tab.title) + '!A1:O90'], 'serial'))[0] || []);
+  try { await marksGrid(tab, p); } catch (e) { console.error('payroll marks failed: ' + e.message); }
+  return p;
+};
+const fillReq = (tab, p, year, month, on) => {
+  const y = p.years.find((x) => x.year === Number(year)); if (!y) return null;
+  const row = p.at.monthsRow + month;   // 0-based: months row + month (JAN = +1)
+  return { repeatCell: { range: { sheetId: tab.sheetId, startRowIndex: row, endRowIndex: row + 1, startColumnIndex: y.col, endColumnIndex: y.col + 1 },
+    cell: { userEnteredFormat: { backgroundColor: on ? MARK : WHITE } }, fields: 'userEnteredFormat.backgroundColor' } };
+};
 
 function curYearIdx(p) {
   const nowY = new Date(Date.now() + 5.5 * 3600e3).getUTCFullYear();
@@ -126,6 +149,13 @@ async function setCommit(a) {
   const m = Number(a.month); if (!(m >= 1 && m <= 12)) throw new Error('Bad month');
   let v = a.value; if (v === null || v === '' || v === undefined) v = ''; else { v = Number(v); if (![0, 0.5, 1].includes(v)) throw new Error('Commitment must be 1, 0.5 or 0'); }
   await G.batchUpdate(SHEET_ID(), [upd(tab, colL(yr.col) + (p.at.monthsRow + 1 + m), v)], 'RAW');
+  return get(a);
+}
+async function setMark(a) {
+  const tab = await resolve(a.key), p = await read(tab), m = Number(a.month);
+  if (!(m >= 1 && m <= 12)) throw new Error('Bad month');
+  const rq = fillReq(tab, p, a.year, m, !!a.on); if (!rq) throw new Error('That year is not in this profile');
+  await G.format(SHEET_ID(), [rq]);
   return get(a);
 }
 async function setPay(a) {
@@ -169,6 +199,10 @@ async function setIncrements(a) {
       { repeatCell: { range: rng(1, 2), cell: { userEnteredFormat: { numberFormat: { type: 'DATE', pattern: 'mmm yyyy' } } }, fields: 'userEnteredFormat.numberFormat' } },
     ]);
   }
+  if (a.mark && items.length) {
+    const rq = items.map((x) => fillReq(tab, p, x.y, x.m, true)).filter(Boolean);
+    if (rq.length) await G.format(SHEET_ID(), rq);
+  }
   if (a.setBasic && items.length && p.at.basicRow !== undefined) {
     await G.batchUpdate(SHEET_ID(), [upd(tab, 'B' + (p.at.basicRow + 1), 'Basic Salary: ' + items[items.length - 1].amt)], 'RAW');
   }
@@ -184,7 +218,7 @@ async function setPerf(a) {
 
 const ROUTES = {
   'payroll.list': () => list(), 'payroll.get': (a) => get(a || {}),
-  'payroll.setCommit': (a) => setCommit(a || {}), 'payroll.setPay': (a) => setPay(a || {}), 'payroll.setBank': (a) => setBank(a || {}),
+  'payroll.setCommit': (a) => setCommit(a || {}), 'payroll.setMark': (a) => setMark(a || {}), 'payroll.setPay': (a) => setPay(a || {}), 'payroll.setBank': (a) => setBank(a || {}),
   'payroll.setIncrements': (a) => setIncrements(a || {}), 'payroll.setPerf': (a) => setPerf(a || {}),
 };
 module.exports = { ROUTES, _t: { parse, whenOf } };

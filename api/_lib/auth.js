@@ -65,7 +65,7 @@ const ROUTE_PERMS = {
     'att.addWorker': ['attendance.staff'], 'att.setStatus': ['attendance.staff'], 'att.rebuild': ['attendance.staff'],
     'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],
   },
-  payroll: { 'payroll.list': ['payroll.view', 'payroll.edit'], 'payroll.get': ['payroll.view', 'payroll.edit'], 'payroll.setCommit': ['payroll.edit'], 'payroll.setPay': ['payroll.edit'], 'payroll.setBank': ['payroll.edit'], 'payroll.setIncrements': ['payroll.edit'], 'payroll.setPerf': ['payroll.edit'] },
+  payroll: { 'payroll.list': ['payroll.view', 'payroll.edit'], 'payroll.get': ['payroll.view', 'payroll.edit'], 'payroll.setCommit': ['payroll.edit'], 'payroll.setMark': ['payroll.edit'], 'payroll.setPay': ['payroll.edit'], 'payroll.setBank': ['payroll.edit'], 'payroll.setIncrements': ['payroll.edit'], 'payroll.setPerf': ['payroll.edit'] },
   advances: { 'advances.add': ['advances.add'], 'advances.list': ['advances.view'] },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
