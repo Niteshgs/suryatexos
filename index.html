@@ -1382,7 +1382,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v199</span>
+    <span class="app-ver" id="appVer" title="App version">v200</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1433,7 +1433,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
     <button class="app-tile" id="tileHR" onclick="openHR()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
       <div class="app-name">Human Resource</div>
-      <div class="app-sub">Attendance · Payroll · Advances</div>
+      <div class="app-sub">Attendance · Payroll · Docs</div>
     </button>
     <button class="app-tile" id="tileCalc" onclick="openCalc()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg></div>
@@ -1449,11 +1449,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg></div>
       <div class="app-name">Analytics</div>
       <div class="app-sub">Knitted · Warping</div>
-    </button>
-    <button class="app-tile" id="tileDocs" onclick="openDocs()" style="display:none">
-      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></div>
-      <div class="app-name">Documents</div>
-      <div class="app-sub">Roles Clarity</div>
     </button>
     <button class="app-tile" id="tileUsers" onclick="openUsers()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></div>
@@ -1483,7 +1478,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <div class="view" id="v-hr">
   <div class="sp-wrap">
-    <div class="sp-head"><div><h2>Human Resource</h2><p>Attendance &middot; Payroll &middot; Advances</p></div></div>
+    <div class="sp-head"><div><h2>Human Resource</h2><p>Attendance &middot; Payroll &middot; Advances &middot; Documents</p></div></div>
     <div class="app-grid" id="hrGrid">
     <button class="app-tile" id="tileAtt" onclick="openAtt()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
@@ -1499,6 +1494,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-wallet"/></svg></div>
       <div class="app-name">Advances</div>
       <div class="app-sub">Record staff advances</div>
+    </button>
+    <button class="app-tile" id="tileDocs" onclick="openDocs()" style="display:none">
+      <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></div>
+      <div class="app-name">Documents</div>
+      <div class="app-sub">Roles Clarity</div>
     </button>
     </div>
   </div>
@@ -1802,7 +1802,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],hr:['Human Resource','Attendance · Payroll · Advances'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],hr:['Human Resource','Attendance · Payroll · Advances · Documents'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -1899,7 +1899,7 @@ var VIEW_PERM={dash:'yarn.dash',entry:'yarn.entry',proc:'yarn.proc',fg:'fg.statu
 function can(k){if(!ME)return false;if(k==='@admin')return !!ME.isAdmin;return ME.access.indexOf(k)>=0;}
 function attAny(){return ['attendance.mark','attendance.markToday','attendance.view','attendance.edit','attendance.staff'].some(can);}
 function canAny(pre){return !!ME&&ME.access.some(function(k){return k.indexOf(pre)===0;});}
-function hrAny(){return canAny('advances.')||canAny('payroll.')||attAny()||can('attendance.leave');}
+function hrAny(){return can('@admin')||canAny('advances.')||canAny('payroll.')||attAny()||can('attendance.leave');}
 function salesAny(){return can('sales.touchA')||can('sales.touchB');}
 function anaAny(){return can('knitted.admin')||can('warping.analytics');}
 function canView(v){var k=VIEW_PERM[v];if(k==='@ana')return anaAny();if(k==='@att')return attAny();if(k==='@hr')return hrAny();if(k==='@sales')return salesAny();if(k&&k.slice(-1)==='*')return canAny(k.slice(0,-1));return !k||can(k);}
@@ -4616,7 +4616,7 @@ window.addEventListener('online',function(){if(current==='dash'&&loaded)loadData
 window.addEventListener('DOMContentLoaded',function(){pRenderMaterial();document.getElementById('p_date').value=today();bootAuth();});
 </script>
 <script>
-var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileHR','tileCalc','tileWarp','tileAna','tileDocs','tileUsers'];
+var HOME_TILES=['tileYarn','tileFG','tileKN','tileSales','tileExp','tileHR','tileCalc','tileWarp','tileAna','tileUsers'];
 function homeKey(){return 'homeHidden:'+(ME&&ME.email||'');}
 function homeHidden(){if(!ME||!ME.isAdmin)return [];return Array.isArray(ME.homeHidden)?ME.homeHidden:[];}
 function localHidden(){try{return JSON.parse(localStorage.getItem(homeKey())||'[]');}catch(e){return [];}}
