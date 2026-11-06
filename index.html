@@ -916,7 +916,7 @@ button.wp-sbox{cursor:pointer}
 .pay-m small{font-size:13px;font-weight:700;letter-spacing:.6px}.pay-m b{font-size:20px;line-height:1}
 .pay-m.v1{border-color:var(--success);color:var(--success)}.pay-m.vh{border-color:var(--accent);color:var(--accent)}.pay-m.v0{border-color:var(--danger);color:var(--danger)}
 .pay-m.mk{background:rgba(111,168,220,.28);box-shadow:inset 0 0 0 2px #6FA8DC}
-.pay-mg.lock .pay-m{cursor:default;opacity:.9}
+.pay-mg.frozen .pay-m{cursor:default;opacity:.9}
 .pay-m.sel{outline:2px solid var(--accent);outline-offset:1px}
 .pay-hb{display:flex;gap:8px}
 .pay-ch{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.pay-ch h3{margin:0}
@@ -1383,7 +1383,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v201</span>
+    <span class="app-ver" id="appVer" title="App version">v202</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3463,7 +3463,7 @@ var PAY=(function(){
   function pickBtn(v,label,on){return '<button class="pay-sm'+(on?' on':'')+'" data-pay-set="'+(v===null?'':v)+'" aria-pressed="'+!!on+'">'+label+'</button>';}
   function months(){
     var y=curYear();if(!y)return '<div class="ex-empty">No year columns in this profile</div>';
-    var h='<div class="pay-mg'+(editMode?'':' lock')+'">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+(y.marks&&y.marks[i]?' mk':'')+(editMode&&sel===i?' sel':'')+'" data-pay-m="'+i+'"><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>';
+    var h='<div class="pay-mg'+(editMode?'':' frozen')+'">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+(y.marks&&y.marks[i]?' mk':'')+(editMode&&sel===i?' sel':'')+'" data-pay-m="'+i+'"><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>';
     if(editMode&&sel!==null){var v=y.months[sel],mk=!!(y.marks&&y.marks[sel]);
       h+='<div class="pay-pick"><div class="pay-pt">'+MN[sel]+' '+yr+'</div><div class="pay-pb">'+pickBtn(1,'\u2713 1',v===1)+pickBtn(0.5,'\u00bd 0.5',v===0.5)+pickBtn(0,'\u2717 0',v===0)+pickBtn(null,'Blank',v==null)+'</div>'
         +'<div class="pay-pb" style="margin-top:8px"><button class="pay-sm'+(mk?' on':'')+'" data-pay-blue aria-pressed="'+mk+'">'+(mk?'Remove blue highlight':'Highlight as increment month')+'</button></div></div>';}
