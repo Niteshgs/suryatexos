@@ -918,6 +918,8 @@ html:has(body.light){color-scheme:light}
 .kn-sub{font-size:13px;color:var(--text-muted);margin:0 0 14px}
 .kn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .kn-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.kn-last{padding:9px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)}
+.kn-last b{color:var(--text);font-weight:700}
 .kn-card-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
 .kn-edit{min-height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .kn-edit:hover{color:var(--accent);border-color:var(--accent)}
@@ -1342,7 +1344,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v189</span>
+    <span class="app-ver" id="appVer" title="App version">v190</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2595,6 +2597,7 @@ var KN=(function(){
   }
   var dview=(function(){try{return localStorage.getItem('sx_kn_view')||'full';}catch(e){return 'full';}})();
   var DVIEWS=[{id:'full',name:'Full'},{id:'cycles',name:'Cycles'},{id:'quality',name:'Quality'}];
+  function lastLine(id){var u=D.lastUpdate&&D.lastUpdate[id];return '<div class="kn-last">'+(u?'Last updated <b>'+esc(u.when)+'</b> by <b>'+esc(u.user)+'</b>':'No updates yet')+'</div>';}
   function renderDash(){
     var h='<div class="kn-dhead"><h2 class="kn-title">All Machines</h2><p class="kn-sub">Latest saved beam data across every machine</p>'
       +'<div class="kn-seg" role="tablist" aria-label="Dashboard view">'
@@ -2609,7 +2612,7 @@ var KN=(function(){
           +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
         +'<table class="kn-table"><thead><tr><th>#</th><th>Tape</th>'+(showC?'<th class="kn-c">Cycle</th>':'')
-        +(showW?'<th class="kn-n">Wt/Mtr (g)</th><th class="kn-n">Wt/Roll (kg)</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+        +(showW?'<th class="kn-n">Wt/Mtr (g)</th><th class="kn-n">Wt/Roll (kg)</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>'+lastLine(m.id)+'</div>';
     });
     h+='</div>'+(can('knitted.admin')?'<div class="kn-manage-wrap"><button class="kn-manage" data-kn-manage>'+ICON_SHIELD+'Admin</button></div>':'');
     $('knView').innerHTML=h;

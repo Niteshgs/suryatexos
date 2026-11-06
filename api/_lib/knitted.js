@@ -91,7 +91,29 @@ async function getAll() {
       return { cycle: cell(r, col(L.cols.cycle)), tape: cell(r, col(L.cols.tape)), weightMtr: cell(r, col(L.cols.weightMtr)), weightRoll: cell(r, col(L.cols.weightRoll)) };
     });
   }
-  return { cycleData, tapeList: prod.map((r) => String(cell(r, 0))).filter((n) => n.trim().length > 0), loaded: nowParts().loaded };
+  return { cycleData, tapeList: prod.map((r) => String(cell(r, 0))).filter((n) => n.trim().length > 0), loaded: nowParts().loaded, lastUpdate: await lastUpdates() };
+}
+
+// Latest save per machine, from the Entry Log (read-only; never breaks the dashboard)
+async function lastUpdates() {
+  try {
+    const titles = await G.sheetTitles(SHEET_ID);
+    if (!titles.includes(LOG)) return {};
+    const [col] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:A')], 'serial');
+    const n = col.length; if (!n) return {};
+    const from = Math.max(2, n + 2 - 400);
+    const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A' + from + ':D' + (n + 1))], 'serial');
+    const out = {};
+    for (const r of rows) {
+      const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], day = serialDay(cell(r, 0));
+      if (!id || day == null) continue;
+      const secs = Math.round(dayFrac(cell(r, 1)) * 86400), d = new Date(DAY0 + day * 864e5);
+      const hh = Math.floor(secs / 3600) % 24, mm = Math.floor((secs % 3600) / 60);
+      out[id] = { user: String(cell(r, 2) || '').trim() || 'Unknown',
+        when: d.getUTCDate() + ' ' + MON3[d.getUTCMonth()] + ', ' + ((hh % 12) || 12) + ':' + String(mm).padStart(2, '0') + ' ' + (hh < 12 ? 'am' : 'pm') };
+    }
+    return out;
+  } catch (e) { console.error('lastUpdates failed: ' + e.message); return {}; }
 }
 
 async function saveBeams(machineId, beams, meta) {
@@ -397,4 +419,4 @@ const ROUTES = {
   'knitted.recentLogs': () => recentLogs(),
 };
 
-module.exports = { ROUTES, SHEET_ID, _t: { computeCycles } };
+module.exports = { ROUTES, SHEET_ID, _t: { computeCycles, lastUpdates } };
