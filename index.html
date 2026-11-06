@@ -616,7 +616,7 @@ a.app-tile{display:block;text-decoration:none}
 .wp-on-hold{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
 .wp-big.done{background:var(--success);color:var(--on)}
 .wp-stamp{margin-top:6px;font-size:17px;font-weight:800;color:var(--success);text-align:right}.wp-stamp span{display:block;font-size:13px;font-weight:700;color:var(--text-muted)}
-.wp-standpill{display:inline-block;font-size:13px;font-weight:800;padding:4px 12px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
+.wp-standpill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
 .wp-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-width:0}
 .wp-nums span{display:block;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:16px;font-weight:800}
 .wp-nums i{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
@@ -655,15 +655,16 @@ button.wp-sbox{cursor:pointer}
 .wp-arch{display:block;width:33.333%;min-height:44px;margin:12px 0 0 auto;padding:6px 8px;font-size:13px;line-height:1.2}
 .wp-archived{color:var(--text-muted)}
 .wp-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:30px;margin-top:4px}
-.wp-id{font-size:13px;font-weight:700;color:var(--text-muted)}
+.wp-id{white-space:nowrap;font-size:12px;font-weight:700;color:var(--text-muted)}
 .wp-when{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;min-height:22px;margin-top:6px;font-size:14px;color:var(--text-muted)}
 .wp-when i{font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
 .wp-when b{color:var(--text);font-weight:800}
 .wp-when.done,.wp-when.done b{color:var(--success)}.wp-when.done b{font-size:14px}
 .wp-archbtn{flex:none;width:44px;height:44px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer}
 .wp-archbtn .ic{width:22px;height:22px}.wp-archbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
-.wp-metar{display:inline-flex;align-items:center;gap:8px}
-.wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:28px;cursor:pointer}
+.wp-metar{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.wp-tags{display:inline-flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap}
+.wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:28px;white-space:nowrap;cursor:pointer}
 .wp-imgo{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
 .wp-imgbox{background:var(--card,var(--bg));color:var(--text);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:14px}
 .wp-imgbody{display:flex;justify-content:center;padding-top:10px}.wp-imgbody img{max-width:100%;max-height:70vh;border-radius:8px}
@@ -1316,7 +1317,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .wp-mq{font-weight:700;text-align:center;color:var(--text);margin:2px 0 8px}
 .wp-mach{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
 .wp-mbtn{padding:14px 4px}
-.wp-mchip{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:var(--accent-strong);color:var(--on)}
+.wp-mchip{display:inline-block;white-space:nowrap;padding:3px 10px;border-radius:99px;border:2px solid var(--accent-strong);font-size:12px;font-weight:700;background:var(--accent-strong);color:var(--on)}
 </style>
 </head>
 <body>
@@ -1341,7 +1342,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v188</span>
+    <span class="app-ver" id="appVer" title="App version">v189</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3367,7 +3368,7 @@ var WP=(function(){
   function part(label,beams,m,ends,yarn){if(!beams)return '';return '<div class="wp-part">'+(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'')+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
-  function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return (t?'<span class="wp-standpill">'+esc(t)+'</span>':'')+mchip(j)||'<span></span>';}
+  function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return (t||j.machine)?'<span class="wp-tags">'+(t?'<span class="wp-standpill">'+esc(t)+'</span>':'')+mchip(j)+'</span>':'<span></span>';}
   function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}
   function head(j){return '<div class="wp-top"><b>'+wk(j.category)+esc(j.tape)+'</b>'+pill(j.status)+'</div>';}
   function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+(String(j.id).indexOf('tmp')===0?'Saving…':esc(j.id))+'</span></span></div>';}
