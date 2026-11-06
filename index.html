@@ -19,7 +19,7 @@
   --on:#1A1305;--on-danger:#2A0A08;--on-warn:#1A1305;
   --text:#F4F1EA;--text-muted:#A09A90;--text-dim:#D2CCC0;
   --success:#5CC48D;--success-soft:rgba(92,196,141,0.14);--danger:#F0706B;--danger-soft:rgba(240,112,107,0.14);
-  --warn:#E5B94E;--warn-soft:rgba(229,185,78,0.14);--info:#7AAEF2;--purple:#B590EE;--purple-soft:rgba(181,144,238,0.14);
+  --warn:#E5B94E;--warn-soft:rgba(229,185,78,0.14);--orange:#F9A869;--orange-soft:rgba(242,146,74,0.16);--info:#7AAEF2;--purple:#B590EE;--purple-soft:rgba(181,144,238,0.14);
   --radius:14px;--radius-sm:8px;
 }
 .light{
@@ -27,21 +27,21 @@
   --bg:#F6F3EE;--surface:#FFFFFF;--surface2:#EEE9E1;--border:#DDD6CA;--text:#1B1915;--text-muted:#6B645A;--text-dim:#3A352E;
   --success:#1B7F4C;--success-soft:rgba(27,127,76,0.1);--danger:#B3342E;--danger-soft:rgba(179,52,46,0.1);
   --accent:#86560F;--accent-strong:#86560F;--accent-soft:rgba(134,86,15,0.1);--on:#FFFFFF;--on-danger:#FFFFFF;--on-warn:#FFFFFF;
-  --warn:#8A5F00;--warn-soft:rgba(138,95,0,0.1);--info:#2F5FB8;--purple:#7b3fc8;--purple-soft:rgba(123,63,200,0.1);
+  --warn:#8A5F00;--warn-soft:rgba(138,95,0,0.1);--orange:#8F3E04;--orange-soft:rgba(201,92,10,0.12);--info:#2F5FB8;--purple:#7b3fc8;--purple-soft:rgba(123,63,200,0.1);
 }
 .navy{
   --kn-field:#0F1A2E;
   --bg:#0B1424;--surface:#121E33;--surface2:#1A2A45;--border:#26395A;--text:#EAF0FA;--text-muted:#93A4C0;--text-dim:#C9D6EA;
   --accent:#5AA9FF;--accent-strong:#5AA9FF;--accent-soft:rgba(90,169,255,0.14);--on:#06182E;
   --success:#4CD08F;--success-soft:rgba(76,208,143,0.14);--danger:#FF7A7A;--danger-soft:rgba(255,122,122,0.14);
-  --warn:#F2C14E;--warn-soft:rgba(242,193,78,0.14);--info:#52D0D6;
+  --warn:#F2C14E;--warn-soft:rgba(242,193,78,0.14);--orange:#FBB074;--orange-soft:rgba(245,154,85,0.16);--info:#52D0D6;
 }
 .navy.light{
   --kn-field:#EAF0F8;
   --bg:#F2F5FA;--surface:#FFFFFF;--surface2:#E6ECF5;--border:#D2DBE8;--text:#0F1B2E;--text-muted:#54647C;--text-dim:#2E3F5A;
   --accent:#1456B8;--accent-strong:#1456B8;--accent-soft:rgba(20,86,184,0.1);--on:#FFFFFF;
   --success:#17754A;--success-soft:rgba(23,117,74,0.1);--danger:#BA3030;--danger-soft:rgba(186,48,48,0.1);
-  --warn:#8A5A00;--warn-soft:rgba(138,90,0,0.1);--info:#0B6F82;
+  --warn:#8A5A00;--warn-soft:rgba(138,90,0,0.1);--orange:#8F3E04;--orange-soft:rgba(201,92,10,0.12);--info:#0B6F82;
 }
 #v-entry,#v-proc{--text-dim:#A09A90}
 .navy{--lg-disc:#EAF2FF;--lg-mark:#3D8BF0}
@@ -922,13 +922,13 @@ html:has(body.light){color-scheme:light}
 .kn-table th{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
 .kn-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .kn-table tr:last-child td{border-bottom:none}
-.kn-table tbody tr.c1{background:var(--success-soft)}.kn-table tbody tr.c2{background:var(--accent-soft)}.kn-table tbody tr.c3{background:var(--danger-soft)}
-.kn-table tbody tr.c1 td:first-child{box-shadow:inset 4px 0 0 var(--success)}.kn-table tbody tr.c2 td:first-child{box-shadow:inset 4px 0 0 var(--accent)}.kn-table tbody tr.c3 td:first-child{box-shadow:inset 4px 0 0 var(--danger)}
+.kn-table tbody tr.c1{background:var(--success-soft)}.kn-table tbody tr.c2{background:var(--orange-soft)}.kn-table tbody tr.c3{background:var(--danger-soft)}
+.kn-table tbody tr.c1 td:first-child{box-shadow:inset 4px 0 0 var(--success)}.kn-table tbody tr.c2 td:first-child{box-shadow:inset 4px 0 0 var(--orange)}.kn-table tbody tr.c3 td:first-child{box-shadow:inset 4px 0 0 var(--danger)}
 .kn-table .kn-n{text-align:right;font-variant-numeric:tabular-nums}
 .kn-bn{color:var(--text-muted);font-weight:700;width:20px}
 .kn-none{color:var(--text-muted);font-style:italic}
 .kn-cyc{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:12px;font-weight:800;background:var(--surface2);color:var(--text-muted)}
-.kn-cyc.c1{background:var(--success-soft);color:var(--success)}.kn-cyc.c2{background:var(--accent-soft);color:var(--accent)}.kn-cyc.c3{background:var(--danger-soft);color:var(--danger)}
+.kn-cyc.c1{background:var(--success-soft);color:var(--success)}.kn-cyc.c2{background:var(--orange-soft);color:var(--orange)}.kn-cyc.c3{background:var(--danger-soft);color:var(--danger)}
 .kn-sum{display:flex;justify-content:space-between;padding:10px 16px;font-size:12px;color:var(--text-muted);background:var(--accent-soft);border-top:1px solid color-mix(in srgb,var(--accent) 20%,transparent)}
 .kn-sum b{color:var(--accent);font-weight:800}
 .kn-link{background:none;border:none;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:6px 2px;min-height:32px}
@@ -1335,7 +1335,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v179</span>
+    <span class="app-ver" id="appVer" title="App version">v180</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
