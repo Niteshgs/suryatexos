@@ -31,6 +31,8 @@ const CATALOG = [
     { id: 'attendance.leave', name: 'Leave Request (apply & see who applied)' } ] },
   { id: 'warping', name: 'Warping', items: [
     { id: 'warping.plan', name: 'Planner (plan warping programs, see the queue)' }, { id: 'warping.execute', name: 'Execute (machine screen: see programs, mark Started / Done)' }, { id: 'warping.archive', name: 'Archive finished beams (send from Beams ready to Archive, restore)' }, { id: 'warping.analytics', name: 'See Warping Analytics (time per beam)' }, { id: 'warping.tapes', name: 'Add tapes to the Warping Data sheet (Dashboard)' }, { id: 'warping.cancel', name: 'Cancel a job / delete a plan (Planner and Execute)' } ] },
+  { id: 'advances', name: 'Advances', items: [
+    { id: 'advances.add', name: 'Add an advance (name, date, amount)' }, { id: 'advances.view', name: 'See the advances list' } ] },
   { id: 'calc', name: 'Calculators', items: [
     { id: 'calc.payment', name: 'Payment Calculator' }, { id: 'calc.gross', name: 'Gross Value Calculator' } ] },
 ];
@@ -61,6 +63,7 @@ const ROUTE_PERMS = {
     'att.addWorker': ['attendance.staff'], 'att.setStatus': ['attendance.staff'], 'att.rebuild': ['attendance.staff'],
     'leave.submit': ['attendance.leave'], 'leave.list': ['attendance.leave'],
   },
+  advances: { 'advances.add': ['advances.add'], 'advances.list': ['advances.view'] },
   expenses: { 'expenses.add': ['expenses.add'], 'expenses.list': ['expenses.view'], 'expenses.totals': ['expenses.view'] },
   warping: {
     'warp.catalog': ['warping.plan'], 'warp.list': ['warping.plan'], 'warp.add': ['warping.plan'], 'warp.edit': ['warping.plan'], 'warp.note': ['warping.plan'], 'warp.toExecute': ['warping.plan'], 'warp.cancel': ['warping.cancel'], 'warp.remove': ['warping.cancel'], 'warp.ready': ['warping.plan', 'warping.execute'], 'warp.summary': ['warping.plan', 'warping.execute'], 'warp.addTape': ['warping.tapes'], 'warp.analytics': ['warping.analytics'], 'warp.image': ['warping.plan', 'warping.execute'], 'warp.archive': ['warping.archive'], 'warp.unarchive': ['warping.archive'], 'warp.archived': ['warping.archive'], 'warp.board': ['warping.plan', 'warping.execute'],
