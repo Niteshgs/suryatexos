@@ -916,7 +916,10 @@ button.wp-sbox{cursor:pointer}
 .pay-m small{font-size:11px;font-weight:700;letter-spacing:.5px}.pay-m b{font-size:18px;line-height:1}
 .pay-m.v1{border-color:var(--success);color:var(--success)}.pay-m.vh{border-color:var(--accent);color:var(--accent)}.pay-m.v0{border-color:var(--danger);color:var(--danger)}
 .pay-m.mk{background:rgba(111,168,220,.28);box-shadow:inset 0 0 0 2px #6FA8DC}
-.pay-m[disabled]{cursor:default}
+.pay-mg.lock .pay-m{cursor:default;opacity:.9}
+.pay-m.sel{outline:2px solid var(--accent);outline-offset:1px}
+.pay-ch{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.pay-ch h3{margin:0}
+.pay-pick{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)}.pay-pt{font-size:13px;font-weight:800;margin-bottom:8px}.pay-pb{display:flex;gap:8px;flex-wrap:wrap}.pay-sm.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .pay-sm[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .pay-leg{font-size:12px;color:var(--text-muted);margin-top:10px}
 .pay-inc{display:flex;gap:8px;align-items:center;margin-bottom:8px}.pay-inc input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;min-height:44px}
@@ -1379,7 +1382,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v197</span>
+    <span class="app-ver" id="appVer" title="App version">v198</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3385,7 +3388,7 @@ var AD=(function(){
 function openAdv(fromPop){if(!canAny('advances.')){go('home');return;}go('adv',fromPop);AD.open();}
 
 var PAY=(function(){
-  var LST=null,PR=null,yr=null,q='',queue=Promise.resolve(),markMode=false;
+  var LST=null,PR=null,yr=null,q='',queue=Promise.resolve(),editMode=false,sel=null;
   function $(id){return document.getElementById(id);}
   function call(fn,args){return fetch('/api/payroll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
@@ -3400,7 +3403,7 @@ var PAY=(function(){
   function err(msg){return '<div class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>'+esc(msg)+'</div>';}
   function list(){
     var el=$('payView');
-    var h='<div class="sp-head"><div><h2>Payroll System</h2><p>Tap a name to view &amp; manage the profile &middot; saved to the Payroll sheet</p></div></div>'
+    var h='<div class="sp-head"><div><h2>Payroll System</h2><p>Tap a name to open the profile</p></div></div>'
       +'<div class="ex-f"><input type="search" id="payQ" placeholder="Search name" value="'+esc(q)+'" autocomplete="off"></div><div id="payList">';
     if(!LST)h+='<div class="loading"><div class="spinner"></div>Loading profiles…</div>';
     else h+=cards();
@@ -3410,9 +3413,7 @@ var PAY=(function(){
     var rows=(LST.people||[]).filter(function(p){return !q||p.name.toLowerCase().indexOf(q.toLowerCase())>=0;});
     if(!rows.length)return '<div class="ex-empty">No one found</div>';
     return rows.map(function(p){
-      return '<button class="pay-p" data-pay-open="'+esc(p.key)+'"><div><div class="pay-pn">'+esc(p.name)+(p.missingBank?'<span class="pay-chip">bank incomplete</span>':'')+'</div>'
-        +'<div class="pay-ps">Basic '+inr(p.basic)+' &middot; '+p.increments+' increment'+(p.increments===1?'':'s')+'</div></div>'
-        +'<div class="pay-sc">'+pct(p.final)+'<small>'+(p.year||'')+': '+pct(p.yearScore)+'</small></div></button>';
+      return '<button class="pay-p" data-pay-open="'+esc(p.key)+'"><div class="pay-pn">'+esc(p.name)+'</div><svg class="ic" aria-hidden="true" style="width:18px;height:18px;color:var(--text-muted)"><use href="#i-chevron"/></svg></button>';
     }).join('');
   }
   function fetchList(manual,quiet){
@@ -3443,11 +3444,14 @@ var PAY=(function(){
   }
   function curYear(){return PR.years.filter(function(y){return y.year===yr;})[0];}
   function mval(v){return v===1?['v1','✓']:v===0.5?['vh','½']:v===0?['v0','✗']:['','–'];}
+  function pickBtn(v,label,on){return '<button class="pay-sm'+(on?' on':'')+'" data-pay-set="'+(v===null?'':v)+'" aria-pressed="'+!!on+'">'+label+'</button>';}
   function months(){
     var y=curYear();if(!y)return '<div class="ex-empty">No year columns in this profile</div>';
-    return '<div class="pay-mg">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+(y.marks&&y.marks[i]?' mk':'')+'" data-pay-m="'+i+'"'+(ed()?'':' disabled')+'><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>'
-      +(ed()?'<div style="margin-top:10px"><button class="pay-sm" data-pay-mode aria-pressed="'+markMode+'">'+(markMode?'Done highlighting':'Highlight increment month')+'</button></div>':'')
-      +'<div class="pay-leg">Blue month = increment received that month. '+(markMode?'Tap a month to add or remove the blue highlight (it also shows in the sheet). ':'')+(ed()&&!markMode?'Tap to change: blank → ✓ full (1) → ½ half (0.5) → ✗ absent (0) → blank. ':'')+'Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
+    var h='<div class="pay-mg'+(editMode?'':' lock')+'">'+y.months.map(function(v,i){var m=mval(v);return '<button class="pay-m '+m[0]+(y.marks&&y.marks[i]?' mk':'')+(editMode&&sel===i?' sel':'')+'" data-pay-m="'+i+'"><small>'+MN[i]+'</small><b>'+m[1]+'</b></button>';}).join('')+'</div>';
+    if(editMode&&sel!==null){var v=y.months[sel],mk=!!(y.marks&&y.marks[sel]);
+      h+='<div class="pay-pick"><div class="pay-pt">'+MN[sel]+' '+yr+'</div><div class="pay-pb">'+pickBtn(1,'\u2713 1',v===1)+pickBtn(0.5,'\u00bd 0.5',v===0.5)+pickBtn(0,'\u2717 0',v===0)+pickBtn(null,'Blank',v==null)+'</div>'
+        +'<div class="pay-pb" style="margin-top:8px"><button class="pay-sm'+(mk?' on':'')+'" data-pay-blue aria-pressed="'+mk+'">'+(mk?'Remove blue highlight':'Highlight as increment month')+'</button></div></div>';}
+    return h+'<div class="pay-leg">'+(editMode?'Editing is on \u2014 tap a month, then choose its value. ':'Locked \u2014 tap the pencil to edit. ')+'Blue month = increment received. Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
   }
   function fld(id,label,val,extra){return '<div class="ex-f"><label for="'+id+'">'+label+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'" maxlength="120" autocomplete="off" '+(extra||'')+(ed()?'':' readonly')+'></div>';}
   function incRow(x){
@@ -3458,7 +3462,7 @@ var PAY=(function(){
     if(!PR||PR.loading){el.innerHTML='<button class="pay-back" data-pay-back>‹ All people</button><div class="loading"><div class="spinner"></div>Loading profile…</div>';return;}
     var b=PR.bank,h='<button class="pay-back" data-pay-back>‹ All people</button><div class="sp-head"><div><h2>'+esc(PR.name)+'</h2><p>'+(ed()?'Changes save straight to the sheet':'View only')+'</p></div></div>'
       +'<div class="pay-sum"><div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div></div>'
-      +'<div class="pay-card"><h3>Commitment</h3><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
+      +'<div class="pay-card"><div class="pay-ch"><h3>Commitment</h3>'+(ed()?'<button class="pay-sm" data-pay-edit aria-pressed="'+editMode+'">'+(editMode?'\u2713 Done':'\u270e Edit')+'</button>':'')+'</div><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
       +'<div class="pay-card"><h3>Pay scale</h3>'+fld('payBasic','Basic salary (₹)',PR.basic,'inputmode="decimal"')+fld('payOT','Basic for OT (₹)',PR.ot,'inputmode="decimal"')
       +(ed()?'<button class="pay-save" data-pay-save="pay">Save pay scale</button>':'')+'<div class="ex-msg" id="msg_pay" role="status"></div></div>'
       +'<div class="pay-card"><h3>Bank details</h3>'+fld('bkHolder','Account holder',b.holder)+fld('bkBank','Bank name',b.bank)+fld('bkAcct','Account no',b.acct,'inputmode="numeric"')+fld('bkIfsc','IFSC code',b.ifsc,'autocapitalize="characters"')
@@ -3504,10 +3508,8 @@ var PAY=(function(){
       showToast(on?'Month highlighted':'Highlight removed','success');
     }).catch(function(){showToast('No connection \u2014 change not saved','danger');if(PR&&PR.key===key)loadProfile(key);});
   }
-  function cycle(i){
-    if(!ed()||!PR||PR.loading)return;var y=curYear(),v=y.months[i];
-    if(markMode){toggleMark(i);return;}
-    var nv=v==null?1:v===1?0.5:v===0.5?0:null;y.months[i]=nv;$('payMonths').innerHTML=months();
+  function setVal(i,nv){
+    if(!ed()||!PR||PR.loading||!editMode)return;var y=curYear();y.months[i]=nv;$('payMonths').innerHTML=months();
     var key=PR.key,year=y.year;
     queue=queue.then(function(){return call('payroll.setCommit',{key:key,year:year,month:i+1,value:nv});}).then(function(j){
       if(j._status===401)return showLock(j.error);
@@ -3521,11 +3523,13 @@ var PAY=(function(){
   document.addEventListener('input',function(ev){if(ev.target&&ev.target.id==='payQ'){q=ev.target.value;if($('payList')&&LST)$('payList').innerHTML=cards();}});
   document.addEventListener('click',function(ev){
     var t=ev.target,x;if(!t.closest||!t.closest('#v-pay'))return;
-    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;markMode=false;loadProfile(x.getAttribute('data-pay-open'));return;}
-    if(t.closest('[data-pay-back]')){PR=null;list();fetchList(false,true);return;}
-    if((x=t.closest('[data-pay-yr]'))){yr=Number(x.getAttribute('data-pay-yr'));profile();return;}
-    if(t.closest('[data-pay-mode]')){markMode=!markMode;$('payMonths').innerHTML=months();return;}
-    if((x=t.closest('[data-pay-m]'))){cycle(Number(x.getAttribute('data-pay-m')));return;}
+    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;editMode=false;sel=null;loadProfile(x.getAttribute('data-pay-open'));return;}
+    if(t.closest('[data-pay-back]')){PR=null;editMode=false;sel=null;list();fetchList(false,true);return;}
+    if((x=t.closest('[data-pay-yr]'))){yr=Number(x.getAttribute('data-pay-yr'));sel=null;profile();return;}
+    if((x=t.closest('[data-pay-edit]'))){editMode=!editMode;sel=null;x.setAttribute('aria-pressed',editMode);x.textContent=editMode?'\u2713 Done':'\u270e Edit';$('payMonths').innerHTML=months();return;}
+    if((x=t.closest('[data-pay-m]'))){if(!editMode){showToast('Locked \u2014 tap Edit to change months','info');return;}sel=Number(x.getAttribute('data-pay-m'));$('payMonths').innerHTML=months();return;}
+    if((x=t.closest('[data-pay-set]'))){if(sel===null)return;var sv=x.getAttribute('data-pay-set');setVal(sel,sv===''?null:Number(sv));return;}
+    if(t.closest('[data-pay-blue]')){if(sel!==null)toggleMark(sel);return;}
     if((x=t.closest('[data-pay-save]'))){save(x.getAttribute('data-pay-save'));return;}
     if(t.closest('[data-inc-add]')){var l=$('incList'),e=$('incEmpty');if(e)e.remove();l.insertAdjacentHTML('beforeend',incRow({ym:'',amount:null}));return;}
     if((x=t.closest('[data-inc-del]'))){x.parentNode.remove();return;}
