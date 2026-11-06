@@ -1337,7 +1337,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v186</span>
+    <span class="app-ver" id="appVer" title="App version">v187</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3370,6 +3370,10 @@ var WP=(function(){
     var lab=d?'Done':r?'Started':'Planned',t=d?j.done:r?j.started:j.created,by=d?j.doneBy:r?j.startedBy:j.by;
     return '<div class="wp-when'+(d?' done':'')+'">'+(t?'<i>'+lab+'</i><b>'+esc(t)+'</b>'+(by?'<span>by '+esc(by)+'</span>':''):'&nbsp;')+'</div>';
   }
+  function stamps(j){
+    var row=function(l,t,by,d){return '<div class="wp-when'+(d?' done':'')+'"><i>'+l+'</i><b>'+esc(t)+'</b>'+(by?'<span>by '+esc(by)+'</span>':'')+'</div>';};
+    return (j.created?row('Planned',j.created,j.by):'')+(j.started?row('Started',j.started,j.startedBy):'')+(j.done?row('Done',j.done,j.doneBy,1):'');
+  }
   function body(j){return part('Base',j.baseBeams,j.baseMeters,j.baseEnds,j.baseYarn)+part('Design',j.designBeams,j.designMeters,j.designEnds,j.designYarn);}
   function editCard(j){
     var f=function(id,l,v){return '<label>'+l+'<input id="'+id+'" type="number" inputmode="numeric" min="0" max="99999" value="'+(v||'')+'"></label>';};
@@ -3471,8 +3475,7 @@ var WP=(function(){
     if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(live.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>'+anaBtn();
     return mb+ab+ft+'<div class="wp-board">'+rows.map(function(j){var st=stageOf(j),op=openJ===j.id;
       var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
-      if(op)h+='<div class="wp-bdet">'+meta(j)+when(j)+body(j)+'</div>';
-        +(j.started?'<div class="wp-sub">Started '+esc(j.started)+(j.startedBy?' by '+esc(j.startedBy):'')+'</div>':'')+(j.done?'<div class="wp-stamp" style="text-align:left">Done '+esc(j.done)+(j.doneBy?'<span>by '+esc(j.doneBy)+'</span>':'')+'</div>':'')+'</div>';
+      if(op)h+='<div class="wp-bdet">'+meta(j)+stamps(j)+body(j)+'</div>';
       return '<div class="wp-bitem">'+h+'</div>';}).join('')+'</div>'+anaBtn();
   }
   function anaBtn(){return can('warping.analytics')?'<div class="wp-anarow"><button type="button" class="wp-sm wp-anabtn" data-wp-adm="1">Admin</button></div>':'';}
