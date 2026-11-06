@@ -911,13 +911,14 @@ button.wp-sbox{cursor:pointer}
 .pay-yrs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .pay-yr{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;min-height:34px}
 .pay-yr.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.pay-mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.pay-m{font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer}
-.pay-m small{font-size:11px;font-weight:700;letter-spacing:.5px}.pay-m b{font-size:18px;line-height:1}
+.pay-mg{display:flex;flex-direction:column;gap:6px}
+.pay-m{font:inherit;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;min-height:46px;width:100%;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer}
+.pay-m small{font-size:13px;font-weight:700;letter-spacing:.6px}.pay-m b{font-size:20px;line-height:1}
 .pay-m.v1{border-color:var(--success);color:var(--success)}.pay-m.vh{border-color:var(--accent);color:var(--accent)}.pay-m.v0{border-color:var(--danger);color:var(--danger)}
 .pay-m.mk{background:rgba(111,168,220,.28);box-shadow:inset 0 0 0 2px #6FA8DC}
 .pay-mg.lock .pay-m{cursor:default;opacity:.9}
 .pay-m.sel{outline:2px solid var(--accent);outline-offset:1px}
+.pay-hb{display:flex;gap:8px}
 .pay-ch{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.pay-ch h3{margin:0}
 .pay-pick{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)}.pay-pt{font-size:13px;font-weight:800;margin-bottom:8px}.pay-pb{display:flex;gap:8px;flex-wrap:wrap}.pay-sm.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .pay-sm[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -1382,7 +1383,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v200</span>
+    <span class="app-ver" id="appVer" title="App version">v201</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3468,27 +3469,32 @@ var PAY=(function(){
         +'<div class="pay-pb" style="margin-top:8px"><button class="pay-sm'+(mk?' on':'')+'" data-pay-blue aria-pressed="'+mk+'">'+(mk?'Remove blue highlight':'Highlight as increment month')+'</button></div></div>';}
     return h+'<div class="pay-leg">'+(editMode?'Editing is on \u2014 tap a month, then choose its value. ':'Locked \u2014 tap the pencil to edit. ')+'Blue month = increment received. Yearly '+yr+': <b>'+pct(PR.yearly[yr])+'</b></div>';
   }
-  function fld(id,label,val,extra){return '<div class="ex-f"><label for="'+id+'">'+label+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'" maxlength="120" autocomplete="off" '+(extra||'')+(ed()?'':' readonly')+'></div>';}
+  var EDT={pay:false,bank:false,inc:false,perf:false};
+  function resetEdit(){EDT={pay:false,bank:false,inc:false,perf:false};editMode=false;sel=null;}
+  function on(k){return ed()&&EDT[k];}
+  function hdr(title,k){return '<div class="pay-ch"><h3>'+title+'</h3>'+(ed()?(EDT[k]?'<span class="pay-hb"><button class="pay-sm" data-pay-cancel="'+k+'">Cancel</button><button class="pay-sm on" data-pay-save="'+k+'">Save</button></span>':'<button class="pay-sm" data-pay-startedit="'+k+'">✎ Edit</button>'):'')+'</div>';}
+  function fld(id,label,val,extra,k){return '<div class="ex-f"><label for="'+id+'">'+label+'</label><input type="text" id="'+id+'" value="'+esc(val==null?'':val)+'" maxlength="120" autocomplete="off" '+(extra||'')+(on(k)?'':' readonly')+'></div>';}
   function incRow(x){
-    return '<div class="pay-inc"><input type="month" data-inc-ym value="'+esc(x.ym||'')+'"'+(ed()?'':' disabled')+'><input type="number" data-inc-amt inputmode="decimal" min="1" placeholder="Amount ₹" value="'+(x.amount==null?'':x.amount)+'"'+(ed()?'':' disabled')+'>'+(ed()?'<button class="pay-sm" data-inc-del aria-label="Remove">✕</button>':'')+'</div>';
+    var e=on('inc');
+    return '<div class="pay-inc"><input type="month" data-inc-ym value="'+esc(x.ym||'')+'"'+(e?'':' disabled')+'><input type="number" data-inc-amt inputmode="decimal" min="1" placeholder="Amount ₹" value="'+(x.amount==null?'':x.amount)+'"'+(e?'':' disabled')+'>'+(e?'<button class="pay-sm" data-inc-del aria-label="Remove">✕</button>':'')+'</div>';
   }
   function profile(){
     var el=$('payView');
     if(!PR||PR.loading){el.innerHTML='<button class="pay-back" data-pay-back>‹ All people</button><div class="loading"><div class="spinner"></div>Loading profile…</div>';return;}
-    var b=PR.bank,h='<button class="pay-back" data-pay-back>‹ All people</button><div class="sp-head"><div><h2>'+esc(PR.name)+'</h2><p>'+(ed()?'Changes save straight to the sheet':'View only')+'</p></div></div>'
+    var b=PR.bank,h='<button class="pay-back" data-pay-back>‹ All people</button><div class="sp-head"><div><h2>'+esc(PR.name)+'</h2><p>'+(ed()?'Tap Edit on a block to change it, then Save':'View only')+'</p></div></div>'
       +'<div class="pay-sum"><div><span>Final commitment</span><b>'+pct(PR.final)+'</b></div><div><span>'+(yr||'')+' score</span><b>'+pct(PR.yearly[yr])+'</b></div></div>'
-      +'<div class="pay-card"><div class="pay-ch"><h3>Commitment</h3>'+(ed()?'<button class="pay-sm" data-pay-edit aria-pressed="'+editMode+'">'+(editMode?'\u2713 Done':'\u270e Edit')+'</button>':'')+'</div><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
-      +'<div class="pay-card"><h3>Pay scale</h3>'+fld('payBasic','Basic salary (₹)',PR.basic,'inputmode="decimal"')+fld('payOT','Basic for OT (₹)',PR.ot,'inputmode="decimal"')
-      +(ed()?'<button class="pay-save" data-pay-save="pay">Save pay scale</button>':'')+'<div class="ex-msg" id="msg_pay" role="status"></div></div>'
-      +'<div class="pay-card"><h3>Bank details</h3>'+fld('bkHolder','Account holder',b.holder)+fld('bkBank','Bank name',b.bank)+fld('bkAcct','Account no',b.acct,'inputmode="numeric"')+fld('bkIfsc','IFSC code',b.ifsc,'autocapitalize="characters"')
-      +fld('bkN0','Notes',b.notes[0])+fld('bkN1','Notes (more)',b.notes[1])+fld('bkN2','Notes (more)',b.notes[2])
-      +(ed()?'<button class="pay-save" data-pay-save="bank">Save bank details</button>':'')+'<div class="ex-msg" id="msg_bank" role="status"></div></div>'
-      +'<div class="pay-card"><h3>Increment trend</h3><div id="incList">'+(PR.increments.length?PR.increments.map(incRow).join(''):'<div class="ex-empty" id="incEmpty">No increments yet</div>')+'</div>'
-      +(ed()?'<button class="pay-sm" data-inc-add>+ Add increment</button><div class="ex-f" style="margin:12px 0 0"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px"><input type="checkbox" id="incBasic" style="width:auto;min-height:0"> Also set the latest increment as the current basic salary</label><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;margin-top:8px"><input type="checkbox" id="incMark" checked style="width:auto;min-height:0"> Highlight each increment month in blue in the commitment table</label></div><button class="pay-save" data-pay-save="inc">Save increments</button>':'')
+      +'<div class="pay-card"><div class="pay-ch"><h3>Commitment</h3>'+(ed()?'<button class="pay-sm" data-pay-edit aria-pressed="'+editMode+'">'+(editMode?'✓ Done':'✎ Edit')+'</button>':'')+'</div><div class="pay-yrs">'+PR.years.map(function(y){return '<button class="pay-yr'+(y.year===yr?' on':'')+'" data-pay-yr="'+y.year+'">'+y.year+'</button>';}).join('')+'</div><div id="payMonths">'+months()+'</div></div>'
+      +'<div class="pay-card">'+hdr('Pay scale','pay')+fld('payBasic','Basic salary (₹)',PR.basic,'inputmode="decimal"','pay')+fld('payOT','Basic for OT (₹)',PR.ot,'inputmode="decimal"','pay')
+      +'<div class="ex-msg" id="msg_pay" role="status"></div></div>'
+      +'<div class="pay-card">'+hdr('Bank details','bank')+fld('bkHolder','Account holder',b.holder,'','bank')+fld('bkBank','Bank name',b.bank,'','bank')+fld('bkAcct','Account no',b.acct,'inputmode="numeric"','bank')+fld('bkIfsc','IFSC code',b.ifsc,'autocapitalize="characters"','bank')
+      +fld('bkN0','Notes',b.notes[0],'','bank')+fld('bkN1','Notes (more)',b.notes[1],'','bank')+fld('bkN2','Notes (more)',b.notes[2],'','bank')
+      +'<div class="ex-msg" id="msg_bank" role="status"></div></div>'
+      +'<div class="pay-card">'+hdr('Increment trend','inc')+'<div id="incList">'+(PR.increments.length?PR.increments.map(incRow).join(''):'<div class="ex-empty" id="incEmpty">No increments yet</div>')+'</div>'
+      +(on('inc')?'<button class="pay-sm" data-inc-add>+ Add increment</button><div class="ex-f" style="margin:12px 0 0"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px"><input type="checkbox" id="incBasic" style="width:auto;min-height:0"> Also set the latest increment as the current basic salary</label><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;margin-top:8px"><input type="checkbox" id="incMark" checked style="width:auto;min-height:0"> Highlight each increment month in blue in the commitment table</label></div>':'')
       +'<div class="ex-msg" id="msg_inc" role="status"></div></div>';
     if(PR.perf.length){
-      h+='<div class="pay-card"><h3>Performance notes</h3>'+PR.perf.map(function(x){return '<div class="ex-f"><label for="pf_'+x.key+'">'+esc(x.label)+'</label><textarea id="pf_'+x.key+'" rows="2" maxlength="500"'+(ed()?'':' readonly')+'>'+esc(x.text)+'</textarea></div>';}).join('')
-        +(ed()?'<button class="pay-save" data-pay-save="perf">Save notes</button>':'')+'<div class="ex-msg" id="msg_perf" role="status"></div></div>';
+      h+='<div class="pay-card">'+hdr('Performance notes','perf')+PR.perf.map(function(x){return '<div class="ex-f"><label for="pf_'+x.key+'">'+esc(x.label)+'</label><textarea id="pf_'+x.key+'" rows="2" maxlength="500"'+(on('perf')?'':' readonly')+'>'+esc(x.text)+'</textarea></div>';}).join('')
+        +'<div class="ex-msg" id="msg_perf" role="status"></div></div>';
     }
     el.innerHTML=h;
   }
@@ -3496,7 +3502,7 @@ var PAY=(function(){
   function afterSave(j,k,okText){
     if(j._status===401)return showLock(j.error);
     if(!j.ok){setMsg(k,'Error: '+(j.error||'could not save'),false);return false;}
-    PR=j.data;LST=null;setMsg(k,okText,true);showToast(okText,'success');return true;
+    PR=j.data;LST=null;EDT[k]=false;showToast(okText,'success');return true;
   }
   function saveBtn(k,on){var b=document.querySelector('[data-pay-save="'+k+'"]');if(b){b.disabled=!on;b.textContent=on?b.getAttribute('data-t'):'Saving…';}}
   function save(k){
@@ -3538,13 +3544,15 @@ var PAY=(function(){
   document.addEventListener('input',function(ev){if(ev.target&&ev.target.id==='payQ'){q=ev.target.value;if($('payList')&&LST)$('payList').innerHTML=cards();}});
   document.addEventListener('click',function(ev){
     var t=ev.target,x;if(!t.closest||!t.closest('#v-pay'))return;
-    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;editMode=false;sel=null;loadProfile(x.getAttribute('data-pay-open'));return;}
-    if(t.closest('[data-pay-back]')){PR=null;editMode=false;sel=null;list();fetchList(false,true);return;}
+    if((x=t.closest('[data-pay-open]'))){yr=null;PR=null;resetEdit();loadProfile(x.getAttribute('data-pay-open'));return;}
+    if(t.closest('[data-pay-back]')){PR=null;resetEdit();list();fetchList(false,true);return;}
     if((x=t.closest('[data-pay-yr]'))){yr=Number(x.getAttribute('data-pay-yr'));sel=null;profile();return;}
     if((x=t.closest('[data-pay-edit]'))){editMode=!editMode;sel=null;x.setAttribute('aria-pressed',editMode);x.textContent=editMode?'\u2713 Done':'\u270e Edit';$('payMonths').innerHTML=months();return;}
     if((x=t.closest('[data-pay-m]'))){if(!editMode){showToast('Locked \u2014 tap Edit to change months','info');return;}sel=Number(x.getAttribute('data-pay-m'));$('payMonths').innerHTML=months();return;}
     if((x=t.closest('[data-pay-set]'))){if(sel===null)return;var sv=x.getAttribute('data-pay-set');setVal(sel,sv===''?null:Number(sv));return;}
     if(t.closest('[data-pay-blue]')){if(sel!==null)toggleMark(sel);return;}
+    if((x=t.closest('[data-pay-startedit]'))){EDT[x.getAttribute('data-pay-startedit')]=true;profile();return;}
+    if((x=t.closest('[data-pay-cancel]'))){EDT[x.getAttribute('data-pay-cancel')]=false;profile();return;}
     if((x=t.closest('[data-pay-save]'))){save(x.getAttribute('data-pay-save'));return;}
     if(t.closest('[data-inc-add]')){var l=$('incList'),e=$('incEmpty');if(e)e.remove();l.insertAdjacentHTML('beforeend',incRow({ym:'',amount:null}));return;}
     if((x=t.closest('[data-inc-del]'))){x.parentNode.remove();return;}
