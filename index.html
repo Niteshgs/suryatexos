@@ -1401,7 +1401,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v222</span>
+    <span class="app-ver" id="appVer" title="App version">v223</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3768,8 +3768,8 @@ var WP=(function(){
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
   function n(v){return Number(v||0).toLocaleString('en-IN');}
   function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}
-  var WIC={plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={plan:'Plan',exec:'Program',ready:'Ready'};
-  function navTabs(){var t=[];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
+  var WIC={dash:'i-dashboard',plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={dash:'Dash',plan:'Plan',exec:'Program',ready:'Ready'};
+  function navTabs(){var t=['dash'];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
   function nav(){var n=$('wpNav'),t=navTabs();if(!n)return;n.style.gridTemplateColumns='repeat('+t.length+',1fr)';n.innerHTML=t.map(function(k){return '<button type="button" class="'+(tab===k?'on':'')+'"'+(tab===k?' aria-current="page"':'')+' data-wp-tab="'+k+'"><span><svg class="ic" aria-hidden="true"><use href="#'+WIC[k]+'"/></svg></span>'+WLB[k]+'</button>';}).join('');}
   function tabs(){return '';}
   function sumHtml(){
