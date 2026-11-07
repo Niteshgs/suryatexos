@@ -1400,7 +1400,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v216</span>
+    <span class="app-ver" id="appVer" title="App version">v217</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1461,7 +1461,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
     <button class="app-tile" id="tileWarp" onclick="openWarp()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-beam"/></svg></div>
       <div class="app-name">Warping</div>
-      <div class="app-sub">Planner · Execute</div>
+      <div class="app-sub">Planner · Program</div>
     </button>
     <button class="app-tile" id="tileAna" onclick="openAna()" style="display:none">
       <div class="app-ico"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg></div>
@@ -1826,7 +1826,7 @@ function openYarn(fromPop){
   if(!loaded){var c=readCache();if(c&&c.d){renderData(c.d);loaded=true;document.getElementById('syncTime').textContent='Updating… (last synced '+new Date(c.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+')';}}
   if(Date.now()-lastLoad>30000)loadData();
 }
-var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Execute'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],hr:['Human Resource','Attendance · Payroll · Advances · Documents'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
+var HEAD={dash:['Yarn Stock','Dashboard'],entry:['Material Entry','Stock Update'],proc:['New Order','Procurement Entry'],home:['Suryatex OS','Home'],fg:['Finished Goods','Stock Status'],fgpo:['PO Track','Purchase Orders'],fgsw:['Stock Sweep','Clearance Stock'],users:['Access Controls','People & permissions'],docs:['Documents','Roles Clarity'],warp:['Warping','Planner · Program'],ana:['Analytics','Knitted · Warping'],sales:['Sales','Customer Touch Points'],exp:['Cash Expenses','Suryatex · FY26-27'],adv:['Advances','Staff advances'],pay:['Payroll System','Staff profiles'],hr:['Human Resource','Attendance · Payroll · Advances · Documents'],att:['Attendance','Staff · Register · Profiles'],leave:['Leave Request','Apply · Who\'s applied'],calc:['Calculators','Gross Value · Payment'],kn:['Knitted Tracker',''],knentry:['Knitted Tracker',''],kntapes:['Knitted Tracker',''],knadmin:['Knitted Tracker',''],knact:['Knitted Tracker',''],knlogs:['Knitted Tracker','']};
 function goHome(){if(window.KN&&KN.isDirty()){KN.guard(function(){goHomeNow();});return;}goHomeNow();}
 function goHomeNow(){try{var st=history.state;if(st&&st.i>0){history.back();return;}}catch(e){}go('home');}
 /* App-wide Back: every screen change is one history step, so the phone's back button,
@@ -3767,17 +3767,18 @@ var WP=(function(){
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
   function n(v){return Number(v||0).toLocaleString('en-IN');}
   function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}
-  var WIC={plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={plan:'Plan',exec:'Execute',ready:'Ready'};
+  var WIC={plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={plan:'Plan',exec:'Program',ready:'Ready'};
   function navTabs(){var t=[];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
   function nav(){var n=$('wpNav'),t=navTabs();if(!n)return;n.style.gridTemplateColumns='repeat('+t.length+',1fr)';n.innerHTML=t.map(function(k){return '<button type="button" class="'+(tab===k?'on':'')+'"'+(tab===k?' aria-current="page"':'')+' data-wp-tab="'+k+'"><span><svg class="ic" aria-hidden="true"><use href="#'+WIC[k]+'"/></svg></span>'+WLB[k]+'</button>';}).join('');}
   function tabs(){return '';}
   function sumHtml(){
     var v=function(k){return sum?n(sum[k]):'–';};
     var box=function(t,k,lab,extra){var h='<b>'+v(k)+'</b><span>'+lab+'</span>'+(extra||'<em>&nbsp;</em>');return (t==='plan'?canP():t==='exec'?canE():true)?'<button type="button" class="wp-sbox" data-wp-tab="'+t+'" aria-label="'+lab+'">'+h+'</button>':'<div class="wp-sbox">'+h+'</div>';};
-    return box('plan','planning','Planning')+box('exec','execute','In execute',sum&&sum.hold?'<em>'+n(sum.hold)+' on hold</em>':'')+box('ready','doneToday','Done today');
+    return box('plan','planning','Planning')+box('exec','execute','In program',sum&&sum.hold?'<em>'+n(sum.hold)+' on hold</em>':'')+box('ready','doneToday','Done today');
   }
   function loadSum(){var v=ver;return api('warp.summary').then(function(d){if(v!==ver)return;sum=d;var e=$('wpSum');if(e)e.innerHTML=sumHtml();}).catch(function(){});}
-  function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(s)+'</span>';}
+  var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Ready'};   // wording shown to the team (sheet values are unchanged)
+  function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function part(label,beams,m,ends,yarn){if(!beams)return '';return '<div class="wp-part">'+(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'')+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
@@ -3811,7 +3812,7 @@ var WP=(function(){
     }
     else if(j.status==='Planned'&&canP()){
       if(ask==='del')return two('<button type="button" class="wp-big danger" data-wp-del="'+sid+'">Delete?</button>');
-      s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-askdel="'+sid+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Execute</button><button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';
+      s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-askdel="'+sid+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Send to program</button><button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';
     }
     if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
     if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
@@ -3859,7 +3860,7 @@ var WP=(function(){
     var l=jobs.filter(function(j){return !j.status||j.status==='Planned';}).reverse();
     return h+(l.length?'<div class="wp-list">'+l.map(function(j){return jobCard(j,false);}).join('')+'</div>':'<div class="empty-state">No jobs yet.</div>');
   }
-  function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Done','done']:j.status==='Archived'?['Archived','archived']:j.status==='On hold'?['Execute · On hold','on-hold']:['Execute','ready'];}
+  function stageOf(j){return j.status==='Planned'?['Planning','']:j.status==='Done'?['Ready','done']:j.status==='Archived'?['Archived','archived']:j.status==='On hold'?['On hold','on-hold']:j.status==='Started'?['Running','started']:['In Program','ready'];}
   var imgC={};
   function showImg(name){
     var o=document.getElementById('wpImgO');if(o)o.remove();
@@ -3948,7 +3949,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping execution list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
+    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping program list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
@@ -4020,7 +4021,7 @@ var WP=(function(){
     var j=find(id);if(!j)return;ver++;
     patch(id,function(x){x.status='Ready';});bump('planning',-1);bump('execute',1);
     if(exec&&!exec.some(function(x){return x.id===id;}))exec=exec.concat([j]);
-    hold(j);msg='Sent for execution';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
+    hold(j);msg='Sent to program';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel)draw();},3000);
     bg('warp.toExecute',{id:id});
   }
   function del(id){
