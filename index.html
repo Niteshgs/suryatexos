@@ -1416,7 +1416,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v261</span>
+    <span class="app-ver" id="appVer" title="App version">v262</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1663,7 +1663,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
   <div class="stats-row">
     <div class="stat-card danger active" onclick="setMainTab('reorder')" id="tabReorder"><div class="stat-num" id="statReorder">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>Re-Order</div></div>
     <div class="stat-card success" onclick="setMainTab('safe')" id="tabSafe"><div class="stat-num" id="statSafe">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Safe</div></div>
-    <div class="stat-card warn" onclick="setMainTab('orders')" id="tabOrders"><div class="stat-num" id="statOrders">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-truck"/></svg>Orders Placed</div></div>
+    <div class="stat-card warn" onclick="setMainTab('orders')" id="tabOrders"><div class="stat-num" id="statOrders">—</div><div class="stat-label"><svg class="ic" aria-hidden="true"><use href="#i-truck"/></svg>Active Orders</div></div>
   </div>
   <div id="cardsSection">
     <div class="shade-pick">
@@ -2156,7 +2156,7 @@ function updateStats(){
   var r=allData.filter(function(x){return x.reorder==='YES';}).length;
   document.getElementById('statReorder').textContent=r;
   document.getElementById('statSafe').textContent=allData.length-r;
-  document.getElementById('statOrders').textContent=allOrders.length;
+  document.getElementById('statOrders').textContent=allOrders.filter(function(o){return statusKey(o.status)!=='clear';}).length;   // active orders only: Cleared ones are done
 }
 /* Shade picker: dShade '' = normal list, '*' = every shade as a bulk card, otherwise one shade */
 var dShade='';
