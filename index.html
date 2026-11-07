@@ -1416,7 +1416,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v258</span>
+    <span class="app-ver" id="appVer" title="App version">v259</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2712,7 +2712,7 @@ var KN=(function(){
   var DVIEWS=[{id:'full',name:'Full'},{id:'cycles',name:'Cycles'},{id:'quality',name:'Quality'}];
   function lastLine(id){var u=D.lastUpdate&&D.lastUpdate[id];return '<div class="kn-last">'+(u?'Last updated <b>'+esc(u.when)+'</b> by <b>'+esc(u.user)+'</b>':'No updates yet')+'</div>';}
   function renderDash(){
-    var h='<div class="kn-dhead"><h2 class="kn-title">All Machines</h2><p class="kn-sub">Latest saved beam data across every machine</p>'
+    var h='<div class="kn-dhead"><h2 class="kn-title">All Machines</h2>'
       +(can('knitted.logs')?'<button type="button" class="kn-btn kn-logbtn" data-kn-go-logs>'+ICON_ACT+' Recent logs</button>':'')+'</div><div class="kn-grid">';
     var showC=dview!=='quality', showW=dview!=='cycles';
     MACHINES.forEach(function(m){
