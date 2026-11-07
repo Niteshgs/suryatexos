@@ -162,16 +162,16 @@ async function addOneOff(a, who) {
   let bE = f.baseBeams ? ends(a.baseEnds) : '', dE = f.designBeams ? ends(a.designEnds) : '';
   if (Number.isNaN(bE) || Number.isNaN(dE)) throw new Error('Ends must be whole numbers');
   let bY = f.baseBeams ? flat(a.baseYarn).slice(0, 80) : '', dY = f.designBeams ? flat(a.designYarn).slice(0, 80) : '';
-  if (a.split) {   // split beam (1A 1B 1C), knitted only: each part has its own ends and yarn; the total ends go in the Ends column, the parts are written in the yarn text as "1A 27 ends - 150/0 Navy | 1B ..."
+  if (a.split) {   // split beam (A B C), knitted only: each part has its own ends and yarn; the total ends go in the Ends column, the parts are written in the yarn text as "A 27 ends - 150/0 Navy | B ..."
     if (cat !== 'Knitted') throw new Error('Split beams are for knitted tapes');
     const side = (parts, on, label) => {
       if (!on) return ['', ''];
-      if (!Array.isArray(parts) || parts.length !== 3) throw new Error(label + ': fill 1A, 1B and 1C');
+      if (!Array.isArray(parts) || parts.length !== 3) throw new Error(label + ': fill A, B and C');
       let tot = 0; const txt = parts.map((p, k) => {
         const e = ends(p && p.ends), y = flat(p && p.yarn).replace(/\|/g, '/').slice(0, 60);
-        if (!e || Number.isNaN(e)) throw new Error(label + ' ' + (1 + 'ABC'[k]) + ': enter the ends');
-        if (!y) throw new Error(label + ' ' + (1 + 'ABC'[k]) + ': enter the yarn');
-        tot += e; return '1' + 'ABC'[k] + ' ' + e + ' ends - ' + y;
+        if (!e || Number.isNaN(e)) throw new Error(label + ' ' + 'ABC'[k] + ': enter the ends');
+        if (!y) throw new Error(label + ' ' + 'ABC'[k] + ': enter the yarn');
+        tot += e; return 'ABC'[k] + ' ' + e + ' ends - ' + y;
       });
       return [tot, txt.join(' | ')];
     };
