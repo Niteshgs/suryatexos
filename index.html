@@ -627,6 +627,8 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-on-hold{color:var(--orange,#c95c0a);border-color:var(--orange,#c95c0a);background:var(--orange-soft,rgba(201,92,10,.12))}
 .wp-big.done{background:var(--success);color:var(--on)}
 .wp-stamp{margin-top:6px;font-size:17px;font-weight:800;color:var(--success);text-align:right}.wp-stamp span{display:block;font-size:13px;font-weight:700;color:var(--text-muted)}
+.wp-stand button.on[data-st=d]{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
+.wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-standpill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
 .wp-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-width:0}
 .wp-nums span{display:block;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:16px;font-weight:800}
@@ -1407,7 +1409,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v235</span>
+    <span class="app-ver" id="appVer" title="App version">v236</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3790,9 +3792,10 @@ var WP=(function(){
   var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Done'};   // wording shown to the team (sheet values are unchanged)
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function part(label,beams,m,ends,yarn){if(!beams)return '';return '<div class="wp-part">'+(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'')+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
-  function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill">'+esc(st)+'</span>':'';}
+  function dbl(t){return /double/i.test(t||'')?' dbl':'';}
+  function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill'+dbl(st)+'">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
-  function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return (t||j.machine)?'<span class="wp-tags">'+(t?'<span class="wp-standpill">'+esc(t)+'</span>':'')+mchip(j)+'</span>':'<span></span>';}
+  function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return (t||j.machine)?'<span class="wp-tags">'+(t?'<span class="wp-standpill'+dbl(t)+'">'+esc(t)+'</span>':'')+mchip(j)+'</span>':'<span></span>';}
   function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}
   function head(j){return '<div class="wp-top"><b>'+wk(j.category)+esc(j.tape)+'</b>'+pill(j.status)+'</div>';}
   function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+(String(j.id).indexOf('tmp')===0?'Saving…':esc(j.id))+'</span></span></div>';}
@@ -3853,7 +3856,7 @@ var WP=(function(){
   function pickTape(nm){var t=cat.tapes.filter(function(a){return a.name.toLowerCase()===nm.trim().toLowerCase();})[0];if(!t)return false;sel=t;vr=t.variants.length===1?t.variants[0]:null;msg='';qs='';draw();return true;}
   function form(){
     var t=sel,h='<div class="wp-sel"><div class="wp-top"><b>'+wk(t.variants[0].category)+esc(t.name)+'</b><button type="button" class="wp-x" data-wp-clear="1">Change</button></div>';
-    if(t.variants.length>1){h+='<div class="wp-stand">'+t.variants.map(function(v,i){return '<button type="button" class="'+(vr===v?'on':'')+'" data-wp-var="'+i+'">'+esc(v.stand)+'</button>';}).join('')+'</div>';if(!vr)return h+'<p class="wp-hint">Choose the stand to continue.</p></div>';}
+    if(t.variants.length>1){h+='<div class="wp-stand">'+t.variants.map(function(v,i){return '<button type="button" class="'+(vr===v?'on':'')+'" data-wp-var="'+i+'" data-st="'+(/double/i.test(v.stand)?'d':'s')+'">'+esc(v.stand)+'</button>';}).join('')+'</div>';if(!vr)return h+'<p class="wp-hint">Choose the stand to continue.</p></div>';}
     var v=vr;
     h+='<div style="margin:8px 0 4px">'+(v.category?'<span class="wp-st">'+esc(v.category)+'</span> ':'')+standPill(v.stand)+'</div>'
       +'<div class="wp-yarns"><div><span>Base yarn</span><b>'+esc(v.baseYarn||'—')+'</b></div><div><span>Design yarn</span><b>'+esc(v.designYarn||'—')+'</b></div></div>'
