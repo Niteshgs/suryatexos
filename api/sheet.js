@@ -20,12 +20,17 @@ module.exports = async (req, res) => {
 
   const { passcode, ...rest } = body;   // (legacy field, never forwarded)
   try {
-    const r = await fetch(url, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...rest, token }),
-    });
+    const ac = new AbortController(), t = setTimeout(() => ac.abort(), 27000);   // Vercel stops the function at 30 s: answer with a clear message before that
+    let r;
+    try {
+      r = await fetch(url, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...rest, token }),
+        signal: ac.signal,
+      });
+    } finally { clearTimeout(t); }
     const text = await r.text();
     let json;
     try { json = JSON.parse(text); } catch (e) {
@@ -33,6 +38,6 @@ module.exports = async (req, res) => {
     }
     return res.status(200).json(json);
   } catch (e) {
-    return res.status(502).json({ ok: false, error: 'Upstream error: ' + e.message });
+    return res.status(502).json({ ok: false, error: e && e.name === 'AbortError' ? 'Google Sheets took too long to answer' : 'Upstream error: ' + e.message });
   }
 };

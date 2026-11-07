@@ -1416,7 +1416,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v260</span>
+    <span class="app-ver" id="appVer" title="App version">v261</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1819,10 +1819,10 @@ var combinations = {
 var allData=[], allOrders=[], mainTab='reorder', orderTab='all', S={}, loaded=false, current='dash';
 
 /* ══ API ══ */
-function api(action,payload){
+function api(action,payload,ctl){
   if(action!=='getAll'&&navigator.onLine===false)return Promise.reject(new Error('You are offline — not saved'));
   var body=Object.assign({action:action},payload||{});
-  return fetch('/api/sheet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  return fetch('/api/sheet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl?ctl.signal:undefined})
     .then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -2382,12 +2382,17 @@ function pSubmit(){
   if(!r){showToast('Please enter Rate','danger');return;}
   btn.disabled=true;btn.textContent='Placing Order…';
   var o={shade:pv.shade,denier:pv.denier,vendor:pv.vendor,qty:q,orderDate:document.getElementById('p_date').value,rate:r,status:pv.status,leadTime:document.getElementById('p_lead').value,remarks:document.getElementById('p_remarks').value,name:document.getElementById('p_name').value};
-  api('addOrder',{order:o}).then(function(j){
-    if(!j.ok)throw new Error(j.error||'Failed');
-    btn.disabled=false;btn.textContent='Place Order';
-    document.getElementById('p_detail').textContent=o.shade+' · '+o.denier+' — '+o.vendor+', '+o.qty+' KG @ ₹'+o.rate;
-    document.getElementById('p_banner').classList.add('show');window.scrollTo(0,0);loadData();
-  }).catch(function(e){showToast('Error: '+(e.message||'failed'),'danger');btn.disabled=false;btn.textContent='Place Order';});
+  var same=function(x){return x&&x.shade===o.shade&&x.denier===o.denier&&x.vendor===o.vendor&&String(x.qty)===String(o.qty)&&String(x.orderDate||'')===String(o.orderDate||'');};
+  var before=allOrders.filter(same).length,done=false,slow=setTimeout(function(){if(!done)btn.textContent='Still placing… please wait';},8000);
+  var finish=function(){done=true;clearTimeout(slow);btn.disabled=false;btn.textContent='Place Order';};
+  var ok=function(){finish();document.getElementById('p_detail').textContent=o.shade+' · '+o.denier+' — '+o.vendor+', '+o.qty+' KG @ ₹'+o.rate;
+    document.getElementById('p_banner').classList.add('show');window.scrollTo(0,0);loadData();};
+  var ctl=window.AbortController?new AbortController():null,kill=setTimeout(function(){if(ctl)ctl.abort();},40000);   // never wait forever
+  var fail=function(e){   // the order may have reached the sheet even though the reply did not come back: check before asking the user to try again
+    api('getAll').then(function(j){var os=(j.data&&j.data.orders)||[];if(j.ok&&os.filter(same).length>before){allOrders=os;ok();return;}throw e;})
+    .catch(function(){finish();showToast('Not confirmed. Check the Orders list before placing it again','danger');});
+  };
+  api('addOrder',{order:o},ctl).then(function(j){clearTimeout(kill);if(!j.ok)throw new Error(j.error||'Failed');ok();},function(e){clearTimeout(kill);fail(e);});
 }
 function pReset(){
   document.getElementById('p_banner').classList.remove('show');
