@@ -1399,7 +1399,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v213</span>
+    <span class="app-ver" id="appVer" title="App version">v214</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3073,7 +3073,7 @@ var KN=(function(){
 })();
 /* ══ ANALYTICS · one place for Knitted + Warping analytics (data comes from each function's own sheets) ══ */
 var AN=(function(){
-  var tab='',pin='',wd=null,wErr='',kd=null,kErr='',km='',kBusy=false;
+  var tab='',pin='',wd=null,wErr='',kd=null,kErr='',km='',kBusy=false,kq='';
   function $(i){return document.getElementById(i);}
   function post(url,body){return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j._status=r.status;if(r.status===401){showLock(j.error);throw new Error(j.error||'Signed out');}return j;});});}
   function n(v){return Number(v||0).toLocaleString('en-IN');}
@@ -3110,7 +3110,19 @@ var AN=(function(){
     if(!pin)h+='<div class="empty-state">Analytics is locked.<br><br><button type="button" class="wp-sm wp-anabtn" data-an-unlock="1">Enter password</button></div>';
     else h+=tab==='kn'?knHtml():wpHtml();
     b.innerHTML=h;
+    if(pin&&tab==='kn')kFilter();
   }
+  /* ---- Knitted: search by machine or tape ---- */
+  function kFilter(){
+    var q=(kq||'').trim().toLowerCase(),secs=document.querySelectorAll('#anView .cy-m'),any=false;
+    secs.forEach(function(sc){
+      var mm=!q||(sc.getAttribute('data-s')||'').indexOf(q)>-1,vis=0;
+      sc.querySelectorAll('[data-s]').forEach(function(it){var ok=mm||(it.getAttribute('data-s')||'').indexOf(q)>-1;it.hidden=!ok;if(ok)vis++;});
+      sc.hidden=!(mm||vis);if(!sc.hidden)any=true;
+    });
+    var no=document.getElementById('anNone');if(no)no.hidden=any||!q;
+  }
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='anKq'){kq=e.target.value;kFilter();}});
   /* ---- Knitted: time between cycle changes, per tape ---- */
   function dur(x){if(x==null)return '–';var m=Math.round(x*1440);if(m<1)return '<1m';var d=Math.floor(m/1440),h=Math.floor(m%1440/60),mi=m%60;return d?d+'d '+h+'h':h?h+'h '+(mi?mi+'m':''):mi+'m';}
   function knHtml(){
@@ -3120,24 +3132,25 @@ var AN=(function(){
     if(!a)return '';
     if(!a.totalRuns)return '<p class="kn-sub">No tape runs yet. They appear as beams are saved in the Knitted entry.</p>';
     var h='<p class="kn-sub">For each machine: what is running now on the dashboard, and the past programmes with time from Cycle 1 (start) to Beam 0 (finish). Cycles 2 and 3 are not counted. Tracking since '+esc(a.since)+' · '+a.totalRuns+' runs.</p>';
+    h+='<input class="dc-q" id="anKq" type="search" placeholder="Search machine or tape" aria-label="Search machine or tape" autocomplete="off" value="'+esc(kq)+'" style="margin:0 0 6px"><p class="kn-sub" id="anNone" hidden>No machine or tape matches that.</p>';
     a.machines.forEach(function(m){
-      h+='<h3 class="cy-mh">'+esc(m.name)+'</h3>';
+      h+='<section class="cy-m" data-s="'+esc(m.name.toLowerCase())+'"><h3 class="cy-mh">'+esc(m.name)+'</h3>';
       var cur=m.current||[];
       if(cur.length){
         h+='<div class="cy-sh">Running now · on the dashboard</div><div class="cy-now"><div class="cy-runs">'+cur.map(function(c){
-          if(c.empty)return '<div class="cy-r off"><div class="cy-rt"><b>Beam '+esc(c.beam)+'</b><span>Beam 0 · empty</span></div></div>';
-          return '<div class="cy-r"><div class="cy-rt"><b>Beam '+esc(c.beam)+' · '+esc(c.tape)+'</b><span>'+(c.start?'since '+esc(c.start):'start not recorded')+'</span></div>'
+          if(c.empty)return '<div class="cy-r off" data-s=""><div class="cy-rt"><b>Beam '+esc(c.beam)+'</b><span>Beam 0 · empty</span></div></div>';
+          return '<div class="cy-r" data-s="'+esc(String(c.tape).toLowerCase())+'"><div class="cy-rt"><b>Beam '+esc(c.beam)+' · '+esc(c.tape)+'</b><span>'+(c.start?'since '+esc(c.start):'start not recorded')+'</span></div>'
             +'<div class="cy-rs"><span>Running for <b>'+(c.elapsed!=null?dur(c.elapsed):'–')+'</b></span></div></div>';}).join('')+'</div></div>';
       }
       h+='<div class="cy-sh">Past programmes · finished</div>';
-      if(!m.tapes.length){h+='<p class="kn-sub">No past runs yet.</p>';return;}
+      if(!m.tapes.length){h+='<p class="kn-sub">No past runs yet.</p></section>';return;}
       h+='<div class="cy-list">'+m.tapes.map(function(t){
-        return '<details class="cy-t"><summary><span class="cy-n">'+esc(t.name)+'</span><span class="cy-c">'+(t.finished?'Avg <b>'+dur(t.avg)+'</b> · '+t.finished+' finished':'No finished run yet')+'</span></summary>'
+        return '<details class="cy-t" data-s="'+esc(String(t.name).toLowerCase())+'"><summary><span class="cy-n">'+esc(t.name)+'</span><span class="cy-c">'+(t.finished?'Avg <b>'+dur(t.avg)+'</b> · '+t.finished+' finished':'No finished run yet')+'</span></summary>'
           +(t.notRecorded?'<p class="cy-note">'+t.notRecorded+' finished run'+(t.notRecorded===1?'':'s')+' began before cycle 1 was saved, so left out of the average.</p>':'')
           +'<div class="cy-runs">'+t.list.map(function(r){
             return '<div class="cy-r"><div class="cy-rt"><b>Beam '+esc(r.beam)+'</b><span>'+esc(r.start)+(r.end?' → '+esc(r.end):'')+'</span></div>'
               +'<div class="cy-rs"><span>Cycle 1 → Beam 0 <b>'+dur(r.dur)+'</b></span></div>'
-              +'<div class="cy-st">'+esc(r.status)+(r.startKnown?'':' · start not recorded')+'</div></div>';}).join('')+'</div></details>';}).join('')+'</div>';
+              +'<div class="cy-st">'+esc(r.status)+(r.startKnown?'':' · start not recorded')+'</div></div>';}).join('')+'</div></details>';}).join('')+'</div></section>';
     });
     return h+'<p class="kn-sub" style="margin-top:12px">Times are between app saves, so they follow when your team saves Cycle 1 and Beam 0.</p>';
   }
