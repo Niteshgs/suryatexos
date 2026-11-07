@@ -1417,7 +1417,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v263</span>
+    <span class="app-ver" id="appVer" title="App version">v264</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2150,7 +2150,7 @@ function setMainTab(tab){
   mainTab=tab;
   ['reorder','safe','orders'].forEach(function(t){document.getElementById('tab'+cap(t)).classList.remove('active');});
   document.getElementById('tab'+cap(tab)).classList.add('active');
-  if(tab==='orders'){document.getElementById('cardsSection').style.display='none';document.getElementById('ordersSection').style.display='block';renderOrderCards();}
+  if(tab==='orders'){document.getElementById('cardsSection').style.display='none';document.getElementById('ordersSection').style.display='block';renderOrderCards();var nb=document.querySelector('.otab[data-tab="new"]');if(nb)setOrderTab(nb);}   // always open on New Order
   else{if(dShade){dShade='';shadeMark();}document.getElementById('cardsSection').style.display='block';document.getElementById('ordersSection').style.display='none';renderCards();}
 }
 function updateStats(){
