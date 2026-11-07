@@ -408,45 +408,52 @@ async function recentLogs() {
 const stampOf = (t) => { const d = Math.floor(t), f = t - d, sec = Math.round(f * 86400), h = Math.floor(sec / 3600) % 24, m = Math.floor((sec % 3600) / 60), dt = new Date(DAY0 + d * 864e5);
   return dt.getUTCDate() + ' ' + MON3[dt.getUTCMonth()] + ' ' + ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm'); };
 const avg = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+// Machine-wise time from START (cycle 1) to END (Beam 0, i.e. cycle 0 or a cleared beam). Cycles 2 and 3 are ignored.
+// Each beam (and each split part 1B/1C) is followed on its own. A run ends at Beam 0; if the tape or cycle 1 changes
+// first, the run is closed without a duration.
 function computeCycles(rows) {
   const events = [];
   for (const r of rows) {
     const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], pos = beamPos(cell(r, 4)), day = serialDay(cell(r, 0));
-    if (!id || !pos || (pos.part && pos.part !== 'A') || day == null) continue;
-    const beam = pos.n;
-    events.push({ id, beam, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), clear: /^cleared$/i.test(String(cell(r, 9) || '')) });
+    if (!id || !pos || day == null) continue;
+    const act = String(cell(r, 9) || '').trim();
+    if (/^(add|remove|rename) tape$/i.test(act)) continue;
+    events.push({ id, n: pos.n, part: pos.part === 'A' ? '' : pos.part, t: day + dayFrac(cell(r, 1)), cycle: cnum(cell(r, 5)), tape: String(cell(r, 6) || '').trim(), clear: /^cleared$/i.test(act) });
   }
   events.sort((a, b) => a.t - b.t);
   const runs = [], open = {};
+  const key = (e, part) => e.id + '|' + e.n + '|' + part;
   const close = (k, t, why, next) => { const r = open[k]; if (!r) return; r.end = t; r.why = why; r.next = next || ''; delete open[k]; };
   for (const e of events) {
-    const k = e.id + '|' + e.beam, r = open[k];
-    if (e.clear) { close(k, e.t, 'cleared'); continue; }
-    if (!e.tape || e.cycle == null) continue;
+    const k = key(e, e.part);
+    if (e.clear) { ['', 'B', 'C'].forEach((pt) => close(key(e, pt), e.t, 'done')); continue; }       // beam emptied = Beam 0
+    if (e.part === '') ['B', 'C'].forEach((pt) => close(key(e, pt), e.t, 'merged'));                  // beam is no longer split
+    const r = open[k];
+    if (e.cycle == null) { if (r) close(k, e.t, 'done'); continue; }                                    // Beam 0 = end point
+    if (!e.tape) continue;
     const same = r && norm(r.tape) === norm(e.tape);
-    if (same && e.cycle > r.last) { r.marks[e.cycle] = e.t; r.last = e.cycle; continue; }
-    if (same && !(e.cycle === 1 && r.last > 1)) continue;                       // repeat save or a correction
-    if (r) close(k, e.t, same ? 'restart' : 'changeover', same ? '' : e.tape);   // tape changed, or same tape began again at cycle 1
-    const nr = { tape: e.tape, machine: MACHINE_NAMES[e.id], beam: e.beam, start: e.t, startKnown: e.cycle === 1, first: e.cycle, last: e.cycle, marks: {}, end: null, why: '', next: '' };
-    nr.marks[e.cycle] = e.t; open[k] = nr; runs.push(nr);
+    if (same && !(e.cycle === 1 && r.last > 1)) { if (e.cycle > r.last) r.last = e.cycle; continue; }  // cycle 2 / 3 / repeat save
+    if (r) close(k, e.t, same ? 'restart' : 'changed', same ? '' : e.tape);
+    const nr = { tape: e.tape, id: e.id, machine: MACHINE_NAMES[e.id], beam: e.n + e.part, start: e.t, startKnown: e.cycle === 1, last: e.cycle, end: null, why: '', next: '' };
+    open[k] = nr; runs.push(nr);
   }
-  const by = {};
+  const byMachine = {};
   for (const r of runs) {
-    const m = r.marks, step = (a, b) => (m[a] != null && m[b] != null) ? m[b] - m[a] : null;
-    const o = { machine: r.machine, beam: r.beam, start: stampOf(r.start), startKnown: r.startKnown, lastCycle: r.last, ts: r.start,
-      d12: step(1, 2), d23: step(2, 3), d13: step(1, 3), run: (r.startKnown && r.end != null && r.why === 'changeover') ? r.end - r.start : null,
-      status: r.end == null ? 'Running' : r.why === 'changeover' ? 'Changed to ' + r.next : r.why === 'cleared' ? 'Beam cleared' : 'Started again' };
-    const key = norm(r.tape);
-    (by[key] = by[key] || { name: r.tape, list: [] }).list.push(o);
+    const done = r.why === 'done', dur = (done && r.startKnown) ? r.end - r.start : null;
+    const o = { beam: r.beam, start: stampOf(r.start), end: done ? stampOf(r.end) : '', startKnown: r.startKnown, dur, ts: r.start,
+      status: r.end == null ? 'Running' : done ? 'Finished at Beam 0' : r.why === 'changed' ? 'Tape changed to ' + r.next + ' before Beam 0' : r.why === 'merged' ? 'Split removed' : 'Started again at cycle 1' };
+    const m = (byMachine[r.id] = byMachine[r.id] || {});
+    (m[norm(r.tape)] = m[norm(r.tape)] || { name: r.tape, list: [] }).list.push(o);
   }
-  const tapes = Object.values(by).map((g) => {
-    const L = g.list.sort((a, b) => b.ts - a.ts), pick = (f) => L.map((x) => x[f]).filter((v) => v != null);
-    const a12 = pick('d12'), a23 = pick('d23'), a13 = pick('d13'), ar = pick('run');
-    return { name: g.name, runs: L.length, running: L.filter((x) => x.status === 'Running').length,
-      avg12: avg(a12), n12: a12.length, avg23: avg(a23), n23: a23.length, avg13: avg(a13), n13: a13.length, avgRun: avg(ar), nRun: ar.length,
-      notRecorded: L.filter((x) => !x.startKnown).length, list: L.slice(0, 30) };
-  }).sort((a, b) => b.runs - a.runs || a.name.localeCompare(b.name));
-  return { tapes, totalRuns: runs.length, since: events.length ? stampOf(events[0].t) : '' };
+  const machines = Object.keys(MACHINE_NAMES).map((id) => {
+    const tapes = Object.values(byMachine[id] || {}).map((g) => {
+      const L = g.list.sort((a, b) => b.ts - a.ts), d = L.map((x) => x.dur).filter((v) => v != null);
+      return { name: g.name, runs: L.length, finished: d.length, avg: avg(d), running: L.filter((x) => x.status === 'Running').length,
+        notRecorded: L.filter((x) => x.status === 'Finished at Beam 0' && !x.startKnown).length, list: L.slice(0, 30) };
+    }).sort((a, b) => b.runs - a.runs || a.name.localeCompare(b.name));
+    return { id, name: MACHINE_NAMES[id], tapes };
+  });
+  return { machines, totalRuns: runs.length, since: events.length ? stampOf(events[0].t) : '' };
 }
 async function cycles(meta) {
   requireAdmin(meta);

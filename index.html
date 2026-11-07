@@ -681,6 +681,7 @@ button.wp-sbox{cursor:pointer}
 .wp-fl{display:block;font-size:13px;font-weight:700;color:var(--text-muted);margin-top:10px}
 .wp-fl input{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;font:inherit;font-size:16px;color:var(--text)}.wp-fl input:focus{outline:none;border-color:var(--accent)}
 .wp-bigdone{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--accent-strong);border-radius:28px;padding:26px 44px;box-shadow:0 10px 40px rgba(0,0,0,.5);pointer-events:none;animation:wpbd 1.5s forwards}.wp-bigdone svg{width:96px;height:96px;fill:none;stroke:var(--success);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.wp-bigdone b{font-size:40px;font-weight:800;color:var(--text);letter-spacing:.5px}@keyframes wpbd{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+.cy-mh{margin:16px 0 6px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
 .cy-list{display:flex;flex-direction:column;gap:10px}.cy-t{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 12px}.cy-t summary{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;cursor:pointer;list-style:none;min-height:44px}.cy-t summary::-webkit-details-marker{display:none}.cy-n{font-weight:700;color:var(--text)}.cy-c{color:var(--text-muted);font-size:13px;text-align:right}.cy-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding-bottom:10px}.cy-g>div{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 10px;display:flex;flex-direction:column}.cy-g span{color:var(--text-muted);font-size:12px}.cy-g b{color:var(--text);font-size:18px}.cy-g small{color:var(--text-muted);font-size:11px}.cy-note{color:var(--text-muted);font-size:12px;margin:0 0 10px}.cy-runs{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}.cy-r{border-top:1px solid var(--border);padding-top:8px}.cy-rt{display:flex;justify-content:space-between;gap:8px;color:var(--text)}.cy-rt span{color:var(--text-muted);font-size:12px}.cy-rs{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--text-muted);font-size:13px;margin-top:4px}.cy-rs b{color:var(--text)}.cy-st{font-size:12px;color:var(--text-muted);margin-top:4px}.cy-st.on{color:var(--success)}
 .wp-note{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font:inherit;font-size:17px;font-weight:600;line-height:1.35;resize:vertical;min-height:60px}.wp-note::placeholder{color:var(--text-muted);font-weight:500}.wp-note:focus{outline:none;border-color:var(--accent)}
 .wp-noterow{display:flex;gap:8px;align-items:stretch;margin-top:10px}.wp-noterow .wp-note{margin-top:0;flex:1;min-width:0}.wp-notesave{flex:none;width:48px;border-radius:var(--radius-sm);border:1px solid var(--accent-strong);background:var(--accent-strong);color:var(--on);display:grid;place-items:center;cursor:pointer}.wp-notesave .ic{width:24px;height:24px;stroke:var(--on)}.wp-notesave:disabled{opacity:.5}
@@ -1395,7 +1396,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v209</span>
+    <span class="app-ver" id="appVer" title="App version">v211</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3101,7 +3102,7 @@ var AN=(function(){
   }
   function draw(){
     var b=$('anView');if(!b)return;var t=tabs();
-    var h='<div class="us-bar wp-bar"><div><p>'+(tab==='kn'?'Knitted cycle timeline':tab==='wp'?'Warping time per beam':'Analytics')+'</p></div></div>';
+    var h='<div class="us-bar wp-bar"><div><p>'+(tab==='kn'?'Knitted · Cycle 1 to Beam 0':tab==='wp'?'Warping time per beam':'Analytics')+'</p></div></div>';
     if(t.length>1)h+='<div class="dc-tabs" role="tablist" style="grid-template-columns:repeat('+t.length+',1fr)">'+t.map(function(a){return '<button type="button" role="tab" aria-selected="'+(tab===a[0])+'" class="'+(tab===a[0]?'on':'')+'" data-an-tab="'+a[0]+'">'+a[1]+'</button>';}).join('')+'</div>';
     if(!pin)h+='<div class="empty-state">Analytics is locked.<br><br><button type="button" class="wp-sm wp-anabtn" data-an-unlock="1">Enter password</button></div>';
     else h+=tab==='kn'?knHtml():wpHtml();
@@ -3114,18 +3115,20 @@ var AN=(function(){
     if(kBusy&&!a)return '<div class="kn-state">Calculating…</div>';
     if(kErr&&!a)return '<div class="kn-state err">'+esc(kErr)+'</div>';
     if(!a)return '';
-    if(!a.tapes.length)return '<p class="kn-sub">No tape runs yet. They appear as beams are saved in the Knitted entry.</p>';
-    var h='<p class="kn-sub">Each beam is followed on its own, from the save at cycle 1 until a different tape replaces it. Tracking since '+esc(a.since)+' · '+a.totalRuns+' runs · averages sharpen as data grows.</p><div class="cy-list">';
-    h+=a.tapes.map(function(t){
-      var cell=function(l,v,c){return '<div><span>'+l+'</span><b>'+dur(v)+'</b>'+(c?'<small>'+c+' run'+(c===1?'':'s')+'</small>':'<small>no data</small>')+'</div>';};
-      return '<details class="cy-t"><summary><span class="cy-n">'+esc(t.name)+'</span><span class="cy-c">'+t.runs+' run'+(t.runs===1?'':'s')+(t.running?' · '+t.running+' on now':'')+'</span></summary>'
-        +'<div class="cy-g">'+cell('Cycle 1 → 2',t.avg12,t.n12)+cell('Cycle 2 → 3',t.avg23,t.n23)+cell('Cycle 1 → 3',t.avg13,t.n13)+cell('Cycle 1 → changeover',t.avgRun,t.nRun)+'</div>'
-        +(t.notRecorded?'<p class="cy-note">'+t.notRecorded+' run'+(t.notRecorded===1?'':'s')+' started before cycle 1 was saved, so left out of the averages.</p>':'')
-        +'<div class="cy-runs">'+t.list.map(function(r){
-          return '<div class="cy-r"><div class="cy-rt"><b>'+esc(r.machine)+' · Beam '+r.beam+'</b><span>'+esc(r.start)+'</span></div>'
-            +'<div class="cy-rs"><span>1→2 <b>'+dur(r.d12)+'</b></span><span>2→3 <b>'+dur(r.d23)+'</b></span><span>1→3 <b>'+dur(r.d13)+'</b></span><span>Total <b>'+dur(r.run)+'</b></span></div>'
-            +'<div class="cy-st'+(r.status==='Running'?' on':'')+'">'+esc(r.status)+(r.startKnown?'':' · start not recorded')+'</div></div>';}).join('')+'</div></details>';}).join('');
-    return h+'</div><p class="kn-sub" style="margin-top:12px">Times are between app saves, so they follow when your team saves each cycle. Total = cycle 1 until another tape takes the beam.</p>';
+    if(!a.totalRuns)return '<p class="kn-sub">No tape runs yet. They appear as beams are saved in the Knitted entry.</p>';
+    var h='<p class="kn-sub">Time from Cycle 1 (start) to Beam 0 (finish), for each tape on each machine. Cycles 2 and 3 are not counted. Tracking since '+esc(a.since)+' · '+a.totalRuns+' runs.</p>';
+    a.machines.forEach(function(m){
+      h+='<h3 class="cy-mh">'+esc(m.name)+'</h3>';
+      if(!m.tapes.length){h+='<p class="kn-sub">No runs yet.</p>';return;}
+      h+='<div class="cy-list">'+m.tapes.map(function(t){
+        return '<details class="cy-t"><summary><span class="cy-n">'+esc(t.name)+'</span><span class="cy-c">'+(t.finished?'Avg <b>'+dur(t.avg)+'</b> · '+t.finished+' finished':(t.running?'Running now':'No finished run yet'))+'</span></summary>'
+          +(t.notRecorded?'<p class="cy-note">'+t.notRecorded+' finished run'+(t.notRecorded===1?'':'s')+' began before cycle 1 was saved, so left out of the average.</p>':'')
+          +'<div class="cy-runs">'+t.list.map(function(r){
+            return '<div class="cy-r"><div class="cy-rt"><b>Beam '+esc(r.beam)+'</b><span>'+esc(r.start)+(r.end?' → '+esc(r.end):'')+'</span></div>'
+              +'<div class="cy-rs"><span>Cycle 1 → Beam 0 <b>'+dur(r.dur)+'</b></span></div>'
+              +'<div class="cy-st'+(r.status==='Running'?' on':'')+'">'+esc(r.status)+(r.startKnown?'':' · start not recorded')+'</div></div>';}).join('')+'</div></details>';}).join('')+'</div>';
+    });
+    return h+'<p class="kn-sub" style="margin-top:12px">Times are between app saves, so they follow when your team saves Cycle 1 and Beam 0.</p>';
   }
   /* ---- Warping: same view as Warping › Admin ---- */
   function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}
