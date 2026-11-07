@@ -647,6 +647,7 @@ button.wp-sbox{cursor:pointer}
 .wp-brow{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:14px;font:inherit;color:var(--text);text-align:left;cursor:pointer;min-height:56px}
 .wp-bn{flex:1;min-width:0;font-size:15px;font-weight:800;overflow-wrap:anywhere}
 .wp-brow .ic{width:18px;height:18px;flex:none;color:var(--text-muted);transition:transform .15s}.wp-brow.open .ic{transform:rotate(180deg)}
+.wp-job.wp-jc{padding:0;overflow:hidden}.wp-jc .wp-bdet{padding-top:10px}
 .wp-bdet{padding:0 14px 14px;border-top:1px solid var(--border)}
 .wp-planning{color:var(--text-muted)}
 .wp-wide{display:block;width:100%;margin-top:12px;padding:14px}
@@ -1399,7 +1400,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v215</span>
+    <span class="app-ver" id="appVer" title="App version">v216</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3819,8 +3820,11 @@ var WP=(function(){
   }
   function jobCard(j,x){
     if(!x&&editId===j.id)return editCard(j);
-    return '<div class="wp-job" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+head(j)+meta(j)+when(j)+body(j)+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>';
+    var op=!!openL[j.id]||askId===j.id||noteEd===j.id;                     // collapsed by default: only the item name shows
+    var hd='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-ljob="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span>'+pill(j.status)+'<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
+    return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>':'')+'</div>';
   }
+  var openL={};
   var noteEd=null;
   function noteBox(j){
     if(!j.note&&noteEd!==j.id)return '<div class="wp-noteadd" data-wp-nrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-noteedit="'+esc(j.id)+'">+ Add note</button></div>';
@@ -4049,6 +4053,7 @@ var WP=(function(){
     if(t.closest('[data-wp-tclose]')){addT=null;return draw();}
     if((x=t.closest('[data-wp-tset]'))){tapeVals();var kv=x.getAttribute('data-wp-tset').split('|');addT[kv[0]]=kv[1];if(kv[0]==='category')addT.stand=kv[1]==='Knitted'?'Not Relevant':'';var fe=addT.category;draw();return;}
     if(t.closest('[data-wp-tsave]'))return tapeSave();
+    if((x=t.closest('[data-wp-ljob]'))){var lid=x.getAttribute('data-wp-ljob');if(openL[lid])delete openL[lid];else openL[lid]=1;return draw();}
     if((x=t.closest('[data-wp-open]'))){var oid=x.getAttribute('data-wp-open');openJ=openJ===oid?null:oid;return draw();}
     if((x=t.closest('[data-wp-ask]'))){askId=x.getAttribute('data-wp-ask');askAct='done';return draw();}
     if((x=t.closest('[data-wp-askst]'))){askId=x.getAttribute('data-wp-askst');askAct='start';return draw();}
