@@ -1013,6 +1013,8 @@ button.kn-bno{border:0;cursor:pointer;font-family:inherit;touch-action:manipulat
 .kn-l{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.6px;text-transform:uppercase}
 .kn-f:focus-within .kn-l{color:var(--accent)}
 .kn-f input,.kn-tbox input{min-height:28px;background:transparent;border:none;outline:none;color:var(--text);font-size:18px;font-weight:700;font-family:inherit;width:100%;padding:0;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.kn-f select{min-height:28px;background:transparent;border:none;outline:none;color:var(--text);font-size:18px;font-weight:700;font-family:inherit;width:100%;padding:0;cursor:pointer}
+.kn-f select.zero{color:var(--text-muted);font-weight:500;font-size:14px}
 .kn-f input.zero{color:var(--text-muted);font-weight:500}
 .kn-f input::-webkit-outer-spin-button,.kn-f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .kn-ac{position:relative}
@@ -1391,7 +1393,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v204</span>
+    <span class="app-ver" id="appVer" title="App version">v205</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2711,6 +2713,13 @@ var KN=(function(){
       +MACHINES.map(function(m){var d=savedDot[m.id];return '<button class="kn-mi'+(m.id===active?' on':'')+'" data-kn-m="'+m.id+'"><span>'+m.name+'</span>'+(d?'<i class="kn-dot '+d+'"></i>':'')+'</button>';}).join('')
       +'</aside><div class="kn-backdrop" id="knBackdrop" data-kn-close-side></div>';
   }
+  function cycSel(p,idx,v){
+    var c=String(Number(v)||0), o=['1','2','3'];
+    var h='<select id="kc_'+p+'" name="cycle'+idx+'" class="'+(c==='0'?'zero':'')+'">';
+    o.forEach(function(n){h+='<option value="'+n+'"'+(c===n?' selected':'')+'>'+n+'</option>';});
+    if(c!=='0'&&o.indexOf(c)<0)h+='<option value="'+c+'" selected>'+c+'</option>';   // keep any other value already in the sheet
+    return h+'<option value="0"'+(c==='0'?' selected':'')+'>Beam empty</option></select>';
+  }
   function unit(b,idx,label,dit){
     var p=active+'_'+idx;
     return '<div class="kn-row1">'+label
@@ -2721,7 +2730,7 @@ var KN=(function(){
       +(dit?'<button type="button" class="kn-ditto" data-kn-ditto="'+idx+'" aria-label="Copy the entry above" title="Copy the entry above"><span aria-hidden="true">〃</span></button>':'')
       +'</div>'
       +'<div class="kn-3">'
-      +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span><input type="text" inputmode="numeric" maxlength="1" id="kc_'+p+'" name="cycle'+idx+'" autocomplete="off" placeholder="0" class="'+(Number(b.cycle)?'':'zero')+'" value="'+blank0(b.cycle)+'" data-kn-cyc="'+idx+'"></label>'
+      +'<label class="kn-f" for="kc_'+p+'"><span class="kn-l">Cycle</span>'+cycSel(p,idx,b.cycle)+'</label>'
       +'<label class="kn-f" for="km_'+p+'"><span class="kn-l">Wt/Mtr (g)</span><input type="number" inputmode="decimal" step="any" id="km_'+p+'" name="wtmtr'+idx+'" autocomplete="off" placeholder="0" class="'+(Number(b.weightMtr)?'':'zero')+'" value="'+blank0(b.weightMtr)+'"></label>'
       +'<label class="kn-f" for="kr_'+p+'"><span class="kn-l">Wt/Roll (kg)</span><input type="number" inputmode="decimal" step="any" id="kr_'+p+'" name="wtroll'+idx+'" autocomplete="off" placeholder="0" class="'+(Number(b.weightRoll)?'':'zero')+'" value="'+blank0(b.weightRoll)+'"></label>'
       +'</div>';
@@ -2903,7 +2912,7 @@ var KN=(function(){
     var n=(D.cycleData[active]||[]).length;
     for(var i=0;i<n;i++){unitsOf(i).forEach(function(u){var p=active+'_'+u;
       var tt=$('kt_'+p);if(tt){tt.value='';knMark(tt);}var bx=$('ktb_'+p);if(bx)bx.classList.remove('invalid');
-      ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value='';knMark(e);}});});}
+      ['kc_','km_','kr_'].forEach(function(k){var e=$(k+p);if(e){e.value=k==='kc_'?'0':'';knMark(e);}});});}
     var id=active, snap=JSON.parse(JSON.stringify(D.cycleData[id]||[]));   // last saved state, for Undo
     save(null,{msg:'Beams cleared',undo:function(){undoClear(id,snap);}});
   }
