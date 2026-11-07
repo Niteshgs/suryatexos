@@ -410,7 +410,7 @@ const stampOf = (t) => { const d = Math.floor(t), f = t - d, sec = Math.round(f 
 const avg = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
 // Machine-wise time from START (cycle 1) to END (Beam 0, i.e. cycle 0 or a cleared beam). Cycles 2 and 3 are ignored.
 // Each beam (and each split part 1B/1C) is followed on its own. A run ends at Beam 0; if the tape or cycle 1 changes
-// first, the run is closed without a duration.
+// first (someone forgot Beam 0), the run is treated as finished at that moment.
 function computeCycles(rows) {
   const events = [];
   for (const r of rows) {
@@ -439,9 +439,9 @@ function computeCycles(rows) {
   }
   const byMachine = {};
   for (const r of runs) {
-    const done = r.why === 'done', dur = (done && r.startKnown) ? r.end - r.start : null;
+    const done = r.why === 'done' || r.why === 'changed' || r.why === 'restart', dur = (done && r.startKnown) ? r.end - r.start : null;
     const o = { beam: r.beam, start: stampOf(r.start), end: done ? stampOf(r.end) : '', startKnown: r.startKnown, dur, ts: r.start,
-      status: r.end == null ? 'Running' : done ? 'Finished at Beam 0' : r.why === 'changed' ? 'Tape changed to ' + r.next + ' before Beam 0' : r.why === 'merged' ? 'Split removed' : 'Started again at cycle 1' };
+      status: r.end == null ? 'Running' : r.why === 'done' ? 'Finished at Beam 0' : r.why === 'changed' ? 'Finished when ' + r.next + ' started (Beam 0 not set)' : r.why === 'restart' ? 'Finished when cycle 1 started again (Beam 0 not set)' : 'Split removed', fin: done };
     const m = (byMachine[r.id] = byMachine[r.id] || {});
     (m[norm(r.tape)] = m[norm(r.tape)] || { name: r.tape, list: [] }).list.push(o);
   }
@@ -449,7 +449,7 @@ function computeCycles(rows) {
     const tapes = Object.values(byMachine[id] || {}).map((g) => {
       const L = g.list.sort((a, b) => b.ts - a.ts), d = L.map((x) => x.dur).filter((v) => v != null);
       return { name: g.name, runs: L.length, finished: d.length, avg: avg(d), running: L.filter((x) => x.status === 'Running').length,
-        notRecorded: L.filter((x) => x.status === 'Finished at Beam 0' && !x.startKnown).length, list: L.slice(0, 30) };
+        notRecorded: L.filter((x) => x.fin && !x.startKnown).length, list: L.slice(0, 30) };
     }).sort((a, b) => b.runs - a.runs || a.name.localeCompare(b.name));
     return { id, name: MACHINE_NAMES[id], tapes };
   });
