@@ -181,9 +181,11 @@ async function loadUsers(force) {
 }
 const forget = () => { cache = { at: 0, list: null }; };
 
+// A Partner always has the working Warping screens (plan, program, dashboard, cancel, archive), whatever is ticked for them; Warping Admin (analytics) and tape editing stay as ticked.
+const PARTNER_WARPING = ['warping.plan', 'warping.dash', 'warping.execute', 'warping.cancel', 'warping.archive'];
 function meOf(u) {
   const isAdmin = u.role === 'Admin';
-  return { email: u.email, name: u.name || u.email.split('@')[0], role: u.role, isAdmin, access: isAdmin ? ALL_KEYS.slice() : u.access, homeHidden: isAdmin ? (u.homeHidden || []) : [], homeOrder: u.homeOrder || [] };
+  return { email: u.email, name: u.name || u.email.split('@')[0], role: u.role, isAdmin, access: isAdmin ? ALL_KEYS.slice() : u.role === 'Partner' ? Array.from(new Set([].concat(u.access, PARTNER_WARPING))) : u.access, homeHidden: isAdmin ? (u.homeHidden || []) : [], homeOrder: u.homeOrder || [] };
 }
 
 /* ---------- request checks ---------- */
