@@ -676,7 +676,11 @@ button.wp-sbox{cursor:pointer}
 .wp-archbtn .ic{width:22px;height:22px}.wp-archbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 .wp-metar{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
 .wp-tags{display:inline-flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap}
-.wp-bt{display:flex;flex-direction:column;min-width:0}.wp-bsub{font-size:12.5px;font-weight:600;color:var(--text-muted);margin-top:2px}
+.wp-brow:has(.wp-bt){display:grid;grid-template-columns:auto 1fr auto auto;column-gap:10px;row-gap:2px}
+.wp-brow:has(.wp-bt) .wp-bn,.wp-brow .wp-bt{display:contents}
+.wp-brow:has(.wp-bt) .wp-wk{grid-column:1;grid-row:1}.wp-brow .wp-bt>span{grid-column:2;grid-row:1;font-size:15px;font-weight:800;min-width:0;overflow-wrap:anywhere}
+.wp-brow:has(.wp-bt) .wp-st{grid-column:3;grid-row:1}.wp-brow:has(.wp-bt)>.ic{grid-column:4;grid-row:1}
+.wp-bsub{grid-column:2/-1;font-size:12.5px;font-weight:600;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wp-cancelbtn.wp-cancelbtn{display:block;width:auto;margin:14px auto 0;background:none;border:none;color:var(--text-muted);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;padding:8px 12px;min-height:0;cursor:pointer}
 .wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:36px;padding:6px 16px;font-size:13px;white-space:nowrap;cursor:pointer}
 .wp-imgo{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
@@ -1403,7 +1407,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v229</span>
+    <span class="app-ver" id="appVer" title="App version">v231</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3806,8 +3810,8 @@ var WP=(function(){
       +'<div class="us-err" id="wpEErr" role="alert"></div><div class="us-act"><button type="button" class="us-cancel" data-wp-ecancel="1">Cancel</button><button type="button" class="btn-submit" id="wpESave" data-wp-esave="'+esc(j.id)+'">Save changes</button></div></div>';
   }
   function canCan(){return can('warping.cancel')&&!!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
-  function sizeOf(j){var b=+j.baseBeams||+j.designBeams||0,m=+j.baseMeters||+j.designMeters||0;if(!b&&!m)return '';return (b?b+' beam'+(b===1?'':'s'):'')+(b&&m?' × ':'')+(m?Number(m).toLocaleString('en-IN')+' m':'');}
-  function bname(j){var z=sizeOf(j);return '<span class="wp-bt"><span>'+esc(j.tape)+'</span>'+(z?'<small class="wp-bsub">'+z+'</small>':'')+'</span>';}
+  function sizeLn(e,b,m){var o=[];if(+e)o.push(+e+' Ends');if(+b)o.push(+b+' Beam'+(+b===1?'':'s'));if(+m)o.push(Number(m).toLocaleString('en-IN')+' Meters');return o.join(', ');}
+  function bname(j){var a=sizeLn(j.baseEnds,j.baseBeams,j.baseMeters),d=sizeLn(j.designEnds,j.designBeams,j.designMeters);return '<span class="wp-bt"><span>'+esc(j.tape)+'</span>'+(a?'<small class="wp-bsub">'+a+'</small>':'')+(d?'<small class="wp-bsub">'+d+'</small>':'')+'</span>';}
   function acts(j,x){
     var s='',sid=esc(j.id),ask=askId===j.id?askAct:'';
     var two=function(btn){return '<div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button>'+btn+'</div>';};
