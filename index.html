@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v245</span>
+    <span class="app-ver" id="appVer" title="App version">v246</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3798,7 +3798,7 @@ var WP=(function(){
   var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Done'};   // wording shown to the team (sheet values are unchanged)
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function splitParts(y){var a=String(y||'').split(' | ');if(a.length!==3)return null;var o=[];for(var i=0;i<3;i++){var m=/^1?([ABC]) (\d+) ends - (.+)$/.exec(a[i]);if(!m||m[1]!=='ABC'.charAt(i))return null;o.push({l:m[1],e:+m[2],y:m[3]});}return o;}
-  function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn);var yh=sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
+  function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn);var yh=sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+(isNaN(+m)?esc(String(m)):n(m))+'</span></div></div>';}
   function dbl(t){return /double/i.test(t||'')?' dbl':'';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill'+dbl(st)+'">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
@@ -3824,7 +3824,7 @@ var WP=(function(){
   }
   function boss(){return !!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
   function canCan(){return can('warping.cancel')&&boss();}function canArc(){return can('warping.archive')&&boss();}
-  function sizeLn(e,b,m){var o=[];if(+e)o.push(+e+' Ends');if(+b)o.push(+b+' Beam'+(+b===1?'':'s'));if(+m)o.push(Number(m).toLocaleString('en-IN')+' Meters');return o.join(', ');}
+  function sizeLn(e,b,m){var o=[];if(+e)o.push(+e+' Ends');if(+b)o.push(+b+' Beam'+(+b===1?'':'s'));if(+m)o.push(Number(m).toLocaleString('en-IN')+' Meters');else if(m&&isNaN(+m))o.push(esc(String(m))+' Meters');return o.join(', ');}
   function bname(j){var a=sizeLn(j.baseEnds,j.baseBeams,j.baseMeters),d=sizeLn(j.designEnds,j.designBeams,j.designMeters);return '<span class="wp-bt"><span>'+esc(j.tape)+'</span>'+(a?'<small class="wp-bsub">'+a+'</small>':'')+(d?'<small class="wp-bsub">'+d+'</small>':'')+'</span>';}
   function acts(j,x){
     var s='',sid=esc(j.id),ask=askId===j.id?askAct:'';
@@ -3913,9 +3913,9 @@ var WP=(function(){
       +(w?'<div class="wp-fl">Stand</div>'+seg('stand',['Single Stand','Double Stand'],t.stand):'')
       +(t.category==='Knitted'?'<div class="wp-fl">Beam type</div><div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:1fr 1fr"><button type="button" class="'+(t.split?'':'on')+'" data-wp-ooset="split|0">Single beam</button><button type="button" class="'+(t.split?'on':'')+'" data-wp-ooset="split|1">Split beam A B C</button></div>':'')
       +(t.category&&t.split&&t.category==='Knitted'?['b','d'].map(function(sd){var nm=sd==='b'?'Base':'Design';return '<div class="wp-spc"><h4>'+nm+'</h4><div class="wp-sp3">'+['A','B','C'].map(function(L,k){var q=t.sp[k];return '<div><span class="wp-spl">'+L+'</span><input id="wpOS'+sd+k+'E" type="number" inputmode="numeric" min="0" value="'+esc(q[sd+'e']||'')+'" placeholder="Ends" aria-label="'+nm+' '+L+' ends" autocomplete="off"><input id="wpOS'+sd+k+'Y" type="text" value="'+esc(q[sd+'y']||'')+'" placeholder="Yarn" aria-label="'+nm+' '+L+' yarn" autocomplete="off"></div>';}).join('')+'</div></div>';}).join('')
-        +'<div class="wp-fl">Beams and meters (same for A, B and C)</div><div class="wp-grid wp-gc"><div><h4>Base</h4>'+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div><div><h4>Design</h4>'+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>'
-      :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div>'
-        +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>':'')
+        +'<div class="wp-grid wp-gc"><div><h4>Base</h4>'+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'text','e.g. 1800')+'</div><div><h4>Design</h4>'+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'text','e.g. 1800')+'</div></div>'
+      :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'text','e.g. 1800')+'</div>'
+        +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'text','e.g. 1800')+'</div></div>':'')
       +(t.category?'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
       +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>Add to planning</button></div>';
   }
@@ -3926,8 +3926,9 @@ var WP=(function(){
     var nm=String(oo.name||'').trim().replace(/\s+/g,' ');
     if(!nm)return bad('Type a name for the tape');
     if(oo.category==='Woven'&&!oo.stand)return bad('Choose Single Stand or Double Stand');
-    var bb=cn(oo.baseBeams),bm=cn(oo.baseMeters),db=cn(oo.designBeams),dm=cn(oo.designMeters),be=cn(oo.baseEnds),de=cn(oo.designEnds);
-    if([bb,bm,db,dm,be,de].some(isNaN))return bad('Ends, beams and meters must be whole numbers');
+    var mt=function(v){return String(v||'').trim().replace(/^[=+\-@]+/,'').slice(0,40);};
+    var bb=cn(oo.baseBeams),bm=mt(oo.baseMeters),db=cn(oo.designBeams),dm=mt(oo.designMeters),be=cn(oo.baseEnds),de=cn(oo.designEnds);
+    if([bb,db,be,de].some(isNaN))return bad('Ends and beams must be whole numbers');
     if(bb>99||db>99)return bad('That is too many beams. Check the number.');
     if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');

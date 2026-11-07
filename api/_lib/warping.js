@@ -33,6 +33,7 @@ const NOACCESS = 'The app cannot open the Warping sheet. Share it with the app\'
 const wrap = async (fn) => { try { return await fn(); } catch (e) { if (/permission|403|404|not found/i.test(e.message)) throw new Error(NOACCESS); throw e; } };
 
 const blankZero = (x) => (x ? x : '');
+const mval = (v) => { const s = String(v == null ? '' : v).trim(); if (!s) return 0; const n = Number(s); return Number.isFinite(n) ? n : s; };   // meters are numbers, except on one-off tapes where they can be typed as text
 function took(from, to) {
   const a = parseStamp(from, Date.now()), b = parseStamp(to, Date.now());
   if (Number.isNaN(a) || Number.isNaN(b) || b < a) return '';
@@ -96,11 +97,11 @@ async function catalogRead() {
 
 /* ---------- jobs ---------- */
 const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: st(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
-  baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: Number(r[9]) || 0,
-  designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: Number(r[13]) || 0,
+  baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: mval(r[9]),
+  designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: mval(r[13]),
   status: str(r[14]) || 'Planned', started: st(r[15]), startedBy: str(r[16]), done: st(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]) });
-const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
-  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: st(r[12]), startedBy: str(r[13]) });
+const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: mval(r[6]),
+  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: mval(r[10]), status: str(r[11]) || 'Ready', started: st(r[12]), startedBy: str(r[13]) });
 // Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
 // Changes (add / execute / start / done ...) always read fresh first, and clear the copy afterwards.
 const PC = { rows: null, at: 0, p: null };
@@ -157,7 +158,13 @@ async function addOneOff(a, who) {
   const cat = flat(a.category), stand = cat === 'Knitted' ? 'Not Relevant' : flat(a.stand);
   if (!['Woven', 'Knitted'].includes(cat)) throw new Error('Choose Woven or Knitted');
   if (cat === 'Woven' && !['Single Stand', 'Double Stand'].includes(stand)) throw new Error('Choose Single Stand or Double Stand');
-  const f = planInputs(a);
+  const cnt = (v) => { const n = Number(v); return v === '' || v == null ? 0 : (Number.isInteger(n) && n >= 0 && n <= 99 ? n : NaN); };
+  const mt = (v) => flat(v).replace(/^[=+\-@]+/, '').slice(0, 40);   // one-off meters may be letters and numbers
+  const f = { baseBeams: cnt(a.baseBeams), baseMeters: mt(a.baseMeters), designBeams: cnt(a.designBeams), designMeters: mt(a.designMeters) };
+  if (Number.isNaN(f.baseBeams) || Number.isNaN(f.designBeams)) throw new Error('Beams must be whole numbers (up to 99)');
+  if (!!f.baseBeams !== !!f.baseMeters) throw new Error('Base needs both the number of beams and the meters');
+  if (!!f.designBeams !== !!f.designMeters) throw new Error('Design needs both the number of beams and the meters');
+  if (!f.baseBeams && !f.designBeams) throw new Error('Enter the beams and meters for Base, Design, or both');
   const ends = (v) => { const n = Number(v); return v === '' || v == null ? '' : (Number.isInteger(n) && n >= 0 && n <= 99999 ? n : NaN); };
   let bE = f.baseBeams ? ends(a.baseEnds) : '', dE = f.designBeams ? ends(a.designEnds) : '';
   if (Number.isNaN(bE) || Number.isNaN(dE)) throw new Error('Ends must be whole numbers');
@@ -296,7 +303,7 @@ async function analytics() {
       else if (since !== null) { hold += e.t - since; since = null; }
     }
     if (since !== null) hold += d - since;
-    const beams = j.baseBeams + j.designBeams, meters = j.baseBeams * j.baseMeters + j.designBeams * j.designMeters;
+    const beams = j.baseBeams + j.designBeams, meters = j.baseBeams * (Number(j.baseMeters) || 0) + j.designBeams * (Number(j.designMeters) || 0);
     const elapsed = (d - s) / 60000, held = Math.min(hold / 60000, elapsed), net = elapsed - held;
     if (!beams) continue;
     jobs.push({ id: j.id, tape: j.tape, category: j.category, stand: j.stand, machine: j.machine, beams, meters, started: j.started, done: j.done, doneMs: d,
