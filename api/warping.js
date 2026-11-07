@@ -13,6 +13,7 @@ module.exports = async (req, res) => {
 
   const me = await A.guard(req, res); if (!me) return;
   const boss = !!(me.isAdmin || me.role === 'Admin' || me.role === 'Partner');
+  if (!boss && body.args && typeof body.args === 'object') delete body.args.mnote;   // only Admin and Partner can write management notes
   const need = A.ROUTE_PERMS.warping[body.fn];
   if (!need || !W.ROUTES[body.fn]) return res.status(400).json({ ok: false, error: 'Bad function' });
   if (!A.allow(me, res, need)) return;

@@ -148,7 +148,7 @@ async function add(a, who) {
   const id = 'W-' + String(max + 1).padStart(4, '0');
   const bEnds = f.baseBeams ? v.baseEnds : '', bYarn = f.baseBeams ? v.baseYarn : '', dEnds = f.designBeams ? v.designEnds : '', dYarn = f.designBeams ? v.designYarn : '';
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(v.category), safe(v.stand), bEnds, safe(bYarn), f.baseBeams || '', f.baseMeters || '',
-    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '']]);
+    dEnds, safe(dYarn), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '', safe(flat(a.mnote).slice(0, 300))]]);
   await log(id, 'Planned', who, name, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : '') + (v.stand !== 'Not Relevant' ? ' (' + v.stand + ')' : ''));
   return { id };
 }
@@ -195,7 +195,7 @@ async function addOneOff(a, who) {
   const max = ids.reduce((m, r) => { const n = Number(str(r[0]).replace(/\D/g, '')); return n > m ? n : m; }, 0);
   const id = 'W-' + String(max + 1).padStart(4, '0');
   await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(cat), safe(stand), bE, safe(bY), f.baseBeams || '', f.baseMeters || '',
-    dE, safe(dY), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '']]);
+    dE, safe(dY), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '', safe(flat(a.mnote).slice(0, 300))]]);
   await log(id, 'Planned (one-off)', who, name, '');
   return { id };
 }
@@ -208,7 +208,8 @@ async function editOneOff(a, who) {
   const { name, cat, stand, f, bE, bY, dE, dY } = oneOffBuild(a);
   await G.batchUpdate(SHEET_ID(), [
     { range: range(PLAN, 'D' + job.row, 'N' + job.row), values: [[safe(name), safe(cat), safe(stand), bE, safe(bY), f.baseBeams || '', f.baseMeters || '', dE, safe(dY), f.designBeams || '', f.designMeters || '']] },
-    { range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(flat(a.note).slice(0, 300))]] }]);
+    { range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(flat(a.note).slice(0, 300))]] },
+    ...(a.mnote !== undefined ? [{ range: range(PLAN, 'V' + job.row, 'V' + job.row), values: [[safe(flat(a.mnote).slice(0, 300))]] }] : [])]);
   await log(job.id, 'Plan edited (one-off)', who, name, '');
   return { edited: true };
 }
@@ -372,6 +373,10 @@ async function edit(a, who) {
   await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'G' + job.row, 'N' + job.row), values: [[
     f.baseBeams ? v.baseEnds : '', f.baseBeams ? safe(v.baseYarn) : '', f.baseBeams || '', f.baseMeters || '',
     f.designBeams ? v.designEnds : '', f.designBeams ? safe(v.designYarn) : '', f.designBeams || '', f.designMeters || '']] }]);
+  const nw = [];
+  if (a.note !== undefined) nw.push({ range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(flat(a.note).slice(0, 300))]] });
+  if (a.mnote !== undefined) nw.push({ range: range(PLAN, 'V' + job.row, 'V' + job.row), values: [[safe(flat(a.mnote).slice(0, 300))]] });
+  if (nw.length) await G.batchUpdate(SHEET_ID(), nw);
   await log(job.id, 'Plan edited', who, job.tape, (f.baseBeams ? 'Base ' + f.baseBeams + ' x ' + f.baseMeters + ' m' : '') + (f.baseBeams && f.designBeams ? '; ' : '') + (f.designBeams ? 'Design ' + f.designBeams + ' x ' + f.designMeters + ' m' : ''));
   return { edited: true };
 }

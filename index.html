@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v252</span>
+    <span class="app-ver" id="appVer" title="App version">v253</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3822,6 +3822,8 @@ var WP=(function(){
     var f=function(id,l,v){return '<label>'+l+'<input id="'+id+'" type="number" inputmode="numeric" min="0" max="99999" value="'+(v||'')+'"></label>';};
     return '<div class="wp-job">'+head(j)+meta(j)+when(j)
       +'<div class="wp-grid" style="margin-top:10px"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+(j.baseEnds?n(j.baseEnds):'—')+'</b></div>'+f('wpEBB','No. of beams',j.baseBeams)+f('wpEBM','Meters per beam',j.baseMeters)+'</div><div><h4>Design</h4><div class="wp-ends">Ends <b>'+(j.designEnds?n(j.designEnds):'—')+'</b></div>'+f('wpEDB','No. of beams',j.designBeams)+f('wpEDM','Meters per beam',j.designMeters)+'</div></div>'
+      +'<label class="wp-fl">Staff note (everyone can see)<textarea id="wpENote" class="wp-note" rows="2" maxlength="300" placeholder="Staff note">'+esc(j.note||'')+'</textarea></label>'
+      +(boss()?'<label class="wp-fl">Management note (only Admin and Partner)<textarea id="wpEMNote" class="wp-note" rows="2" maxlength="300" placeholder="Management note">'+esc(j.mnote||'')+'</textarea></label>':'')
       +'<div class="us-err" id="wpEErr" role="alert"></div><div class="us-act"><button type="button" class="us-cancel" data-wp-ecancel="1">Cancel</button><button type="button" class="btn-submit" id="wpESave" data-wp-esave="'+esc(j.id)+'">Save changes</button></div></div>';
   }
   function boss(){return !!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
@@ -3882,6 +3884,7 @@ var WP=(function(){
       +'<div class="wp-grid"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+n(v.baseEnds)+'</b></div><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><div class="wp-ends">Ends <b>'+n(v.designEnds)+'</b></div><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
       +'<div id="wpNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addnote="1">+ Add staff note</button></div>'
+      +(boss()?'<div id="wpMNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addmnote="1">+ Add management note</button></div>':'')
       +'<div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
     return h;
   }
@@ -3925,10 +3928,10 @@ var WP=(function(){
       +(t.category&&t.split&&t.category==='Knitted'?['b','d'].map(function(sd){var nm=sd==='b'?'Base':'Design';return '<div class="wp-spc"><h4>'+nm+'</h4><div class="wp-sp3">'+['A','B','C'].map(function(L,k){var q=t.sp[k];return '<div><span class="wp-spl">'+L+'</span><input id="wpOS'+sd+k+'E" type="number" inputmode="numeric" min="0" value="'+esc(q[sd+'e']||'')+'" placeholder="Ends" aria-label="'+nm+' '+L+' ends" autocomplete="off"><input id="wpOS'+sd+k+'Y" type="text" value="'+esc(q[sd+'y']||'')+'" placeholder="Yarn" aria-label="'+nm+' '+L+' yarn" autocomplete="off"></div>';}).join('')+'</div><div class="wp-bm">'+f('wp'+(sd==='b'?'OBB':'ODB'),'No. of beams',sd==='b'?t.baseBeams:t.designBeams,'number')+f('wp'+(sd==='b'?'OBM':'ODM'),'Meters per beam',sd==='b'?t.baseMeters:t.designMeters,'text','e.g. 1800')+'</div></div>';}).join('')
       :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'text','e.g. 1800')+'</div>'
         +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'text','e.g. 1800')+'</div></div>':'')
-      +(t.category?'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
+      +(t.category?'<label class="wp-fl">Staff note (everyone can see)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Staff note">'+esc(t.note||'')+'</textarea></label>'+(boss()?'<label class="wp-fl">Management note (only Admin and Partner)<textarea id="wpOMNote" class="wp-note" rows="2" maxlength="300" placeholder="Management note">'+esc(t.mnote||'')+'</textarea></label>':''):'')
       +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>'+(t.editId?'Save changes':'Add to planning')+'</button></div>';
   }
-  function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){if(oo.split)[0,1,2].forEach(function(k){oo.sp[k]={be:g('wpOSb'+k+'E'),by:g('wpOSb'+k+'Y'),de:g('wpOSd'+k+'E'),dy:g('wpOSd'+k+'Y')};});oo.name=g('wpON');if($('wpOBE')){oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');}oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');if($('wpODE')){oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');}oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');}}
+  function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){if(oo.split)[0,1,2].forEach(function(k){oo.sp[k]={be:g('wpOSb'+k+'E'),by:g('wpOSb'+k+'Y'),de:g('wpOSd'+k+'E'),dy:g('wpOSd'+k+'Y')};});oo.name=g('wpON');if($('wpOBE')){oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');}oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');if($('wpODE')){oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');}oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');if($('wpOMNote'))oo.mnote=g('wpOMNote');}}
   function ooSave(){
     ooVals();var er=$('wpOErr'),bad=function(t){er.textContent=t;};er.textContent='';
     var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
@@ -3943,12 +3946,13 @@ var WP=(function(){
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
     if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
     var note=String(oo.note||'').trim().replace(/\s+/g,' ');
+    var mnote=boss()?String(oo.mnote||'').trim().replace(/\s+/g,' '):undefined;
     var spB=null,spD=null,sp2=function(on,pick,lab){if(!on)return [];var r=[];for(var k=0;k<3;k++){var e=cn(oo.sp[k][pick+'e']),y=String(oo.sp[k][pick+'y']||'').trim().replace(/\|/g,'/');if(isNaN(e))return lab+' '+'ABC'.charAt(k)+': ends must be a whole number';if(!e)return lab+' '+'ABC'.charAt(k)+': enter the ends';if(!y)return lab+' '+'ABC'.charAt(k)+': enter the yarn';r.push({ends:e,yarn:y});}return r;};
     if(oo.split){spB=sp2(bb,'b','Base');spD=sp2(db,'d','Design');if(typeof spB==='string')return bad(spB);if(typeof spD==='string')return bad(spD);
       var tot=function(a){return a.reduce(function(m,q){return m+q.ends;},0);},txt=function(a){return a.map(function(q,k){return 'ABC'.charAt(k)+' '+q.ends+' ends - '+q.yarn;}).join(' | ');};
       be=bb?tot(spB):0;de=db?tot(spD):0;oo.baseYarn=bb?txt(spB):'';oo.designYarn=db?txt(spD):'';}
-    var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,split:!!oo.split,baseParts:spB||undefined,designParts:spD||undefined,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};
-    var t={id:'tmp'+Date.now(),tape:nm+' (One-off)',stand:args.stand,category:oo.category,status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:bb?be:0,baseYarn:args.baseYarn,baseBeams:bb,baseMeters:bm,designEnds:db?de:0,designYarn:args.designYarn,designBeams:db,designMeters:dm,note:note};
+    var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,split:!!oo.split,baseParts:spB||undefined,designParts:spD||undefined,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};if(mnote!==undefined)args.mnote=mnote;
+    var t={id:'tmp'+Date.now(),tape:nm+' (One-off)',stand:args.stand,category:oo.category,status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:bb?be:0,baseYarn:args.baseYarn,baseBeams:bb,baseMeters:bm,designEnds:db?de:0,designYarn:args.designYarn,designBeams:db,designMeters:dm,note:note};if(mnote!==undefined)t.mnote=mnote;
     if(oo.editId){var eid=oo.editId;args.id=eid;ver++;var up=function(l){return (l||[]).map(function(x){return x.id===eid?Object.assign({},x,t,{id:eid,created:x.created,by:x.by}):x;});};jobs=up(jobs);if(board)board=up(board);oo=null;msg='';draw();showToast('\u2713 Saved','success mid');bg('warp.editOneOff',args);return;}
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
     oo=null;msg='';qs='';draw();showToast('\u2713 Added to plan','success mid');
@@ -4057,8 +4061,8 @@ var WP=(function(){
     if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
     if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
-    var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm,note:($('wpNote')?$('wpNote').value:'').trim().replace(/\s+/g,' ')};
-    var args={tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM'),note:t.note};
+    var t={id:'tmp'+Date.now(),tape:sel.name,stand:vr.stand,category:vr.category||'',status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:vr.baseEnds||0,baseYarn:vr.baseYarn||'',baseBeams:bb,baseMeters:bm,designEnds:vr.designEnds||0,designYarn:vr.designYarn||'',designBeams:db,designMeters:dm,note:($('wpNote')?$('wpNote').value:'').trim().replace(/\s+/g,' '),mnote:boss()&&$('wpMNote')?$('wpMNote').value.trim().replace(/\s+/g,' '):''};
+    var args={tape:sel.name,stand:vr.stand,baseBeams:g('wpBB'),baseMeters:g('wpBM'),designBeams:g('wpDB'),designMeters:g('wpDM'),note:t.note,mnote:t.mnote};
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
     msg='';sel=null;vr=null;qs='';draw();showToast('\u2713 Added to plan','success mid');
     bg('warp.add',args);
@@ -4080,8 +4084,9 @@ var WP=(function(){
     if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
     if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
-    ver++;patch(id,function(x){x.baseBeams=bb;x.baseMeters=bm;x.designBeams=db;x.designMeters=dm;});
-    var args={id:id,baseBeams:g('wpEBB'),baseMeters:g('wpEBM'),designBeams:g('wpEDB'),designMeters:g('wpEDM')};
+    var nt=g('wpENote').trim().replace(/\s+/g,' '),mn=$('wpEMNote')?g('wpEMNote').trim().replace(/\s+/g,' '):undefined;
+    ver++;patch(id,function(x){x.baseBeams=bb;x.baseMeters=bm;x.designBeams=db;x.designMeters=dm;x.note=nt;if(mn!==undefined)x.mnote=mn;});
+    var args={id:id,baseBeams:g('wpEBB'),baseMeters:g('wpEBM'),designBeams:g('wpEDB'),designMeters:g('wpEDM'),note:nt};if(mn!==undefined)args.mnote=mn;
     editId=null;msg='Plan updated';draw();setTimeout(function(){msg='';if(current==='warp'&&tab==='plan'&&!sel&&!editId)draw();},3000);
     bg('warp.edit',args);
   }
@@ -4127,6 +4132,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
     if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!==home())?home():(nt==='dash'&&!canD())?home():nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;oo=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
+    if((x=t.closest('[data-wp-addmnote]'))){var w2=$('wpMNoteWrap');if(w2){w2.innerHTML='<textarea class="wp-note" id="wpMNote" rows="2" maxlength="300" placeholder="Management note (only Admin and Partner see this)" aria-label="Management note"></textarea>';$('wpMNote').focus();}return;}
     if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Staff note (everyone can see this)" aria-label="Staff note"></textarea>';$('wpNote').focus();}return;}
     if((x=t.closest('[data-wp-noteedit]')))return swapNote(x.getAttribute('data-wp-noteedit'),true);
     if((x=t.closest('[data-wp-mnoteedit]')))return swapMNote(x.getAttribute('data-wp-mnoteedit'),true);
@@ -4140,7 +4146,7 @@ var WP=(function(){
     if((x=t.closest('[data-wp-unarch]')))return arch(x.getAttribute('data-wp-unarch'),true);
     if((x=t.closest('[data-wp-img]'))){showImg(x.getAttribute('data-wp-img'));return;}
     if(t.closest('[data-wp-tnew]')){addT={category:'',stand:'',name:qs.trim(),baseEnds:'',designEnds:'',baseYarn:'',designYarn:''};msg='';return draw();}
-    if(t.closest('[data-wp-oo]')){oo={split:false,sp:[0,1,2].map(function(){return {be:'',by:'',de:'',dy:''};}),category:'',stand:'',name:qs.trim(),baseEnds:'',baseYarn:'',baseBeams:'',baseMeters:'',designEnds:'',designYarn:'',designBeams:'',designMeters:'',note:''};msg='';return draw();}
+    if(t.closest('[data-wp-oo]')){oo={split:false,sp:[0,1,2].map(function(){return {be:'',by:'',de:'',dy:''};}),category:'',stand:'',name:qs.trim(),baseEnds:'',baseYarn:'',baseBeams:'',baseMeters:'',designEnds:'',designYarn:'',designBeams:'',designMeters:'',note:'',mnote:''};msg='';return draw();}
     if(t.closest('[data-wp-ooclose]')){oo=null;return draw();}
     if((x=t.closest('[data-wp-ooset]'))){ooVals();var ov=x.getAttribute('data-wp-ooset').split('|');if(ov[0]==='split'){oo.split=ov[1]==='1';draw();return;}oo[ov[0]]=ov[1];if(ov[0]==='category'){oo.stand='';if(ov[1]!=='Knitted')oo.split=false;}draw();return;}
     if(t.closest('[data-wp-oosave]'))return ooSave();
@@ -4156,7 +4162,7 @@ var WP=(function(){
     if(t.closest('[data-wp-back]')){askId=null;return draw();}
     if((x=t.closest('[data-wp-set]'))){askId=null;var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1],p[2]);}
     if((x=t.closest('[data-wp-edit]'))&&x.getAttribute('data-wp-edit').indexOf('tmp')!==0){var eid2=x.getAttribute('data-wp-edit'),ej=(jobs||[]).filter(function(q){return q.id===eid2;})[0];
-      if(ej&&/\(One-off\)\s*$/.test(ej.tape||'')&&canP()){var bs=splitParts(ej.baseYarn),ds=splitParts(ej.designYarn),sp=!!(bs||ds);oo={editId:eid2,split:sp,sp:[0,1,2].map(function(k){return {be:bs?bs[k].e:'',by:bs?bs[k].y:'',de:ds?ds[k].e:'',dy:ds?ds[k].y:''};}),category:ej.category||'',stand:ej.category==='Woven'?ej.stand:'',name:String(ej.tape).replace(/\s*\(One-off\)\s*$/,''),baseEnds:ej.baseEnds||'',baseYarn:ej.baseYarn||'',baseBeams:ej.baseBeams||'',baseMeters:ej.baseMeters||'',designEnds:ej.designEnds||'',designYarn:ej.designYarn||'',designBeams:ej.designBeams||'',designMeters:ej.designMeters||'',note:ej.note||''};msg='';return draw();}
+      if(ej&&/\(One-off\)\s*$/.test(ej.tape||'')&&canP()){var bs=splitParts(ej.baseYarn),ds=splitParts(ej.designYarn),sp=!!(bs||ds);oo={editId:eid2,split:sp,sp:[0,1,2].map(function(k){return {be:bs?bs[k].e:'',by:bs?bs[k].y:'',de:ds?ds[k].e:'',dy:ds?ds[k].y:''};}),category:ej.category||'',stand:ej.category==='Woven'?ej.stand:'',name:String(ej.tape).replace(/\s*\(One-off\)\s*$/,''),baseEnds:ej.baseEnds||'',baseYarn:ej.baseYarn||'',baseBeams:ej.baseBeams||'',baseMeters:ej.baseMeters||'',designEnds:ej.designEnds||'',designYarn:ej.designYarn||'',designBeams:ej.designBeams||'',designMeters:ej.designMeters||'',note:ej.note||'',mnote:ej.mnote||''};msg='';return draw();}
       editId=eid2;msg='';return draw();}
     if(t.closest('[data-wp-ecancel]')){editId=null;return draw();}
     if((x=t.closest('[data-wp-esave]')))return eSave(x.getAttribute('data-wp-esave'));
