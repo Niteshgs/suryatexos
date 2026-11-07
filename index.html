@@ -641,7 +641,7 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-nums i{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
 .wp-part{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:4px;align-items:center;margin-top:8px}.wp-part .wp-y{grid-column:2;font-size:14px;font-weight:700;color:var(--text-muted)}.wp-part>b{grid-column:1;text-align:center;min-width:56px}.wp-part .wp-nums{grid-column:2}
 .wp-ends{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:8px}.wp-ends b{color:var(--text);font-size:17px}
-.wp-yarns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}.wp-yarns span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}.wp-yarns b{font-size:14px;overflow-wrap:anywhere}
+.wp-yarns{display:grid;grid-template-columns:1fr;gap:10px;margin:6px 0 12px}.wp-yb>span{margin-bottom:4px}.wp-yb .wp-sp{margin:0}.wp-yarns span{display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}.wp-yarns b{font-size:14px;overflow-wrap:anywhere}
 .wp-flash{animation:wpflash 1.4s ease-out}
 @keyframes wpflash{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){.wp-flash{animation:none}}
@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v249</span>
+    <span class="app-ver" id="appVer" title="App version">v250</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3799,6 +3799,7 @@ var WP=(function(){
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function splitParts(y){var a=String(y||'').split(' | ');if(a.length!==3)return null;var o=[];for(var i=0;i<3;i++){var m=/^1?([ABC]) (\d+) ends - (.+)$/.exec(a[i]);if(!m||m[1]!=='ABC'.charAt(i))return null;o.push({l:m[1],e:+m[2],y:m[3]});}return o;}
   function segParts(y){var t=String(y||'');if(t.indexOf('\u2022')<0)return null;var a=t.split('\u2022').map(function(x){return x.trim();}).filter(Boolean);if(a.length<2)return null;var o=[];for(var i=0;i<a.length;i++){var m=/^(\d+)\s*ends?\s*[-\u2013]\s*(.+)$/i.exec(a[i]);if(!m)return null;o.push({e:+m[1],y:m[2]});}return o;}
+  function yarnBlk(l,y){var sp=splitParts(y),sg=sp?null:segParts(y),h;if(sg)h='<div class="wp-sp wp-seg" style="grid-template-columns:repeat('+sg.length+',minmax(0,1fr))">'+sg.map(function(q){return '<div><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>';else if(sp)h='<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>';else h='<b>'+esc(y||'\u2014')+'</b>';return '<div class="wp-yb"><span>'+l+'</span>'+h+'</div>';}
   function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn),sg=sp?null:segParts(yarn);var yh=sg?'<div class="wp-sp wp-seg" style="grid-template-columns:repeat('+sg.length+',minmax(0,1fr))">'+sg.map(function(q){return '<div><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+(isNaN(+m)?esc(String(m)):n(m))+'</span></div></div>';}
   function dbl(t){return /double/i.test(t||'')?' dbl':'';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill'+dbl(st)+'">'+esc(st)+'</span>':'';}
@@ -3869,7 +3870,7 @@ var WP=(function(){
     if(t.variants.length>1){h+='<div class="wp-stand">'+t.variants.map(function(v,i){return '<button type="button" class="'+(vr===v?'on':'')+'" data-wp-var="'+i+'" data-st="'+(/double/i.test(v.stand)?'d':'s')+'">'+esc(v.stand)+'</button>';}).join('')+'</div>';if(!vr)return h+'<p class="wp-hint">Choose the stand to continue.</p></div>';}
     var v=vr;
     h+='<div style="margin:8px 0 4px">'+(v.category?'<span class="wp-st">'+esc(v.category)+'</span> ':'')+standPill(v.stand)+'</div>'
-      +'<div class="wp-yarns"><div><span>Base yarn</span><b>'+esc(v.baseYarn||'—')+'</b></div><div><span>Design yarn</span><b>'+esc(v.designYarn||'—')+'</b></div></div>'
+      +'<div class="wp-yarns">'+yarnBlk('Base yarn',v.baseYarn)+yarnBlk('Design yarn',v.designYarn)+'</div>'
       +'<div class="wp-grid"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+n(v.baseEnds)+'</b></div><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><div class="wp-ends">Ends <b>'+n(v.designEnds)+'</b></div><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
       +'<div id="wpNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addnote="1">+ Add note</button></div>'
