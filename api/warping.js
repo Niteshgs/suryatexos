@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
   const need = A.ROUTE_PERMS.warping[body.fn];
   if (!need || !W.ROUTES[body.fn]) return res.status(400).json({ ok: false, error: 'Bad function' });
   if (!A.allow(me, res, need)) return;
-  if (['warp.cancel', 'warp.toExecute', 'warp.archive', 'warp.unarchive', 'warp.archived', 'warp.analytics', 'warp.mnote'].includes(body.fn) && !boss) return res.status(403).json({ ok: false, error: 'Only Admin or Partner can do this' });
+  if (['warp.cancel', 'warp.remove', 'warp.toExecute', 'warp.archive', 'warp.unarchive', 'warp.archived', 'warp.analytics', 'warp.mnote'].includes(body.fn) && !boss) return res.status(403).json({ ok: false, error: 'Only Admin or Partner can do this' });
   if (!G.enabled()) return res.status(500).json({ ok: false, error: 'Google connection is not set up' });
   try {
     const data = await W.ROUTES[body.fn](body.args || {}, me.name || me.email);

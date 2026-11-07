@@ -1416,7 +1416,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v259</span>
+    <span class="app-ver" id="appVer" title="App version">v260</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3785,12 +3785,12 @@ var WP=(function(){
   function n(v){return Number(v||0).toLocaleString('en-IN');}
   function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}function canD(){return canP()||can('warping.dash');}function home(){return canD()?'dash':canE()?'exec':'ready';}
   var WIC={dash:'i-dashboard',plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={dash:'Dash',plan:'Plan',exec:'Program',ready:'Ready'};
-  function navTabs(){var t=canD()?['dash']:[];if(canP()||canE())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
+  function navTabs(){var t=canD()?['dash']:[];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
   function nav(){var n=$('wpNav'),t=navTabs();if(!n)return;n.style.gridTemplateColumns='repeat('+t.length+',1fr)';n.innerHTML=t.map(function(k){return '<button type="button" class="'+(tab===k?'on':'')+'"'+(tab===k?' aria-current="page"':'')+' data-wp-tab="'+k+'"><span><svg class="ic" aria-hidden="true"><use href="#'+WIC[k]+'"/></svg></span>'+WLB[k]+'</button>';}).join('');}
   function tabs(){return '';}
   function sumHtml(){
     var v=function(k){return sum?n(sum[k]):'–';};
-    var box=function(t,k,lab,extra){var h='<b>'+v(k)+'</b><span>'+lab+'</span>'+(extra||'<em>&nbsp;</em>');return (t==='plan'?(canP()||canE()):t==='exec'?canE():true)?'<button type="button" class="wp-sbox" data-wp-tab="'+t+'" aria-label="'+lab+'">'+h+'</button>':'<div class="wp-sbox">'+h+'</div>';};
+    var box=function(t,k,lab,extra){var h='<b>'+v(k)+'</b><span>'+lab+'</span>'+(extra||'<em>&nbsp;</em>');return (t==='plan'?canP():t==='exec'?canE():true)?'<button type="button" class="wp-sbox" data-wp-tab="'+t+'" aria-label="'+lab+'">'+h+'</button>':'<div class="wp-sbox">'+h+'</div>';};
     return box('plan','planning','Planning')+box('exec','execute','In program',sum&&sum.hold?'<em>'+n(sum.hold)+' on hold</em>':'')+box('ready','doneToday','Done today');
   }
   function loadSum(){var v=ver;return api('warp.summary').then(function(d){if(v!==ver)return;sum=d;var e=$('wpSum');if(e)e.innerHTML=sumHtml();}).catch(function(){});}
@@ -3839,7 +3839,7 @@ var WP=(function(){
     }
     else if(j.status==='Planned'&&canP()&&!x){
       if(ask==='del')return two('<button type="button" class="wp-big danger" data-wp-del="'+sid+'">Delete?</button>');
-      s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-askdel="'+sid+'">Delete</button>':'<span></span>')+''+(boss()?'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Send to program</button>':'<span></span>')+'<button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';
+      s+='<div class="wp-row3">'+(canCan()?'<button type="button" class="wp-sm del" data-wp-askdel="'+sid+'">Delete</button>':'<span></span>')+''+(boss()?'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Send to program</button>':'<span></span>')+'<button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';
     }
     if(j.status==='Done'&&!x&&canArc())s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
     if(j.status==='Archived'&&canArc())s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
