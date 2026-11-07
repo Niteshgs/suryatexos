@@ -151,6 +151,28 @@ async function add(a, who) {
   return { id };
 }
 
+/* One-off tape: a custom job typed by hand. It goes into the Planning Queue only - the Warping Data sheet is never touched. The name is saved with " (One-off)" on the end so it shows everywhere. */
+async function addOneOff(a, who) {
+  let name = flat(a.tape).slice(0, 60).replace(/\s*\(one-off\)\s*$/i, ''); if (!name) throw new Error('Type a name for the tape');
+  const cat = flat(a.category), stand = cat === 'Knitted' ? 'Not Relevant' : flat(a.stand);
+  if (!['Woven', 'Knitted'].includes(cat)) throw new Error('Choose Woven or Knitted');
+  if (cat === 'Woven' && !['Single Stand', 'Double Stand'].includes(stand)) throw new Error('Choose Single Stand or Double Stand');
+  const f = planInputs(a);
+  const ends = (v) => { const n = Number(v); return v === '' || v == null ? '' : (Number.isInteger(n) && n >= 0 && n <= 99999 ? n : NaN); };
+  const bE = f.baseBeams ? ends(a.baseEnds) : '', dE = f.designBeams ? ends(a.designEnds) : '';
+  if (Number.isNaN(bE) || Number.isNaN(dE)) throw new Error('Ends must be whole numbers');
+  const bY = f.baseBeams ? flat(a.baseYarn).slice(0, 80) : '', dY = f.designBeams ? flat(a.designYarn).slice(0, 80) : '';
+  name += ' (One-off)';
+  await ensureTabs();
+  const [ids] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A2', 'A')]);
+  const max = ids.reduce((m, r) => { const n = Number(str(r[0]).replace(/\D/g, '')); return n > m ? n : m; }, 0);
+  const id = 'W-' + String(max + 1).padStart(4, '0');
+  await G.append(SHEET_ID(), range(PLAN, 'A', L(PLAN_HEAD.length)), [[id, stamp(), safe(who), safe(name), safe(cat), safe(stand), bE, safe(bY), f.baseBeams || '', f.baseMeters || '',
+    dE, safe(dY), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '']]);
+  await log(id, 'Planned (one-off)', who, name, '');
+  return { id };
+}
+
 async function deleteRow(tab, row) {
   const props = await G.sheetProps(SHEET_ID()), p = props.find((x) => x.title === tab);
   if (!p) return;
@@ -373,6 +395,7 @@ const ROUTES = {
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.note': (a) => wrap(() => mut(note)(a)),
+  'warp.addOneOff': (a, who) => wrap(() => mut(addOneOff)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
   'warp.cancel': (a, who) => wrap(() => mut(cancel)(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),

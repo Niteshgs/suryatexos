@@ -629,6 +629,7 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-stamp{margin-top:6px;font-size:17px;font-weight:800;color:var(--success);text-align:right}.wp-stamp span{display:block;font-size:13px;font-weight:700;color:var(--text-muted)}
 .wp-stand button.on[data-st=d]{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
+.wp-ooBtn{display:block;width:100%;margin:10px 0 4px;text-align:left;background:var(--surface);border:1px dashed var(--accent);color:var(--accent);border-radius:var(--radius);padding:13px 14px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .wp-standpill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
 .wp-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-width:0}
 .wp-nums span{display:block;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:16px;font-weight:800}
@@ -1409,7 +1410,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v236</span>
+    <span class="app-ver" id="appVer" title="App version">v237</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3772,7 +3773,7 @@ var WP=(function(){
   function patch(id,fn){lists().forEach(function(l){l.forEach(function(j){if(j.id===id)fn(j);});});}
   function gone(id){var f=function(l){return l&&l.filter(function(j){return j.id!==id;});};jobs=f(jobs);exec=f(exec);ready=f(ready);archived=f(archived);board=f(board);}
   function bump(k,d){if(sum&&typeof sum[k]==='number'){sum[k]=Math.max(0,sum[k]+d);var e=$('wpSum');if(e)e.innerHTML=sumHtml();}}
-  function soft(ms){setTimeout(function(){if(pend||current!=='warp')return;if(editId||askId||addT||noting||(sel&&tab==='plan'))return soft(3000);refresh();},ms);}
+  function soft(ms){setTimeout(function(){if(pend||current!=='warp')return;if(editId||askId||addT||oo||noting||(sel&&tab==='plan'))return soft(3000);refresh();},ms);}
   function bg(fn,args){pend++;q=q.then(function(){return api(fn,args);}).then(function(){pend--;if(!pend)soft(1500);},function(e){pend--;showToast(friendly(e.message),'error');if(!pend)refresh();});}
   function $(i){return document.getElementById(i);}
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
@@ -3798,7 +3799,7 @@ var WP=(function(){
   function tag(j){var t=j.stand&&j.stand!=='Not Relevant'?j.stand:(j.category||'');return (t||j.machine)?'<span class="wp-tags">'+(t?'<span class="wp-standpill'+dbl(t)+'">'+esc(t)+'</span>':'')+mchip(j)+'</span>':'<span></span>';}
   function wk(c){return c==='Woven'?'<span class="wp-wk wp-wk-w" role="img" aria-label="Woven" title="Woven">W</span>':c==='Knitted'?'<span class="wp-wk wp-wk-k" role="img" aria-label="Knitted" title="Knitted">K</span>':'';}
   function head(j){return '<div class="wp-top"><b>'+wk(j.category)+esc(j.tape)+'</b>'+pill(j.status)+'</div>';}
-  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar"><button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button><span class="wp-id">'+(String(j.id).indexOf('tmp')===0?'Saving…':esc(j.id))+'</span></span></div>';}
+  function meta(j){return '<div class="wp-meta">'+tag(j)+'<span class="wp-metar">'+(/\(one-off\)\s*$/i.test(j.tape)?'':'<button type="button" class="wp-imgbtn" data-wp-img="'+esc(j.tape)+'">Image</button>')+'<span class="wp-id">'+(String(j.id).indexOf('tmp')===0?'Saving…':esc(j.id))+'</span></span></div>';}
   function when(j){
     var d=(j.status==='Done'||j.status==='Archived')&&j.done,r=(j.status==='Started'||j.status==='On hold')&&j.started;
     var lab=d?'Done':r?'Started':'Planned',t=d?j.done:r?j.started:j.created,by=d?j.doneBy:r?j.startedBy:j.by;
@@ -3852,7 +3853,9 @@ var WP=(function(){
   }
   function swapNote(id,edit){var row=document.querySelector('[data-wp-nrow="'+id+'"]'),j=find(id);if(!row||!j)return;noteEd=edit?id:null;row.outerHTML=noteBox(j);if(edit){var ta=document.querySelector('[data-wp-note="'+id+'"]');if(ta){noting=true;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}}}
   function sugg(){var q=qs.trim().toLowerCase();if(!q)return '';var w=q.split(/\s+/);var l=cat.tapes.filter(function(t){var n=t.name.toLowerCase();return w.every(function(x){return n.indexOf(x)>=0;});}).slice(0,8);var add=can('warping.tapes')?'<button type="button" class="wp-addtape" data-wp-tnew="1">+ Add new tape</button>':'';if(!l.length)return '<div class="wp-none">No tape matches</div>'+(add?'<div class="wp-pick">'+add+'</div>':'');return '<div class="wp-pick">'+l.map(function(t){return '<button type="button" data-wp-tape="'+esc(t.name)+'"><span class="wp-bn">'+wk(t.variants[0].category)+esc(t.name)+'</span>'+(t.variants.length>1?'<small>Single / Double stand</small>':'')+'</button>';}).join('')+add+'</div>';}
-  function tapeBox(){return '<input class="dc-q" id="wpQ" type="search" placeholder="Type a tape name" aria-label="Tape name" value="'+esc(qs)+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><div id="wpTapes">'+sugg()+'</div>';}
+  var oo=null;
+  function oneOffBtn(){return canP()?'<button type="button" class="wp-addtape wp-ooBtn" data-wp-oo="1">+ Add one-off tape</button>':'';}
+  function tapeBox(){return '<input class="dc-q" id="wpQ" type="search" placeholder="Type a tape name" aria-label="Tape name" value="'+esc(qs)+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><div id="wpTapes">'+sugg()+'</div>'+oneOffBtn();}
   function pickTape(nm){var t=cat.tapes.filter(function(a){return a.name.toLowerCase()===nm.trim().toLowerCase();})[0];if(!t)return false;sel=t;vr=t.variants.length===1?t.variants[0]:null;msg='';qs='';draw();return true;}
   function form(){
     var t=sel,h='<div class="wp-sel"><div class="wp-top"><b>'+wk(t.variants[0].category)+esc(t.name)+'</b><button type="button" class="wp-x" data-wp-clear="1">Change</button></div>';
@@ -3870,6 +3873,7 @@ var WP=(function(){
   function drawPlan(){
     var h=(msg?'<div class="wp-ok" role="status">'+esc(msg)+'</div>':'');
     if(addT)return h+tapeForm();
+    if(oo&&canP())return h+ooForm();
     if(canP()){if(!cat)return h+'<div class="loading"><div class="spinner"></div>Loading tapes…</div>';
     h+='<h3 class="wp-ph">Plan a warping program</h3>';
     if(sel)h+=form();
@@ -3892,6 +3896,40 @@ var WP=(function(){
     api('warp.image',{tape:name}).then(function(d){imgC[name]=d.src;done('<img src="'+d.src+'" alt="'+esc(name)+'">');}).catch(function(e){done('<p class="wp-hint">'+esc(friendly(e.message))+'</p>');});
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){var o=document.getElementById('wpImgO');if(o)o.remove();}});
+  function ooForm(){
+    var t=oo,w=t.category==='Woven';
+    var seg=function(key,opts,cur){return '<div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:repeat('+opts.length+',1fr)">'+opts.map(function(o){return '<button type="button" class="'+(cur===o?'on':'')+'" data-st="'+(/double/i.test(o)?'d':'s')+'" data-wp-ooset="'+key+'|'+o+'">'+o+'</button>';}).join('')+'</div>';};
+    var f=function(id,l,v,ty,ph){return '<label class="wp-fl">'+l+'<input id="'+id+'" type="'+(ty||'text')+'"'+(ty==='number'?' inputmode="numeric" min="0"':'')+' value="'+esc(v||'')+'" placeholder="'+(ph||'')+'" autocomplete="off"></label>';};
+    return '<div class="wp-sel"><div class="wp-top"><b>'+wk(t.category)+'One-off tape</b><button type="button" class="wp-x" data-wp-ooclose="1">Cancel</button></div>'
+      +'<p class="wp-hint">A custom tape for this job only. It is not added to the Warping Data sheet.</p>'
+      +f('wpON','Tape name',t.name,'text','e.g. Customer special 38MM')
+      +'<div class="wp-fl">Category</div>'+seg('category',['Woven','Knitted'],t.category)
+      +(w?'<div class="wp-fl">Stand</div>'+seg('stand',['Single Stand','Double Stand'],t.stand):'')
+      +(t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div>'
+        +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>'
+        +'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
+      +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>Add to planning</button></div>';
+  }
+  function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){oo.name=g('wpON');oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');}}
+  function ooSave(){
+    ooVals();var er=$('wpOErr'),bad=function(t){er.textContent=t;};er.textContent='';
+    var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
+    var nm=String(oo.name||'').trim().replace(/\s+/g,' ');
+    if(!nm)return bad('Type a name for the tape');
+    if(oo.category==='Woven'&&!oo.stand)return bad('Choose Single Stand or Double Stand');
+    var bb=cn(oo.baseBeams),bm=cn(oo.baseMeters),db=cn(oo.designBeams),dm=cn(oo.designMeters),be=cn(oo.baseEnds),de=cn(oo.designEnds);
+    if([bb,bm,db,dm,be,de].some(isNaN))return bad('Ends, beams and meters must be whole numbers');
+    if(bb>99||db>99)return bad('That is too many beams. Check the number.');
+    if((bb||bm)&&!(bb&&bm))return bad('Base needs both the number of beams and the meters');
+    if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
+    if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
+    var note=String(oo.note||'').trim().replace(/\s+/g,' ');
+    var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};
+    var t={id:'tmp'+Date.now(),tape:nm+' (One-off)',stand:args.stand,category:oo.category,status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:bb?be:0,baseYarn:args.baseYarn,baseBeams:bb,baseMeters:bm,designEnds:db?de:0,designYarn:args.designYarn,designBeams:db,designMeters:dm,note:note};
+    ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
+    oo=null;msg='';qs='';draw();showToast('\u2713 Added to plan','success mid');
+    bg('warp.addOneOff',args);
+  }
   function tapeForm(){
     var t=addT,w=t.category==='Woven',k=t.category==='Knitted';
     var seg=function(key,opts,cur){return '<div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:repeat('+opts.length+',1fr)">'+opts.map(function(o){return '<button type="button" class="'+(cur===o?'on':'')+'" data-wp-tset="'+key+'|'+o+'">'+o+'</button>';}).join('')+'</div>';};
@@ -4057,7 +4095,7 @@ var WP=(function(){
     var t=e.target,x;if(!t.closest||(!t.closest('#v-warp')&&!t.closest('#wpNav')))return;
     if(t.closest('[data-wp-adm]'))return askPin();
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
-    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!==home())?home():(nt==='dash'&&!canD())?home():nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
+    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!==home())?home():(nt==='dash'&&!canD())?home():nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;oo=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Add a note" aria-label="Note"></textarea>';$('wpNote').focus();}return;}
     if((x=t.closest('[data-wp-noteedit]')))return swapNote(x.getAttribute('data-wp-noteedit'),true);
@@ -4070,6 +4108,10 @@ var WP=(function(){
     if((x=t.closest('[data-wp-unarch]')))return arch(x.getAttribute('data-wp-unarch'),true);
     if((x=t.closest('[data-wp-img]'))){showImg(x.getAttribute('data-wp-img'));return;}
     if(t.closest('[data-wp-tnew]')){addT={category:'',stand:'',name:qs.trim(),baseEnds:'',designEnds:'',baseYarn:'',designYarn:''};msg='';return draw();}
+    if(t.closest('[data-wp-oo]')){oo={category:'',stand:'',name:qs.trim(),baseEnds:'',baseYarn:'',baseBeams:'',baseMeters:'',designEnds:'',designYarn:'',designBeams:'',designMeters:'',note:''};msg='';return draw();}
+    if(t.closest('[data-wp-ooclose]')){oo=null;return draw();}
+    if((x=t.closest('[data-wp-ooset]'))){ooVals();var ov=x.getAttribute('data-wp-ooset').split('|');oo[ov[0]]=ov[1];if(ov[0]==='category')oo.stand='';draw();return;}
+    if(t.closest('[data-wp-oosave]'))return ooSave();
     if(t.closest('[data-wp-tclose]')){addT=null;return draw();}
     if((x=t.closest('[data-wp-tset]'))){tapeVals();var kv=x.getAttribute('data-wp-tset').split('|');addT[kv[0]]=kv[1];if(kv[0]==='category')addT.stand=kv[1]==='Knitted'?'Not Relevant':'';var fe=addT.category;draw();return;}
     if(t.closest('[data-wp-tsave]'))return tapeSave();
