@@ -1,11 +1,11 @@
 // Warping: the Planner (admin / partner) and the Execute screen (staff on the warping machine), straight from Google Sheets.
-// Sheet "Warping": tab "Warping Data" (the tape list), "Planning Queue" (every job, the master record) and "Execute Queue" (open jobs for the machine).
+// Sheet "Warping": tab "Warping Data" (the tape list), "Planning Queue" (every job, the master record) and "Program Queue" (was Execute Queue; open jobs for the machine).
 // Env: WARPING_SHEET_ID (default = the Warping workbook).
 const crypto = require('crypto');
 const G = require('./google');
 
 const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9AsuezpGeU4BppoJj6DGlFEd8';
-const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log', DONE = 'Done List';   // DATA is read-only: the app never writes to it
+const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Program Queue', LOG = 'Warping Log', DONE = 'Done List';   // DATA is read-only: the app never writes to it
 const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
   'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note', 'Machine'];
@@ -44,7 +44,11 @@ const doneRow = (j) => [safe(j.id), safe(j.tape), safe(j.category), safe(j.stand
 let TABS_OK = false;
 async function ensureTabs() {
   if (TABS_OK) return;
-  const titles = await G.sheetTitles(SHEET_ID());
+  let titles = await G.sheetTitles(SHEET_ID());
+  if (titles.includes('Execute Queue') && !titles.includes(EXEC)) {   // the tab was renamed Execute -> Program: rename it in place, nothing is copied or lost
+    const old = (await G.sheetProps(SHEET_ID())).find((x) => x.title === 'Execute Queue');
+    if (old) { await G.format(SHEET_ID(), [{ updateSheetProperties: { properties: { sheetId: old.sheetId, title: EXEC }, fields: 'title' } }]); titles = titles.filter((t) => t !== 'Execute Queue').concat(EXEC); }
+  }
   const adds = [PLAN, EXEC, LOG, DONE].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
   const newDone = !titles.includes(DONE);
@@ -120,7 +124,7 @@ function readPlan(fresh) {
 }
 const dirty = () => { PC.at = 0; };
 const mut = (fn) => async (a, who) => { try { return await fn(a, who); } finally { dirty(); } };   // any change clears the shared copy
-async function readExec() { const [rows] = await G.batchGet(SHEET_ID(), [range(EXEC, 'A2', L(EXEC_HEAD.length))]); return rows.map(execObj).filter((j) => j.id); }
+async function readExec() { await ensureTabs(); const [rows] = await G.batchGet(SHEET_ID(), [range(EXEC, 'A2', L(EXEC_HEAD.length))]); return rows.map(execObj).filter((j) => j.id); }
 
 const count = (v) => { const n = Number(v); return v === '' || v == null ? 0 : (Number.isInteger(n) && n >= 0 && n <= 1000000 ? n : NaN); };
 function planInputs(a) {
