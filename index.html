@@ -672,11 +672,13 @@ button.wp-sbox{cursor:pointer}
 .wp-when i{font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
 .wp-when b{color:var(--text);font-weight:800}
 .wp-when.done,.wp-when.done b{color:var(--success)}.wp-when.done b{font-size:14px}
-.wp-archbtn{flex:none;width:44px;height:44px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer}
+.wp-archbtn{flex:none;height:44px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:700;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer}
 .wp-archbtn .ic{width:22px;height:22px}.wp-archbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 .wp-metar{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
 .wp-tags{display:inline-flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap}
-.wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:28px;white-space:nowrap;cursor:pointer}
+.wp-bt{display:flex;flex-direction:column;min-width:0}.wp-bsub{font-size:12.5px;font-weight:600;color:var(--text-muted);margin-top:2px}
+.wp-cancelbtn.wp-cancelbtn{display:block;width:auto;margin:14px auto 0;background:none;border:none;color:var(--text-muted);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;padding:8px 12px;min-height:0;cursor:pointer}
+.wp-imgbtn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;min-height:36px;padding:6px 16px;font-size:13px;white-space:nowrap;cursor:pointer}
 .wp-imgo{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
 .wp-imgbox{background:var(--card,var(--bg));color:var(--text);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:14px}
 .wp-imgbody{display:flex;justify-content:center;padding-top:10px}.wp-imgbody img{max-width:100%;max-height:70vh;border-radius:8px}
@@ -1401,7 +1403,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v228</span>
+    <span class="app-ver" id="appVer" title="App version">v229</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3803,11 +3805,14 @@ var WP=(function(){
       +'<div class="wp-grid" style="margin-top:10px"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+(j.baseEnds?n(j.baseEnds):'—')+'</b></div>'+f('wpEBB','No. of beams',j.baseBeams)+f('wpEBM','Meters per beam',j.baseMeters)+'</div><div><h4>Design</h4><div class="wp-ends">Ends <b>'+(j.designEnds?n(j.designEnds):'—')+'</b></div>'+f('wpEDB','No. of beams',j.designBeams)+f('wpEDM','Meters per beam',j.designMeters)+'</div></div>'
       +'<div class="us-err" id="wpEErr" role="alert"></div><div class="us-act"><button type="button" class="us-cancel" data-wp-ecancel="1">Cancel</button><button type="button" class="btn-submit" id="wpESave" data-wp-esave="'+esc(j.id)+'">Save changes</button></div></div>';
   }
+  function canCan(){return can('warping.cancel')&&!!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
+  function sizeOf(j){var b=+j.baseBeams||+j.designBeams||0,m=+j.baseMeters||+j.designMeters||0;if(!b&&!m)return '';return (b?b+' beam'+(b===1?'':'s'):'')+(b&&m?' × ':'')+(m?Number(m).toLocaleString('en-IN')+' m':'');}
+  function bname(j){var z=sizeOf(j);return '<span class="wp-bt"><span>'+esc(j.tape)+'</span>'+(z?'<small class="wp-bsub">'+z+'</small>':'')+'</span>';}
   function acts(j,x){
     var s='',sid=esc(j.id),ask=askId===j.id?askAct:'';
     var two=function(btn){return '<div class="wp-two"><button type="button" class="wp-big hold" data-wp-back="1">Back</button>'+btn+'</div>';};
     if(x){
-      if(ask==='cancel')return two('<button type="button" class="wp-big danger" data-wp-cancel="'+sid+'">Cancel job?</button>');
+      if(ask==='cancel')return '<div class="wp-mq">Cancel '+sid+'? This can\'t be undone.</div>'+two('<button type="button" class="wp-big danger" data-wp-cancel="'+sid+'">Yes, cancel</button>');
       if(ask==='start'&&j.status==='Ready')return '<div class="wp-mq">Which machine?</div><div class="wp-mach">'+['Warping 1','Warping 2','Warping 3'].map(function(m){return '<button type="button" class="wp-big wp-mbtn" data-wp-set="'+sid+'|Started|'+m+'">'+m+'</button>';}).join('')+'</div><button type="button" class="wp-sm wp-wide" data-wp-back="1">Back</button>';
       s+=j.status==='Ready'?'<button type="button" class="wp-big" data-wp-askst="'+sid+'">Start</button>':j.status==='On hold'?'<button type="button" class="wp-big" data-wp-set="'+sid+'|Started">Resume</button>':(ask==='done'?two('<button type="button" class="wp-big done" data-wp-set="'+sid+'|Done">Confirm?</button>'):'<div class="wp-two"><button type="button" class="wp-big hold" data-wp-set="'+sid+'|Hold">Hold</button><button type="button" class="wp-big done" data-wp-ask="'+sid+'">Mark done</button></div>');
     }
@@ -3817,13 +3822,13 @@ var WP=(function(){
     }
     if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
     if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
-    if(x&&j.status!=='Done'&&j.status!=='Archived'&&can('warping.cancel')&&ask!=='done')s+='<button type="button" class="wp-sm del wp-cancelbtn" data-wp-askcan="'+sid+'">Cancel job</button>';
+    if(x&&j.status!=='Done'&&j.status!=='Archived'&&canCan()&&ask!=='done')s+='<button type="button" class="wp-cancelbtn" data-wp-askcan="'+sid+'">Cancel job</button>';
     return s;
   }
   function jobCard(j,x){
     if(!x&&editId===j.id)return editCard(j);
     var op=!!openL[j.id]||askId===j.id||noteEd===j.id;                     // collapsed by default: only the item name shows
-    var hd='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-ljob="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span>'+pill(j.status)+'<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
+    var hd='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-ljob="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+bname(j)+'</span>'+pill(j.status)+'<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
     return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>':'')+'</div>';
   }
   var openL={};
@@ -3901,11 +3906,11 @@ var WP=(function(){
     var live=board.filter(function(j){return j.status!=='Archived';});var rows=bf==='All'?live:live.filter(function(j){return j.category===bf;});
     if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(live.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>'+anaBtn();
     return mb+ab+ft+'<div class="wp-board">'+rows.map(function(j){var st=stageOf(j),op=openJ===j.id;
-      var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+esc(j.tape)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
+      var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+bname(j)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
       if(op)h+='<div class="wp-bdet">'+meta(j)+stamps(j)+body(j)+'</div>';
       return '<div class="wp-bitem">'+h+'</div>';}).join('')+'</div>'+anaBtn();
   }
-  function anaBtn(){return can('warping.analytics')?'<div class="wp-anarow"><button type="button" class="wp-sm wp-anabtn" data-wp-adm="1">Admin</button></div>':'';}
+  function anaBtn(){return '';}
   function askPin(){
     var o=document.getElementById('wpPinO');if(o)o.remove();
     o=document.createElement('div');o.id='wpPinO';o.className='wp-imgo';o.setAttribute('role','dialog');o.setAttribute('aria-label','Admin password');
@@ -3951,7 +3956,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Planner':tab==='exec'?'Warping program list':'Warped and Ready')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
+    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Planner':tab==='exec'?'Warping program list':'Warped and Ready')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg><span>Archive</span></button>':'')+(tab==='dash'&&can('warping.analytics')?'<button type="button" class="wp-archbtn wp-admbtn" data-wp-adm="1"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg><span>Admin</span></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
