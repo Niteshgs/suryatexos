@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v250</span>
+    <span class="app-ver" id="appVer" title="App version">v251</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3798,7 +3798,7 @@ var WP=(function(){
   var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Done'};   // wording shown to the team (sheet values are unchanged)
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function splitParts(y){var a=String(y||'').split(' | ');if(a.length!==3)return null;var o=[];for(var i=0;i<3;i++){var m=/^1?([ABC]) (\d+) ends - (.+)$/.exec(a[i]);if(!m||m[1]!=='ABC'.charAt(i))return null;o.push({l:m[1],e:+m[2],y:m[3]});}return o;}
-  function segParts(y){var t=String(y||'');if(t.indexOf('\u2022')<0)return null;var a=t.split('\u2022').map(function(x){return x.trim();}).filter(Boolean);if(a.length<2)return null;var o=[];for(var i=0;i<a.length;i++){var m=/^(\d+)\s*ends?\s*[-\u2013]\s*(.+)$/i.exec(a[i]);if(!m)return null;o.push({e:+m[1],y:m[2]});}return o;}
+  function segParts(y){var t=String(y||'');if(!/[\u2022\u25CF\u25AA]/.test(t))return null;var a=t.split(/[\u2022\u25CF\u25AA]/).map(function(x){return x.trim();}).filter(Boolean);if(a.length<2)return null;var o=[];for(var i=0;i<a.length;i++){var m=/^(\d+)\s*ends?\s*[-\u2013\u2014=:]\s*(.+)$/i.exec(a[i]);if(!m)return null;o.push({e:+m[1],y:m[2]});}return o;}
   function yarnBlk(l,y){var sp=splitParts(y),sg=sp?null:segParts(y),h;if(sg)h='<div class="wp-sp wp-seg" style="grid-template-columns:repeat('+sg.length+',minmax(0,1fr))">'+sg.map(function(q){return '<div><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>';else if(sp)h='<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>';else h='<b>'+esc(y||'\u2014')+'</b>';return '<div class="wp-yb"><span>'+l+'</span>'+h+'</div>';}
   function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn),sg=sp?null:segParts(yarn);var yh=sg?'<div class="wp-sp wp-seg" style="grid-template-columns:repeat('+sg.length+',minmax(0,1fr))">'+sg.map(function(q){return '<div><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+(isNaN(+m)?esc(String(m)):n(m))+'</span></div></div>';}
   function dbl(t){return /double/i.test(t||'')?' dbl':'';}
