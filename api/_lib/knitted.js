@@ -411,7 +411,7 @@ const avg = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null
 // Machine-wise time from START (cycle 1) to END (Beam 0, i.e. cycle 0 or a cleared beam). Cycles 2 and 3 are ignored.
 // Each beam (and each split part 1B/1C) is followed on its own. A run ends at Beam 0; if the tape or cycle 1 changes
 // first (someone forgot Beam 0), the run is treated as finished at that moment.
-function computeCycles(rows) {
+function computeCycles(rows, cur) {
   const events = [];
   for (const r of rows) {
     const id = NAME_TO_ID[String(cell(r, 3)).trim().toLowerCase()], pos = beamPos(cell(r, 4)), day = serialDay(cell(r, 0));
@@ -437,11 +437,32 @@ function computeCycles(rows) {
     const nr = { tape: e.tape, id: e.id, machine: MACHINE_NAMES[e.id], beam: e.n + e.part, start: e.t, startKnown: e.cycle === 1, last: e.cycle, end: null, why: '', next: '' };
     open[k] = nr; runs.push(nr);
   }
+  // what is on the dashboard right now (Tracker beams, plus split parts) = "running now"; everything else is a past programme
+  const nowT = (() => { const np = nowParts(); return serialDay(np.date) + dayFrac(np.time); })();
+  const current = {};
+  if (cur) {
+    for (const id of Object.keys(MACHINE_NAMES)) {
+      current[id] = [];
+      (cur[id] || []).forEach((b, i) => {
+        const units = b && Array.isArray(b.parts) && b.parts.length === 3 ? b.parts.map((p, k) => ({ label: (i + 1) + PART_L[k], match: k === 0 ? String(i + 1) : (i + 1) + PART_L[k], tape: p.tape, cycle: p.cycle }))
+          : [{ label: String(i + 1), match: String(i + 1), tape: b && b.tape, cycle: b && b.cycle }];
+        for (const u of units) {
+          const tape = String(u.tape == null ? '' : u.tape).trim();
+          if (!(Number(u.cycle) > 0) || !tape) { current[id].push({ beam: u.label, tape, empty: true }); continue; }
+          const r = runs.find((x) => x.end == null && x.id === id && x.beam === u.match && norm(x.tape) === norm(tape));
+          if (r) r.current = true;
+          current[id].push({ beam: u.label, tape, empty: false, start: r ? stampOf(r.start) : '', startKnown: !!(r && r.startKnown), elapsed: r && r.startKnown ? Math.max(0, nowT - r.start) : null });
+        }
+      });
+    }
+  }
   const byMachine = {};
   for (const r of runs) {
+    if (cur && r.current) continue;                                    // shown under "running now"
+    if (cur && r.end == null) r.why = 'gone';
     const done = r.why === 'done' || r.why === 'changed' || r.why === 'restart', dur = (done && r.startKnown) ? r.end - r.start : null;
     const o = { beam: r.beam, start: stampOf(r.start), end: done ? stampOf(r.end) : '', startKnown: r.startKnown, dur, ts: r.start,
-      status: r.end == null ? 'Running' : r.why === 'done' ? 'Finished at Beam 0' : r.why === 'changed' ? 'Finished when ' + r.next + ' started (Beam 0 not set)' : r.why === 'restart' ? 'Finished when cycle 1 started again (Beam 0 not set)' : 'Split removed', fin: done };
+      status: r.why === 'gone' ? 'Not on the dashboard any more' : r.end == null ? 'Running' : r.why === 'done' ? 'Finished at Beam 0' : r.why === 'changed' ? 'Finished when ' + r.next + ' started (Beam 0 not set)' : r.why === 'restart' ? 'Finished when cycle 1 started again (Beam 0 not set)' : 'Split removed', fin: done };
     const m = (byMachine[r.id] = byMachine[r.id] || {});
     (m[norm(r.tape)] = m[norm(r.tape)] || { name: r.tape, list: [] }).list.push(o);
   }
@@ -451,14 +472,15 @@ function computeCycles(rows) {
       return { name: g.name, runs: L.length, finished: d.length, avg: avg(d), running: L.filter((x) => x.status === 'Running').length,
         notRecorded: L.filter((x) => x.fin && !x.startKnown).length, list: L.slice(0, 30) };
     }).sort((a, b) => b.runs - a.runs || a.name.localeCompare(b.name));
-    return { id, name: MACHINE_NAMES[id], tapes };
+    return { id, name: MACHINE_NAMES[id], tapes, current: current[id] || [] };
   });
   return { machines, totalRuns: runs.length, since: events.length ? stampOf(events[0].t) : '' };
 }
 async function cycles(meta) {
   requireAdmin(meta);
   const [rows] = await G.batchGet(SHEET_ID, [at(LOG, 'A2:J')], 'serial');
-  return computeCycles(rows || []);
+  const all = await getAll();
+  return computeCycles(rows || [], all.cycleData);
 }
 
 const ROUTES = {
