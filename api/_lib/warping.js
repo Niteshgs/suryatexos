@@ -153,7 +153,7 @@ async function add(a, who) {
 }
 
 /* One-off tape: a custom job typed by hand. It goes into the Planning Queue only - the Warping Data sheet is never touched. The name is saved with " (One-off)" on the end so it shows everywhere. */
-async function addOneOff(a, who) {
+function oneOffBuild(a) {
   let name = flat(a.tape).slice(0, 60).replace(/\s*\(one-off\)\s*$/i, ''); if (!name) throw new Error('Type a name for the tape');
   const cat = flat(a.category), stand = cat === 'Knitted' ? 'Not Relevant' : flat(a.stand);
   if (!['Woven', 'Knitted'].includes(cat)) throw new Error('Choose Woven or Knitted');
@@ -185,6 +185,10 @@ async function addOneOff(a, who) {
     [bE, bY] = side(a.baseParts, !!f.baseBeams, 'Base'); [dE, dY] = side(a.designParts, !!f.designBeams, 'Design');
   }
   name += ' (One-off)';
+  return { name, cat, stand, f, bE, bY, dE, dY };
+}
+async function addOneOff(a, who) {
+  const { name, cat, stand, f, bE, bY, dE, dY } = oneOffBuild(a);
   await ensureTabs();
   const [ids] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A2', 'A')]);
   const max = ids.reduce((m, r) => { const n = Number(str(r[0]).replace(/\D/g, '')); return n > m ? n : m; }, 0);
@@ -193,6 +197,19 @@ async function addOneOff(a, who) {
     dE, safe(dY), f.designBeams || '', f.designMeters || '', 'Planned', '', '', '', '', safe(flat(a.note).slice(0, 300)), '']]);
   await log(id, 'Planned (one-off)', who, name, '');
   return { id };
+}
+
+async function editOneOff(a, who) {
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  if (job.status !== 'Planned') throw new Error('Only a plan that has not gone to Execute can be edited');
+  if (!/\(one-off\)\s*$/i.test(flat(job.tape))) throw new Error('That is not a one-off tape');
+  const { name, cat, stand, f, bE, bY, dE, dY } = oneOffBuild(a);
+  await G.batchUpdate(SHEET_ID(), [
+    { range: range(PLAN, 'D' + job.row, 'N' + job.row), values: [[safe(name), safe(cat), safe(stand), bE, safe(bY), f.baseBeams || '', f.baseMeters || '', dE, safe(dY), f.designBeams || '', f.designMeters || '']] },
+    { range: range(PLAN, 'T' + job.row, 'T' + job.row), values: [[safe(flat(a.note).slice(0, 300))]] }]);
+  await log(job.id, 'Plan edited (one-off)', who, name, '');
+  return { edited: true };
 }
 
 async function deleteRow(tab, row) {
@@ -418,6 +435,7 @@ const ROUTES = {
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.note': (a) => wrap(() => mut(note)(a)),
   'warp.addOneOff': (a, who) => wrap(() => mut(addOneOff)(a, who)),
+  'warp.editOneOff': (a, who) => wrap(() => mut(editOneOff)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),
   'warp.cancel': (a, who) => wrap(() => mut(cancel)(a, who)),
   'warp.execList': () => wrap(async () => { try { return { jobs: (await readPlan()).filter((j) => ['Ready', 'Started', 'On hold'].includes(j.status)) }; } catch (e) { if (/parse range|Unable to parse/i.test(e.message)) return { jobs: [] }; throw e; } }),

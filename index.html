@@ -630,7 +630,7 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-stand button.on[data-st=d]{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-part .wp-sp{grid-column:1/-1;grid-row:2;margin:6px 0 4px}.wp-part:has(.wp-sp)>b{grid-column:1;grid-row:1}.wp-part:has(.wp-sp)>.wp-nums{grid-column:2;grid-row:1}
-.wp-sp{display:grid;gap:4px;margin:2px 0 8px}.wp-sp>div{display:grid;grid-template-columns:34px 78px 1fr;gap:6px;align-items:baseline;font-size:14px}.wp-sp b{color:var(--accent)}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600}
+.wp-sp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 8px}.wp-sp>div{display:flex;flex-direction:column;gap:2px;font-size:14px;min-width:0;border-left:2px solid var(--border);padding-left:8px}.wp-sp b{color:var(--accent);font-size:15px}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600;overflow-wrap:anywhere}
 .wp-gc h4{text-align:center}
 .wp-sp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.wp-sp3>div{display:grid;gap:6px;min-width:0}.wp-spl{font-weight:800;color:var(--accent);text-align:center;font-size:15px}.wp-sp3 input{display:block;width:100%;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;font:inherit;font-size:15px;color:var(--text)}.wp-sp3 input:focus{outline:none;border-color:var(--accent)}
 .wp-spc{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin:8px 0;background:var(--surface)}.wp-spc>h4{margin:0 0 2px;color:var(--accent)}
@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v246</span>
+    <span class="app-ver" id="appVer" title="App version">v247</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3906,7 +3906,7 @@ var WP=(function(){
     var t=oo,w=t.category==='Woven';
     var seg=function(key,opts,cur){return '<div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:repeat('+opts.length+',1fr)">'+opts.map(function(o){return '<button type="button" class="'+(cur===o?'on':'')+'" data-st="'+(/double/i.test(o)?'d':'s')+'" data-wp-ooset="'+key+'|'+o+'">'+o+'</button>';}).join('')+'</div>';};
     var f=function(id,l,v,ty,ph){return '<label class="wp-fl">'+l+'<input id="'+id+'" type="'+(ty||'text')+'"'+(ty==='number'?' inputmode="numeric" min="0"':'')+' value="'+esc(v||'')+'" placeholder="'+(ph||'')+'" autocomplete="off"></label>';};
-    return '<div class="wp-sel"><div class="wp-top"><b>'+wk(t.category)+'One-off tape</b><button type="button" class="wp-x" data-wp-ooclose="1">Cancel</button></div>'
+    return '<div class="wp-sel"><div class="wp-top"><b>'+wk(t.category)+(t.editId?'Edit one-off tape':'One-off tape')+'</b><button type="button" class="wp-x" data-wp-ooclose="1">Cancel</button></div>'
       +'<p class="wp-hint">A custom tape for this job only. It is not added to the Warping Data sheet.</p>'
       +f('wpON','Tape name',t.name,'text','e.g. Customer special 38MM')
       +'<div class="wp-fl">Category</div>'+seg('category',['Woven','Knitted'],t.category)
@@ -3917,7 +3917,7 @@ var WP=(function(){
       :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'text','e.g. 1800')+'</div>'
         +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'text','e.g. 1800')+'</div></div>':'')
       +(t.category?'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
-      +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>Add to planning</button></div>';
+      +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>'+(t.editId?'Save changes':'Add to planning')+'</button></div>';
   }
   function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){if(oo.split)[0,1,2].forEach(function(k){oo.sp[k]={be:g('wpOSb'+k+'E'),by:g('wpOSb'+k+'Y'),de:g('wpOSd'+k+'E'),dy:g('wpOSd'+k+'Y')};});oo.name=g('wpON');if($('wpOBE')){oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');}oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');if($('wpODE')){oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');}oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');}}
   function ooSave(){
@@ -3940,6 +3940,7 @@ var WP=(function(){
       be=bb?tot(spB):0;de=db?tot(spD):0;oo.baseYarn=bb?txt(spB):'';oo.designYarn=db?txt(spD):'';}
     var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,split:!!oo.split,baseParts:spB||undefined,designParts:spD||undefined,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};
     var t={id:'tmp'+Date.now(),tape:nm+' (One-off)',stand:args.stand,category:oo.category,status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:bb?be:0,baseYarn:args.baseYarn,baseBeams:bb,baseMeters:bm,designEnds:db?de:0,designYarn:args.designYarn,designBeams:db,designMeters:dm,note:note};
+    if(oo.editId){var eid=oo.editId;args.id=eid;ver++;var up=function(l){return (l||[]).map(function(x){return x.id===eid?Object.assign({},x,t,{id:eid,created:x.created,by:x.by}):x;});};jobs=up(jobs);if(board)board=up(board);oo=null;msg='';draw();showToast('\u2713 Saved','success mid');bg('warp.editOneOff',args);return;}
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
     oo=null;msg='';qs='';draw();showToast('\u2713 Added to plan','success mid');
     bg('warp.addOneOff',args);
@@ -4138,7 +4139,9 @@ var WP=(function(){
     if((x=t.closest('[data-wp-askcan]'))){askId=x.getAttribute('data-wp-askcan');askAct='cancel';return draw();}
     if(t.closest('[data-wp-back]')){askId=null;return draw();}
     if((x=t.closest('[data-wp-set]'))){askId=null;var p=x.getAttribute('data-wp-set').split('|');return setStatus(p[0],p[1],p[2]);}
-    if((x=t.closest('[data-wp-edit]'))&&x.getAttribute('data-wp-edit').indexOf('tmp')!==0){editId=x.getAttribute('data-wp-edit');msg='';return draw();}
+    if((x=t.closest('[data-wp-edit]'))&&x.getAttribute('data-wp-edit').indexOf('tmp')!==0){var eid2=x.getAttribute('data-wp-edit'),ej=(jobs||[]).filter(function(q){return q.id===eid2;})[0];
+      if(ej&&/\(One-off\)\s*$/.test(ej.tape||'')&&canP()){var bs=splitParts(ej.baseYarn),ds=splitParts(ej.designYarn),sp=!!(bs||ds);oo={editId:eid2,split:sp,sp:[0,1,2].map(function(k){return {be:bs?bs[k].e:'',by:bs?bs[k].y:'',de:ds?ds[k].e:'',dy:ds?ds[k].y:''};}),category:ej.category||'',stand:ej.category==='Woven'?ej.stand:'',name:String(ej.tape).replace(/\s*\(One-off\)\s*$/,''),baseEnds:ej.baseEnds||'',baseYarn:ej.baseYarn||'',baseBeams:ej.baseBeams||'',baseMeters:ej.baseMeters||'',designEnds:ej.designEnds||'',designYarn:ej.designYarn||'',designBeams:ej.designBeams||'',designMeters:ej.designMeters||'',note:ej.note||''};msg='';return draw();}
+      editId=eid2;msg='';return draw();}
     if(t.closest('[data-wp-ecancel]')){editId=null;return draw();}
     if((x=t.closest('[data-wp-esave]')))return eSave(x.getAttribute('data-wp-esave'));
     if((x=t.closest('[data-wp-del]')))return del(x.getAttribute('data-wp-del'));
