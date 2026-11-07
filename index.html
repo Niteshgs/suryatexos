@@ -629,6 +629,9 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-stamp{margin-top:6px;font-size:17px;font-weight:800;color:var(--success);text-align:right}.wp-stamp span{display:block;font-size:13px;font-weight:700;color:var(--text-muted)}
 .wp-stand button.on[data-st=d]{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
+.wp-part .wp-sp{grid-column:1/-1;grid-row:2;margin:6px 0 4px}.wp-part:has(.wp-sp)>b{grid-column:1;grid-row:1}.wp-part:has(.wp-sp)>.wp-nums{grid-column:2;grid-row:1}
+.wp-sp{display:grid;gap:4px;margin:2px 0 8px}.wp-sp>div{display:grid;grid-template-columns:34px 78px 1fr;gap:6px;align-items:baseline;font-size:14px}.wp-sp b{color:var(--accent)}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600}
+.wp-spc{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin:8px 0;background:var(--surface)}.wp-spc>h4{margin:0 0 2px;color:var(--accent)}
 .wp-ooBtn{display:block;width:100%;margin:10px 0 4px;text-align:left;background:var(--surface);border:1px dashed var(--accent);color:var(--accent);border-radius:var(--radius);padding:13px 14px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .wp-standpill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
 .wp-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-width:0}
@@ -1410,7 +1413,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v239</span>
+    <span class="app-ver" id="appVer" title="App version">v241</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3792,7 +3795,8 @@ var WP=(function(){
   function loadSum(){var v=ver;return api('warp.summary').then(function(d){if(v!==ver)return;sum=d;var e=$('wpSum');if(e)e.innerHTML=sumHtml();}).catch(function(){});}
   var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Done'};   // wording shown to the team (sheet values are unchanged)
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
-  function part(label,beams,m,ends,yarn){if(!beams)return '';return '<div class="wp-part">'+(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'')+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
+  function splitParts(y){var a=String(y||'').split(' | ');if(a.length!==3)return null;var o=[];for(var i=0;i<3;i++){var m=/^1([ABC]) (\d+) ends - (.+)$/.exec(a[i]);if(!m||m[1]!=='ABC'.charAt(i))return null;o.push({l:'1'+m[1],e:+m[2],y:m[3]});}return o;}
+  function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn);var yh=sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+n(m)+'</span></div></div>';}
   function dbl(t){return /double/i.test(t||'')?' dbl':'';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill'+dbl(st)+'">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
@@ -3905,12 +3909,15 @@ var WP=(function(){
       +f('wpON','Tape name',t.name,'text','e.g. Customer special 38MM')
       +'<div class="wp-fl">Category</div>'+seg('category',['Woven','Knitted'],t.category)
       +(w?'<div class="wp-fl">Stand</div>'+seg('stand',['Single Stand','Double Stand'],t.stand):'')
-      +(t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div>'
-        +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>'
-        +'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
+      +(t.category==='Knitted'?'<div class="wp-fl">Beam type</div><div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:1fr 1fr"><button type="button" class="'+(t.split?'':'on')+'" data-wp-ooset="split|0">Single beam</button><button type="button" class="'+(t.split?'on':'')+'" data-wp-ooset="split|1">Split beam 1A 1B 1C</button></div>':'')
+      +(t.category&&t.split&&t.category==='Knitted'?['A','B','C'].map(function(L,k){var q=t.sp[k];return '<div class="wp-spc"><h4>1'+L+'</h4><div class="wp-grid"><div><h4>Base</h4>'+f('wpOSb'+k+'E','Ends',q.be,'number')+f('wpOSb'+k+'Y','Yarn',q.by,'text','e.g. 150/0 Navy')+'</div><div><h4>Design</h4>'+f('wpOSd'+k+'E','Ends',q.de,'number')+f('wpOSd'+k+'Y','Yarn',q.dy,'text','e.g. 300D Yellow')+'</div></div></div>';}).join('')
+        +'<div class="wp-fl">Beams and meters (same for 1A, 1B and 1C)</div><div class="wp-grid"><div><h4>Base</h4>'+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div><div><h4>Design</h4>'+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>'
+      :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div>'
+        +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>':'')
+      +(t.category?'<label class="wp-fl">Note (optional)<textarea id="wpONote" class="wp-note" rows="2" maxlength="300" placeholder="Add a note">'+esc(t.note||'')+'</textarea></label>':'')
       +'<div class="us-err" id="wpOErr" role="alert"></div><button type="button" class="btn-submit" id="wpOSave" data-wp-oosave="1"'+(t.category?'':' disabled')+'>Add to planning</button></div>';
   }
-  function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){oo.name=g('wpON');oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');}}
+  function ooVals(){var g=function(i){var e=$(i);return e?e.value:'';};if(oo){if(oo.split)[0,1,2].forEach(function(k){oo.sp[k]={be:g('wpOSb'+k+'E'),by:g('wpOSb'+k+'Y'),de:g('wpOSd'+k+'E'),dy:g('wpOSd'+k+'Y')};});oo.name=g('wpON');if($('wpOBE')){oo.baseEnds=g('wpOBE');oo.baseYarn=g('wpOBY');}oo.baseBeams=g('wpOBB');oo.baseMeters=g('wpOBM');if($('wpODE')){oo.designEnds=g('wpODE');oo.designYarn=g('wpODY');}oo.designBeams=g('wpODB');oo.designMeters=g('wpODM');oo.note=g('wpONote');}}
   function ooSave(){
     ooVals();var er=$('wpOErr'),bad=function(t){er.textContent=t;};er.textContent='';
     var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
@@ -3924,7 +3931,11 @@ var WP=(function(){
     if((db||dm)&&!(db&&dm))return bad('Design needs both the number of beams and the meters');
     if(!bb&&!db)return bad('Enter the beams and meters for Base, Design, or both');
     var note=String(oo.note||'').trim().replace(/\s+/g,' ');
-    var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};
+    var spB=null,spD=null,sp2=function(on,pick,lab){if(!on)return [];var r=[];for(var k=0;k<3;k++){var e=cn(oo.sp[k][pick+'e']),y=String(oo.sp[k][pick+'y']||'').trim().replace(/\|/g,'/');if(isNaN(e))return lab+' 1'+'ABC'.charAt(k)+': ends must be a whole number';if(!e)return lab+' 1'+'ABC'.charAt(k)+': enter the ends';if(!y)return lab+' 1'+'ABC'.charAt(k)+': enter the yarn';r.push({ends:e,yarn:y});}return r;};
+    if(oo.split){spB=sp2(bb,'b','Base');spD=sp2(db,'d','Design');if(typeof spB==='string')return bad(spB);if(typeof spD==='string')return bad(spD);
+      var tot=function(a){return a.reduce(function(m,q){return m+q.ends;},0);},txt=function(a){return a.map(function(q,k){return '1'+'ABC'.charAt(k)+' '+q.ends+' ends - '+q.yarn;}).join(' | ');};
+      be=bb?tot(spB):0;de=db?tot(spD):0;oo.baseYarn=bb?txt(spB):'';oo.designYarn=db?txt(spD):'';}
+    var args={tape:nm,category:oo.category,stand:oo.category==='Knitted'?'Not Relevant':oo.stand,split:!!oo.split,baseParts:spB||undefined,designParts:spD||undefined,baseEnds:bb?be:'',baseYarn:bb?String(oo.baseYarn||'').trim():'',baseBeams:bb||'',baseMeters:bm||'',designEnds:db?de:'',designYarn:db?String(oo.designYarn||'').trim():'',designBeams:db||'',designMeters:dm||'',note:note};
     var t={id:'tmp'+Date.now(),tape:nm+' (One-off)',stand:args.stand,category:oo.category,status:'Planned',created:nowStamp(),by:ME?ME.name:'',baseEnds:bb?be:0,baseYarn:args.baseYarn,baseBeams:bb,baseMeters:bm,designEnds:db?de:0,designYarn:args.designYarn,designBeams:db,designMeters:dm,note:note};
     ver++;jobs=(jobs||[]).concat([t]);if(board)board=[t].concat(board);bump('planning',1);
     oo=null;msg='';qs='';draw();showToast('\u2713 Added to plan','success mid');
@@ -4108,9 +4119,9 @@ var WP=(function(){
     if((x=t.closest('[data-wp-unarch]')))return arch(x.getAttribute('data-wp-unarch'),true);
     if((x=t.closest('[data-wp-img]'))){showImg(x.getAttribute('data-wp-img'));return;}
     if(t.closest('[data-wp-tnew]')){addT={category:'',stand:'',name:qs.trim(),baseEnds:'',designEnds:'',baseYarn:'',designYarn:''};msg='';return draw();}
-    if(t.closest('[data-wp-oo]')){oo={category:'',stand:'',name:qs.trim(),baseEnds:'',baseYarn:'',baseBeams:'',baseMeters:'',designEnds:'',designYarn:'',designBeams:'',designMeters:'',note:''};msg='';return draw();}
+    if(t.closest('[data-wp-oo]')){oo={split:false,sp:[0,1,2].map(function(){return {be:'',by:'',de:'',dy:''};}),category:'',stand:'',name:qs.trim(),baseEnds:'',baseYarn:'',baseBeams:'',baseMeters:'',designEnds:'',designYarn:'',designBeams:'',designMeters:'',note:''};msg='';return draw();}
     if(t.closest('[data-wp-ooclose]')){oo=null;return draw();}
-    if((x=t.closest('[data-wp-ooset]'))){ooVals();var ov=x.getAttribute('data-wp-ooset').split('|');oo[ov[0]]=ov[1];if(ov[0]==='category')oo.stand='';draw();return;}
+    if((x=t.closest('[data-wp-ooset]'))){ooVals();var ov=x.getAttribute('data-wp-ooset').split('|');if(ov[0]==='split'){oo.split=ov[1]==='1';draw();return;}oo[ov[0]]=ov[1];if(ov[0]==='category'){oo.stand='';if(ov[1]!=='Knitted')oo.split=false;}draw();return;}
     if(t.closest('[data-wp-oosave]'))return ooSave();
     if(t.closest('[data-wp-tclose]')){addT=null;return draw();}
     if((x=t.closest('[data-wp-tset]'))){tapeVals();var kv=x.getAttribute('data-wp-tset').split('|');addT[kv[0]]=kv[1];if(kv[0]==='category')addT.stand=kv[1]==='Knitted'?'Not Relevant':'';var fe=addT.category;draw();return;}
