@@ -1400,7 +1400,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v219</span>
+    <span class="app-ver" id="appVer" title="App version">v220</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3949,7 +3949,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Every job and where it stands':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping program list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
+    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Plan a warping program':tab==='exec'?'Warping program list':'Warped and finished')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-label="Archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'<button type="button" class="wp-home" data-wp-tab="dash">&#8249; Dashboard</button>')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
