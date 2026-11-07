@@ -1407,7 +1407,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v233</span>
+    <span class="app-ver" id="appVer" title="App version">v234</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3837,10 +3837,11 @@ var WP=(function(){
     if(!x&&editId===j.id)return editCard(j);
     var op=!!openL[j.id]||askId===j.id||noteEd===j.id;                     // collapsed by default: only the item name shows
     var hd='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-ljob="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+bname(j)+'</span>'+pill(j.status)+'<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
-    return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>':'')+'</div>';
+    return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+(!x&&j.status==='Planned'?'':noteRO(j))+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>':'')+'</div>';
   }
   var openL={};
   var noteEd=null;
+  function noteRO(j){return j.note?'<div class="wp-notev"><div class="wp-nvt"><span>Planning note</span><p>'+esc(j.note)+'</p></div></div>':'';}
   function noteBox(j){
     if(!j.note&&noteEd!==j.id)return '<div class="wp-noteadd" data-wp-nrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-noteedit="'+esc(j.id)+'">+ Add note</button></div>';
     if(j.note&&noteEd!==j.id)return '<div class="wp-notev" data-wp-nrow="'+esc(j.id)+'"><div class="wp-nvt"><span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Note saved</span><p>'+esc(j.note)+'</p></div><button type="button" class="wp-nved" data-wp-noteedit="'+esc(j.id)+'">Edit</button></div>';
@@ -3915,7 +3916,7 @@ var WP=(function(){
     if(!rows.length)return mb+ab+ft+'<div class="empty-state">'+(live.length?'No '+bf.toLowerCase()+' jobs yet.':'No warping jobs yet.')+'</div>'+anaBtn();
     return mb+ab+ft+'<div class="wp-board">'+rows.map(function(j){var st=stageOf(j),op=openJ===j.id;
       var h='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-open="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+bname(j)+'</span><span class="wp-st wp-'+st[1]+'">'+esc(st[0])+'</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
-      if(op)h+='<div class="wp-bdet">'+meta(j)+stamps(j)+body(j)+'</div>';
+      if(op)h+='<div class="wp-bdet">'+meta(j)+stamps(j)+body(j)+noteRO(j)+'</div>';
       return '<div class="wp-bitem">'+h+'</div>';}).join('')+'</div>'+anaBtn();
   }
   function anaBtn(){return '';}
