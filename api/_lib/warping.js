@@ -15,6 +15,16 @@ const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Be
   'Design Yarn', 'Design Ends', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Machine'];
 const L = (n) => { let s = ''; while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; };
 const str = (v) => (v == null ? '' : String(v));
+// A date/time cell can come back as a Google serial number (e.g. 46332.8569) when the sheet turned the text into a date.
+// Show it the same way the app writes it: "7 Nov 8:34 pm".
+const MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function st(v) {
+  if (v == null || v === '') return '';
+  const n = typeof v === 'number' ? v : (/^\d{5}(\.\d+)?$/.test(String(v).trim()) ? Number(v) : NaN);
+  if (Number.isNaN(n) || n < 30000 || n > 80000) return str(v);
+  const d = new Date(Math.round((n - 25569) * 86400) * 1000), h = d.getUTCHours();       // the sheet stores India wall-clock time
+  return d.getUTCDate() + ' ' + MON3[d.getUTCMonth()] + ' ' + ((h % 12) || 12) + ':' + String(d.getUTCMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm');
+}
 const flat = (v) => str(v).replace(/\s+/g, ' ').trim();            // tape names in the sheet contain line breaks
 const safe = (s) => { s = str(s); return /^[=+\-@]/.test(s) ? "'" + s : s; };
 const stamp = () => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date()).replace(',', '');
@@ -85,12 +95,12 @@ async function catalogRead() {
 }
 
 /* ---------- jobs ---------- */
-const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: str(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
+const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: st(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
   baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: Number(r[9]) || 0,
   designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: Number(r[13]) || 0,
-  status: str(r[14]) || 'Planned', started: str(r[15]), startedBy: str(r[16]), done: str(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]) });
+  status: str(r[14]) || 'Planned', started: st(r[15]), startedBy: str(r[16]), done: st(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: Number(r[6]) || 0,
-  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: str(r[12]), startedBy: str(r[13]) });
+  designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: Number(r[10]) || 0, status: str(r[11]) || 'Ready', started: st(r[12]), startedBy: str(r[13]) });
 // Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
 // Changes (add / execute / start / done ...) always read fresh first, and clear the copy afterwards.
 const PC = { rows: null, at: 0, p: null };
@@ -216,7 +226,7 @@ const key0 = (n) => n.toLowerCase();
 /* ---------- analytics: time from Start to Done (hold time taken out) ---------- */
 const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 function parseStamp(t, nowMs) {                       // "5 Nov 9:33 pm" (India time, no year) -> ms; the year is the latest one that is not in the future
-  const m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}):(\d{2})\s*([ap])\.?m/i.exec(str(t).trim());
+  const m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}):(\d{2})\s*([ap])\.?m/i.exec(st(t).trim());
   if (!m || MON[m[2].toLowerCase()] === undefined) return NaN;
   let h = +m[3] % 12 + (m[5].toLowerCase() === 'p' ? 12 : 0);
   const yNow = new Date(nowMs + 19800000).getUTCFullYear();
