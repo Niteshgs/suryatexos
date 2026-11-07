@@ -630,7 +630,7 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-stand button.on[data-st=d]{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-part .wp-sp{grid-column:1/-1;grid-row:2;margin:6px 0 4px}.wp-part:has(.wp-sp)>b{grid-column:1;grid-row:1}.wp-part:has(.wp-sp)>.wp-nums{grid-column:2;grid-row:1}
-.wp-sp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 8px}.wp-sp>div{display:flex;flex-direction:column;gap:2px;font-size:14px;min-width:0;border-left:2px solid var(--border);padding-left:8px}.wp-sp b{color:var(--accent);font-size:15px}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600;overflow-wrap:anywhere}
+.wp-sp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 8px}.wp-sp>div{display:flex;flex-direction:column;gap:2px;font-size:14px;min-width:0;border-left:2px solid var(--border);padding-left:8px}.wp-sp b{color:var(--accent);font-size:15px}.wp-seg{gap:4px}.wp-seg>div{padding-left:6px;font-size:13px}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600;overflow-wrap:anywhere}
 .wp-gc h4{text-align:center}
 .wp-sp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.wp-sp3>div{display:grid;gap:6px;min-width:0}.wp-spl{font-weight:800;color:var(--accent);text-align:center;font-size:15px}.wp-sp3 input{display:block;width:100%;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;font:inherit;font-size:15px;color:var(--text)}.wp-sp3 input:focus{outline:none;border-color:var(--accent)}
 .wp-spc{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin:8px 0;background:var(--surface)}.wp-spc>h4{margin:0 0 2px;color:var(--accent)}
@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v247</span>
+    <span class="app-ver" id="appVer" title="App version">v248</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3798,7 +3798,8 @@ var WP=(function(){
   var STL={'Planned':'Planning','Ready':'In Program','Started':'Running','On hold':'On hold','Done':'Done'};   // wording shown to the team (sheet values are unchanged)
   function pill(s){return '<span class="wp-st wp-'+esc(s.toLowerCase().replace(/\s+/g,'-'))+'">'+esc(STL[s]||s)+'</span>';}
   function splitParts(y){var a=String(y||'').split(' | ');if(a.length!==3)return null;var o=[];for(var i=0;i<3;i++){var m=/^1?([ABC]) (\d+) ends - (.+)$/.exec(a[i]);if(!m||m[1]!=='ABC'.charAt(i))return null;o.push({l:m[1],e:+m[2],y:m[3]});}return o;}
-  function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn);var yh=sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+(isNaN(+m)?esc(String(m)):n(m))+'</span></div></div>';}
+  function segParts(y){var t=String(y||'');if(t.indexOf('\u2022')<0)return null;var a=t.split('\u2022').map(function(x){return x.trim();}).filter(Boolean);if(a.length<2)return null;var o=[];for(var i=0;i<a.length;i++){var m=/^(\d+)\s*ends?\s*[-\u2013]\s*(.+)$/i.exec(a[i]);if(!m)return null;o.push({e:+m[1],y:m[2]});}return o;}
+  function part(label,beams,m,ends,yarn){if(!beams)return '';var sp=splitParts(yarn),sg=sp?null:segParts(yarn);var yh=sg?'<div class="wp-sp wp-seg" style="grid-template-columns:repeat('+sg.length+',minmax(0,1fr))">'+sg.map(function(q){return '<div><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':sp?'<div class="wp-sp">'+sp.map(function(q){return '<div><b>'+q.l+'</b><span>'+n(q.e)+' ends</span><em>'+esc(q.y)+'</em></div>';}).join('')+'</div>':(yarn?'<span class="wp-y">'+esc(yarn)+'</span>':'');return '<div class="wp-part">'+yh+'<b>'+label+'</b><div class="wp-nums"><span><i>Ends</i>'+(ends?n(ends):'—')+'</span><span><i>Beams</i>'+n(beams)+'</span><span><i>Meters</i>'+(isNaN(+m)?esc(String(m)):n(m))+'</span></div></div>';}
   function dbl(t){return /double/i.test(t||'')?' dbl':'';}
   function standPill(st){return st&&st!=='Not Relevant'?'<span class="wp-standpill'+dbl(st)+'">'+esc(st)+'</span>':'';}
   function mchip(j){return j.machine?'<span class="wp-mchip">'+esc(j.machine)+'</span>':'';}
