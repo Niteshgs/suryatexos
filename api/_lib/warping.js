@@ -8,7 +8,7 @@ const SHEET_ID = () => process.env.WARPING_SHEET_ID || '1Rl89_0MXlsvSdqlJi_9Asue
 const DATA = 'Warping Data', PLAN = 'Planning Queue', EXEC = 'Execute Queue', LOG = 'Warping Log', DONE = 'Done List';   // DATA is read-only: the app never writes to it
 const LOG_HEAD = ['When', 'Job ID', 'Action', 'By', 'Tape', 'Details'];
 const PLAN_HEAD = ['Job ID', 'Created', 'Created by', 'Tape', 'Category', 'Stand', 'Base Ends', 'Base Yarn', 'Base Beams', 'Base Meters (each beam)',
-  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note', 'Machine'];
+  'Design Ends', 'Design Yarn', 'Design Beams', 'Design Meters (each beam)', 'Status', 'Started', 'Started by', 'Done', 'Done by', 'Note', 'Machine', 'Management Note'];
 const MACHINES = ['Warping 1', 'Warping 2', 'Warping 3'];
 const DONE_HEAD = ['Job ID', 'Tape', 'Category', 'Stand', 'Base Beams', 'Base Meters (each beam)', 'Design Beams', 'Design Meters (each beam)', 'Started', 'Started by', 'Done', 'Done by', 'Time taken', 'Note', 'Machine'];
 const EXEC_HEAD = ['Job ID', 'Tape', 'Stand', 'Base Yarn', 'Base Ends', 'Base Beams', 'Base Meters (each beam)',
@@ -49,7 +49,7 @@ async function ensureTabs() {
   const adds = [PLAN, EXEC, LOG, DONE].filter((t) => !titles.includes(t)).map((t) => ({ addSheet: { properties: { title: t } } }));
   if (adds.length) await G.format(SHEET_ID(), adds);
   const newDone = !titles.includes(DONE);
-  const [a, b, c, tn, dn, um, om, dm] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1'), range(DONE, 'A1', 'A1'), range(PLAN, 'U1', 'U1'), range(EXEC, 'O1', 'O1'), range(DONE, 'O1', 'O1')]);
+  const [a, b, c, tn, dn, um, om, dm, mh] = await G.batchGet(SHEET_ID(), [range(PLAN, 'A1', 'A1'), range(EXEC, 'A1', 'A1'), range(LOG, 'A1', 'A1'), range(PLAN, 'T1', 'T1'), range(DONE, 'A1', 'A1'), range(PLAN, 'U1', 'U1'), range(EXEC, 'O1', 'O1'), range(DONE, 'O1', 'O1'), range(PLAN, 'V1', 'V1')]);
   const data = [];
   if (!str(((a[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'A1', L(PLAN_HEAD.length) + '1'), values: [PLAN_HEAD] });
   if (!str(((b[0] || [])[0])).trim()) data.push({ range: range(EXEC, 'A1', L(EXEC_HEAD.length) + '1'), values: [EXEC_HEAD] });
@@ -58,6 +58,7 @@ async function ensureTabs() {
   if (str(((a[0] || [])[0])).trim() && !str(((tn[0] || [])[0])).trim()) data.push({ range: range(PLAN, 'T1', 'T1'), values: [['Note']] });
   const has = (x) => !!str(((x[0] || [])[0])).trim();
   if (has(a) && !has(um)) data.push({ range: range(PLAN, 'U1', 'U1'), values: [['Machine']] });        // which warping machine ran the job
+  if (has(a) && !has(mh)) data.push({ range: range(PLAN, 'V1', 'V1'), values: [['Management Note']] });   // management-only note
   if (has(b) && !has(om)) data.push({ range: range(EXEC, 'O1', 'O1'), values: [['Machine']] });
   if (has(dn) && !has(dm)) data.push({ range: range(DONE, 'O1', 'O1'), values: [['Machine']] });
   if (data.length) await G.batchUpdate(SHEET_ID(), data);
@@ -99,7 +100,7 @@ async function catalogRead() {
 const planObj = (r, i) => ({ row: i + 2, id: str(r[0]), created: st(r[1]), by: str(r[2]), tape: str(r[3]), category: str(r[4]), stand: str(r[5]),
   baseEnds: Number(r[6]) || 0, baseYarn: str(r[7]), baseBeams: Number(r[8]) || 0, baseMeters: mval(r[9]),
   designEnds: Number(r[10]) || 0, designYarn: str(r[11]), designBeams: Number(r[12]) || 0, designMeters: mval(r[13]),
-  status: str(r[14]) || 'Planned', started: st(r[15]), startedBy: str(r[16]), done: st(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]) });
+  status: str(r[14]) || 'Planned', started: st(r[15]), startedBy: str(r[16]), done: st(r[17]), doneBy: str(r[18]), note: str(r[19]), machine: str(r[20]), mnote: str(r[21]) });
 const execObj = (r, i) => ({ row: i + 2, id: str(r[0]), tape: str(r[1]), stand: str(r[2]), baseYarn: str(r[3]), baseEnds: Number(r[4]) || 0, baseBeams: Number(r[5]) || 0, baseMeters: mval(r[6]),
   designYarn: str(r[7]), designEnds: Number(r[8]) || 0, designBeams: Number(r[9]) || 0, designMeters: mval(r[10]), status: str(r[11]) || 'Ready', started: st(r[12]), startedBy: str(r[13]) });
 // Google allows ~60 reads/minute for the whole app, so list screens share one short-lived copy of the Planning Queue.
@@ -385,6 +386,16 @@ async function note(a) {
   if (flat(((chk[0] || [])[0])) !== text) throw new Error('The note did not save in the sheet');
   return { note: text };
 }
+async function mnote(a) {   // management note: stored in column V of the Planning Queue; only Admin and Partner can write it, and the server never sends it to anyone else
+  await ensureTabs();
+  const job = (await readPlan(true)).find((j) => j.id === str(a.id));
+  if (!job) throw new Error('That job was not found');
+  const text = flat(a.note).slice(0, 300);
+  await G.batchUpdate(SHEET_ID(), [{ range: range(PLAN, 'V' + job.row, 'V' + job.row), values: [[safe(text)]] }]);
+  const [chk] = await G.batchGet(SHEET_ID(), [range(PLAN, 'V' + job.row, 'V' + job.row)]);
+  if (flat(((chk[0] || [])[0])) !== text) throw new Error('The note did not save in the sheet');
+  return { note: text };
+}
 async function remove(a, who) {
   const job = (await readPlan(true)).find((j) => j.id === str(a.id));
   if (!job) throw new Error('That job was not found');
@@ -434,6 +445,7 @@ const ROUTES = {
   'warp.addTape': (a, who) => wrap(() => addTape(a, who)),
   'warp.edit': (a, who) => wrap(() => mut(edit)(a, who)),
   'warp.note': (a) => wrap(() => mut(note)(a)),
+  'warp.mnote': (a) => wrap(() => mut(mnote)(a)),
   'warp.addOneOff': (a, who) => wrap(() => mut(addOneOff)(a, who)),
   'warp.editOneOff': (a, who) => wrap(() => mut(editOneOff)(a, who)),
   'warp.remove': (a, who) => wrap(() => mut(remove)(a, who)),

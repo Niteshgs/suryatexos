@@ -704,7 +704,7 @@ button.wp-sbox{cursor:pointer}
 .cy-list{display:flex;flex-direction:column;gap:10px}.cy-t{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 12px}.cy-t summary{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;cursor:pointer;list-style:none;min-height:44px}.cy-t summary::-webkit-details-marker{display:none}.cy-n{font-weight:700;color:var(--text)}.cy-c{color:var(--text-muted);font-size:13px;text-align:right}.cy-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding-bottom:10px}.cy-g>div{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 10px;display:flex;flex-direction:column}.cy-g span{color:var(--text-muted);font-size:12px}.cy-g b{color:var(--text);font-size:18px}.cy-g small{color:var(--text-muted);font-size:11px}.cy-note{color:var(--text-muted);font-size:12px;margin:0 0 10px}.cy-runs{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}.cy-r{border-top:1px solid var(--border);padding-top:8px}.cy-rt{display:flex;justify-content:space-between;gap:8px;color:var(--text)}.cy-rt span{color:var(--text-muted);font-size:12px}.cy-rs{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--text-muted);font-size:13px;margin-top:4px}.cy-rs b{color:var(--text)}.cy-st{font-size:12px;color:var(--text-muted);margin-top:4px}.cy-st.on{color:var(--success)}
 .wp-note{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font:inherit;font-size:17px;font-weight:600;line-height:1.35;resize:vertical;min-height:60px}.wp-note::placeholder{color:var(--text-muted);font-weight:500}.wp-note:focus{outline:none;border-color:var(--accent)}
 .wp-noterow{display:flex;gap:8px;align-items:stretch;margin-top:10px}.wp-noterow .wp-note{margin-top:0;flex:1;min-width:0}.wp-notesave{flex:none;width:48px;border-radius:var(--radius-sm);border:1px solid var(--accent-strong);background:var(--accent-strong);color:var(--on);display:grid;place-items:center;cursor:pointer}.wp-notesave .ic{width:24px;height:24px;stroke:var(--on)}.wp-notesave:disabled{opacity:.5}
-.wp-notev{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;margin-top:10px;padding:10px 12px;border-radius:var(--radius);background:var(--accent-soft)}.wp-nvt{min-width:0;flex:1}.wp-nvt span{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}.wp-nvt .ic{width:14px;height:14px;stroke:var(--success)}.wp-nvt p{margin:4px 0 0;font-size:17px;font-weight:600;line-height:1.35;color:var(--text);overflow-wrap:anywhere;white-space:pre-wrap}.wp-nved{flex:none;min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--accent-strong);font:inherit;font-weight:700;cursor:pointer}
+.wp-notev{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;margin-top:10px;padding:10px 12px;border-radius:var(--radius);background:var(--accent-soft)}.wp-mg{background:var(--warn-soft,var(--accent-soft));border:1px dashed var(--border)}.wp-nvt{min-width:0;flex:1}.wp-nvt span{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}.wp-nvt .ic{width:14px;height:14px;stroke:var(--success)}.wp-nvt p{margin:4px 0 0;font-size:17px;font-weight:600;line-height:1.35;color:var(--text);overflow-wrap:anywhere;white-space:pre-wrap}.wp-nved{flex:none;min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--accent-strong);font:inherit;font-weight:700;cursor:pointer}
 .wp-noteadd{margin-top:10px}.wp-addnote{display:block;width:100%;min-height:48px;border:2px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--accent-strong);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .wp-ok{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;background:var(--surface);border:2px solid var(--accent-strong);color:var(--text);border-radius:30px;padding:14px 28px;font-weight:700;font-size:16px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.45);pointer-events:none;animation:wpokf 2.6s forwards}@keyframes wpokf{0%,80%{opacity:1}100%{opacity:0}}
 @media(min-width:900px){.wp-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}}
@@ -1415,7 +1415,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v251</span>
+    <span class="app-ver" id="appVer" title="App version">v252</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3847,19 +3847,27 @@ var WP=(function(){
   }
   function jobCard(j,x){
     if(!x&&editId===j.id)return editCard(j);
-    var op=!!openL[j.id]||askId===j.id||noteEd===j.id;                     // collapsed by default: only the item name shows
+    var op=!!openL[j.id]||askId===j.id||noteEd===j.id||mnoteEd===j.id;                     // collapsed by default: only the item name shows
     var hd='<button type="button" class="wp-brow'+(op?' open':'')+'" data-wp-ljob="'+esc(j.id)+'" aria-expanded="'+op+'"><span class="wp-bn">'+wk(j.category)+bname(j)+'</span>'+pill(j.status)+'<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button>';
-    return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+(!x&&j.status==='Planned'?'':noteRO(j))+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j):'')+'</div>':'')+'</div>';
+    return '<div class="wp-job wp-jc" data-jid="'+esc(j.id)+'" data-jst="'+esc(j.status)+'">'+hd+(op?'<div class="wp-bdet">'+meta(j)+when(j)+body(j)+(!x&&j.status==='Planned'?'':noteRO(j))+acts(j,x)+(!x&&j.status==='Planned'?noteBox(j)+noteBoxM(j):'')+'</div>':'')+'</div>';
   }
   var openL={};
   var noteEd=null;
-  function noteRO(j){return j.note?'<div class="wp-notev"><div class="wp-nvt"><span>Planning note</span><p>'+esc(j.note)+'</p></div></div>':'';}
+  function noteRO(j){return (j.note?'<div class="wp-notev"><div class="wp-nvt"><span>Staff note</span><p>'+esc(j.note)+'</p></div></div>':'')+(boss()&&j.mnote?'<div class="wp-notev wp-mg"><div class="wp-nvt"><span>Management note</span><p>'+esc(j.mnote)+'</p></div></div>':'');}
   function noteBox(j){
-    if(!j.note&&noteEd!==j.id)return '<div class="wp-noteadd" data-wp-nrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-noteedit="'+esc(j.id)+'">+ Add note</button></div>';
-    if(j.note&&noteEd!==j.id)return '<div class="wp-notev" data-wp-nrow="'+esc(j.id)+'"><div class="wp-nvt"><span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Note saved</span><p>'+esc(j.note)+'</p></div><button type="button" class="wp-nved" data-wp-noteedit="'+esc(j.id)+'">Edit</button></div>';
-    return '<div class="wp-noterow" data-wp-nrow="'+esc(j.id)+'"><textarea class="wp-note" rows="2" maxlength="300" data-wp-note="'+esc(j.id)+'" placeholder="Add a note" aria-label="Note for '+esc(j.tape)+'">'+esc(j.note||'')+'</textarea><button type="button" class="wp-notesave" data-wp-notesave="'+esc(j.id)+'" aria-label="Save note"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button></div>';
+    if(!j.note&&noteEd!==j.id)return '<div class="wp-noteadd" data-wp-nrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-noteedit="'+esc(j.id)+'">+ Add staff note</button></div>';
+    if(j.note&&noteEd!==j.id)return '<div class="wp-notev" data-wp-nrow="'+esc(j.id)+'"><div class="wp-nvt"><span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Staff note</span><p>'+esc(j.note)+'</p></div><button type="button" class="wp-nved" data-wp-noteedit="'+esc(j.id)+'">Edit</button></div>';
+    return '<div class="wp-noterow" data-wp-nrow="'+esc(j.id)+'"><textarea class="wp-note" rows="2" maxlength="300" data-wp-note="'+esc(j.id)+'" placeholder="Staff note (everyone can see this)" aria-label="Staff note for '+esc(j.tape)+'">'+esc(j.note||'')+'</textarea><button type="button" class="wp-notesave" data-wp-notesave="'+esc(j.id)+'" aria-label="Save note"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button></div>';
   }
   function swapNote(id,edit){var row=document.querySelector('[data-wp-nrow="'+id+'"]'),j=find(id);if(!row||!j)return;noteEd=edit?id:null;row.outerHTML=noteBox(j);if(edit){var ta=document.querySelector('[data-wp-note="'+id+'"]');if(ta){noting=true;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}}}
+  var mnoteEd=null;
+  function noteBoxM(j){
+    if(!boss()||String(j.id).indexOf('tmp')===0)return '';
+    if(!j.mnote&&mnoteEd!==j.id)return '<div class="wp-noteadd" data-wp-mnrow="'+esc(j.id)+'"><button type="button" class="wp-addnote" data-wp-mnoteedit="'+esc(j.id)+'">+ Add management note</button></div>';
+    if(j.mnote&&mnoteEd!==j.id)return '<div class="wp-notev wp-mg" data-wp-mnrow="'+esc(j.id)+'"><div class="wp-nvt"><span>Management note (only you and partners)</span><p>'+esc(j.mnote)+'</p></div><button type="button" class="wp-nved" data-wp-mnoteedit="'+esc(j.id)+'">Edit</button></div>';
+    return '<div class="wp-noterow" data-wp-mnrow="'+esc(j.id)+'"><textarea class="wp-note" rows="2" maxlength="300" data-wp-mnote="'+esc(j.id)+'" placeholder="Management note (only Admin and Partner see this)" aria-label="Management note for '+esc(j.tape)+'">'+esc(j.mnote||'')+'</textarea><button type="button" class="wp-notesave" data-wp-mnotesave="'+esc(j.id)+'" aria-label="Save management note"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button></div>';
+  }
+  function swapMNote(id,edit){var row=document.querySelector('[data-wp-mnrow="'+id+'"]'),j=find(id);if(!row||!j)return;mnoteEd=edit?id:null;row.outerHTML=noteBoxM(j);if(edit){var ta=document.querySelector('[data-wp-mnote="'+id+'"]');if(ta){noting=true;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}}}
   function sugg(){var q=qs.trim().toLowerCase();if(!q)return '';var w=q.split(/\s+/);var l=cat.tapes.filter(function(t){var n=t.name.toLowerCase();return w.every(function(x){return n.indexOf(x)>=0;});}).slice(0,8);var add=(can('warping.tapes')?'<button type="button" class="wp-addtape" data-wp-tnew="1">+ Add new tape to database</button>':'')+(canP()?'<button type="button" class="wp-addtape" data-wp-oo="1">+ Add one-off tape</button>':'');if(!l.length)return '<div class="wp-none">No tape matches</div>'+(add?'<div class="wp-pick">'+add+'</div>':'');return '<div class="wp-pick">'+l.map(function(t){return '<button type="button" data-wp-tape="'+esc(t.name)+'"><span class="wp-bn">'+wk(t.variants[0].category)+esc(t.name)+'</span>'+(t.variants.length>1?'<small>Single / Double stand</small>':'')+'</button>';}).join('')+add+'</div>';}
   var oo=null;
   function oneOffBtn(){return canP()?'<button type="button" class="wp-addtape wp-ooBtn" data-wp-oo="1">+ Add one-off tape</button>':'';}
@@ -3873,7 +3881,7 @@ var WP=(function(){
       +'<div class="wp-yarns">'+yarnBlk('Base yarn',v.baseYarn)+yarnBlk('Design yarn',v.designYarn)+'</div>'
       +'<div class="wp-grid"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+n(v.baseEnds)+'</b></div><label>No. of beams<input id="wpBB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpBM" type="number" inputmode="numeric" min="0"></label></div>'
       +'<div><h4>Design</h4><div class="wp-ends">Ends <b>'+n(v.designEnds)+'</b></div><label>No. of beams<input id="wpDB" type="number" inputmode="numeric" min="0" max="99"></label><label>Meters per beam<input id="wpDM" type="number" inputmode="numeric" min="0"></label></div></div>'
-      +'<div id="wpNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addnote="1">+ Add note</button></div>'
+      +'<div id="wpNoteWrap" class="wp-noteadd"><button type="button" class="wp-addnote" data-wp-addnote="1">+ Add staff note</button></div>'
       +'<div class="us-err" id="wpErr" role="alert"></div><button type="button" class="btn-submit" id="wpSave" data-wp-save="1">Add to planning</button></div>';
     return h;
   }
@@ -4090,6 +4098,11 @@ var WP=(function(){
     var v=ta.value.trim().replace(/\s+/g,' ');btn.disabled=true;pend++;
     q=q.then(function(){return api('warp.note',{id:id,note:v});}).then(function(){pend--;patch(id,function(x){x.note=v;});showToast('Note saved','success');btn.disabled=false;noting=false;swapNote(id,false);if(!pend)soft(1500);},function(e){pend--;btn.disabled=false;showToast(friendly(e.message),'error');});
   }
+  function saveMNote(id,btn){
+    var row=btn.closest('.wp-noterow'),ta=row&&row.querySelector('textarea');if(!ta||String(id).indexOf('tmp')===0)return;
+    var v=ta.value.trim().replace(/\s+/g,' ');btn.disabled=true;pend++;
+    q=q.then(function(){return api('warp.mnote',{id:id,note:v});}).then(function(){pend--;patch(id,function(x){x.mnote=v;});showToast('Management note saved','success');btn.disabled=false;noting=false;swapMNote(id,false);if(!pend)soft(1500);},function(e){pend--;btn.disabled=false;showToast(friendly(e.message),'error');});
+  }
   function toExec(id){
     if(String(id).indexOf('tmp')===0)return;
     var j=find(id);if(!j)return;ver++;
@@ -4114,8 +4127,10 @@ var WP=(function(){
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
     if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!==home())?home():(nt==='dash'&&!canD())?home():nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;oo=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
-    if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Add a note" aria-label="Note"></textarea>';$('wpNote').focus();}return;}
+    if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Staff note (everyone can see this)" aria-label="Staff note"></textarea>';$('wpNote').focus();}return;}
     if((x=t.closest('[data-wp-noteedit]')))return swapNote(x.getAttribute('data-wp-noteedit'),true);
+    if((x=t.closest('[data-wp-mnoteedit]')))return swapMNote(x.getAttribute('data-wp-mnoteedit'),true);
+    if((x=t.closest('[data-wp-mnotesave]')))return saveMNote(x.getAttribute('data-wp-mnotesave'),x);
     if((x=t.closest('[data-wp-notesave]')))return saveNote(x.getAttribute('data-wp-notesave'),x);
     if((x=t.closest('[data-wp-exec]')))return toExec(x.getAttribute('data-wp-exec'));
     if((x=t.closest('[data-wp-var]'))){vr=sel.variants[+x.getAttribute('data-wp-var')];return draw();}
@@ -4148,8 +4163,8 @@ var WP=(function(){
     if((x=t.closest('[data-wp-del]')))return del(x.getAttribute('data-wp-del'));
     if((x=t.closest('[data-wp-cancel]')))return cancel(x.getAttribute('data-wp-cancel'));
   });
-  document.addEventListener('focusin',function(e){if(e.target&&e.target.getAttribute&&e.target.getAttribute('data-wp-note')!==null&&e.target.hasAttribute('data-wp-note'))noting=true;});
-  document.addEventListener('focusout',function(e){var t=e.target;if(t&&t.hasAttribute&&t.hasAttribute('data-wp-note'))noting=false;});
+  document.addEventListener('focusin',function(e){if(e.target&&e.target.getAttribute&&e.target.hasAttribute&&(e.target.hasAttribute('data-wp-note')||e.target.hasAttribute('data-wp-mnote')))noting=true;});
+  document.addEventListener('focusout',function(e){var t=e.target;if(t&&t.hasAttribute&&(t.hasAttribute('data-wp-note')||t.hasAttribute('data-wp-mnote')))noting=false;});
   document.addEventListener('input',function(e){
     var t=e.target;if(t.id==='wpQ'){qs=t.value;var l=$('wpTapes');if(l)l.innerHTML=sugg();}
     else if(/^wp[BD][BM]$/.test(t.id||''))total();
