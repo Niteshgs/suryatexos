@@ -1006,10 +1006,8 @@ button.kn-bno{border:0;cursor:pointer;font-family:inherit;touch-action:manipulat
 .kn-sub{background:var(--surface);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
 .kn-bno.sub{width:36px;height:36px;margin:3px;font-size:14px;background:var(--accent-soft);color:var(--accent);box-shadow:none}
 .kn-shint{font-size:12px;color:var(--text-muted);text-align:center;margin:-4px 0 10px}
-.kn-beam.kn-off,.kn-sub.kn-off{background:var(--kn-field);border-color:var(--border)}
-.kn-off .kn-bno{background:var(--text-muted);color:var(--surface);box-shadow:none}
-.kn-off .kn-tbox,.kn-off .kn-f{background:transparent;border-color:var(--border)}
-.kn-off input,.kn-off select{color:var(--text-muted)}
+.kn-table tr.kn-off td,.kn-table tr.kn-off td.kn-bn{background:rgba(128,128,128,.2)!important;color:var(--text-muted)}
+.kn-table tr.kn-off .kn-cyc{color:var(--text-muted);background:transparent}
 .kn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .kn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .kn-f{display:flex;flex-direction:column;gap:2px;padding:6px 10px 4px;background:var(--kn-field);border:1.5px solid transparent;border-radius:10px;cursor:text;min-width:0;transition:border-color .15s,box-shadow .15s,background-color .15s}
@@ -1397,7 +1395,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v207</span>
+    <span class="app-ver" id="appVer" title="App version">v209</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2701,7 +2699,7 @@ var KN=(function(){
     MACHINES.forEach(function(m){
       var beams=D.cycleData[m.id]||[], tc=0, tr=0;
       var rows=beams.map(function(b,i){tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
-        return '<tr class="'+(showC?cyc(b.cycle):'')+'"><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
+        return '<tr class="'+(showC?cyc(b.cycle):'')+(Number(b.cycle)?'':' kn-off')+'"><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
           +(showC?'<td class="kn-c"><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td>':'')
           +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
@@ -2751,11 +2749,11 @@ var KN=(function(){
       if(b.parts&&b.parts.length===3){
         h+='<div class="kn-beam kn-splitbox" id="kb_'+p+'" data-kn-np="3"><div class="kn-sh"><span>Beam '+(i+1)+' · split in 3</span><button type="button" class="kn-link" data-kn-merge="'+i+'">Merge</button></div>';
         b.parts.forEach(function(q,k){
-          h+='<div class="kn-sub'+(Number(q.cycle)?'':' kn-off')+'" id="kb_'+p+'_'+k+'">'+unit(q,i+'_'+k,'<span class="kn-bno sub" aria-hidden="true">'+(i+1)+'ABC'.charAt(k)+'</span>',i>0||k>0)+'</div>';
+          h+='<div class="kn-sub" id="kb_'+p+'_'+k+'">'+unit(q,i+'_'+k,'<span class="kn-bno sub" aria-hidden="true">'+(i+1)+'ABC'.charAt(k)+'</span>',i>0||k>0)+'</div>';
         });
         h+='</div>';
       }else{
-        h+='<div class="kn-beam'+(Number(b.cycle)?'':' kn-off')+'" id="kb_'+p+'" data-kn-np="1">'+unit(b,String(i),'<button type="button" class="kn-bno" data-kn-split="'+i+'" aria-label="Beam '+(i+1)+', tap to split into 3 tapes">'+(i+1)+'</button>',i>0)+'</div>';
+        h+='<div class="kn-beam" id="kb_'+p+'" data-kn-np="1">'+unit(b,String(i),'<button type="button" class="kn-bno" data-kn-split="'+i+'" aria-label="Beam '+(i+1)+', tap to split into 3 tapes">'+(i+1)+'</button>',i>0)+'</div>';
       }
     });
     h+='</div><div class="kn-shint">Tap a beam number to split it into 3 tapes.</div><button class="btn-submit kn-save" id="knSave">Save '+m.name+'</button></div></div>';
@@ -3062,7 +3060,7 @@ var KN=(function(){
     knMark(t);});
   document.addEventListener('keydown',function(e){var t=e.target,lq=t.getAttribute&&t.getAttribute('data-kn-lq');if(lq===null||lq===undefined||e.key!=='Enter')return;
     e.preventDefault();var first=document.querySelector('#kto_'+active+'_'+lq+' [data-kn-pick]');if(first)first.click();});
-  function knMark(t){if(!t||!t.closest)return;if(t.id&&t.id.indexOf('kc_')===0){var cd=t.closest('.kn-sub,.kn-beam');if(cd)cd.classList.toggle('kn-off',!Number(t.value));}if(t.closest('#v-kn .kn-beams'))dirty=true;if(t.closest('.kn-f'))t.classList.toggle('zero',!Number(t.value));
+  function knMark(t){if(!t||!t.closest)return;if(t.closest('#v-kn .kn-beams'))dirty=true;if(t.closest('.kn-f'))t.classList.toggle('zero',!Number(t.value));
     var bx=t.closest('.kn-tbox');if(bx)bx.classList.toggle('empty',!t.value.trim());}
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('knSplitDlg').classList.contains('open')){closeSplit();return;}if(e.key==='Escape'&&$('knUnsaved').classList.contains('open')){closeUnsaved();pendingNav=null;return;}if(e.key!=='Enter')return;var id=e.target.id;
     if(id==='knPin')unlock(); else if(id==='knNewTape')$('knAddTape').click(); else if(id==='knEditTape'){var b=document.querySelector('[data-kn-save-edit]');if(b)b.click();}});
