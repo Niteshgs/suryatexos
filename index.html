@@ -1407,7 +1407,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v232</span>
+    <span class="app-ver" id="appVer" title="App version">v233</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -2710,8 +2710,11 @@ var KN=(function(){
     var showC=dview!=='quality', showW=dview!=='cycles';
     MACHINES.forEach(function(m){
       var beams=D.cycleData[m.id]||[], tc=0, tr=0;
-      var rows=beams.map(function(b,i){tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
-        return '<tr class="'+(showC?cyc(b.cycle):'')+(Number(b.cycle)?'':' kn-off')+'"><td class="kn-bn">'+(i+1)+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
+      var units=[];beams.forEach(function(b,i){
+        if(b&&b.parts&&b.parts.length===3)b.parts.forEach(function(q,k){if(k===0||String(q.tape||'').trim()||Number(q.cycle)||Number(q.weightMtr)||Number(q.weightRoll))units.push({b:q,l:(i+1)+'ABC'.charAt(k)});});
+        else units.push({b:b||{},l:String(i+1)});});
+      var rows=units.map(function(u){var b=u.b;tc+=Number(b.cycle)||0;tr+=Number(b.weightRoll)||0;
+        return '<tr class="'+(showC?cyc(b.cycle):'')+(Number(b.cycle)?'':' kn-off')+'"><td class="kn-bn">'+u.l+'</td><td>'+(b.tape?esc(b.tape):'<span class="kn-none">none</span>')+'</td>'
           +(showC?'<td class="kn-c"><span class="kn-cyc '+cyc(b.cycle)+'">'+num0(b.cycle)+'</span></td>':'')
           +(showW?'<td class="kn-n">'+num0(b.weightMtr)+'</td><td class="kn-n">'+num0(b.weightRoll)+'</td>':'')+'</tr>';}).join('');
       h+='<div class="kn-card"><div class="kn-card-h"><span>'+m.name+'</span></div>'
