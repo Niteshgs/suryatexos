@@ -631,6 +631,7 @@ body.hm-drag{overscroll-behavior:contain}
 .wp-standpill.dbl{border-color:var(--danger,#c0392b);color:var(--danger,#c0392b);background:var(--danger-soft,#fbeaea)}
 .wp-part .wp-sp{grid-column:1/-1;grid-row:2;margin:6px 0 4px}.wp-part:has(.wp-sp)>b{grid-column:1;grid-row:1}.wp-part:has(.wp-sp)>.wp-nums{grid-column:2;grid-row:1}
 .wp-sp{display:grid;gap:4px;margin:2px 0 8px}.wp-sp>div{display:grid;grid-template-columns:34px 78px 1fr;gap:6px;align-items:baseline;font-size:14px}.wp-sp b{color:var(--accent)}.wp-sp span{font-weight:700}.wp-sp em{font-style:normal;color:var(--text-muted);font-weight:600}
+.wp-sp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.wp-sp3>div{display:grid;gap:6px;min-width:0}.wp-spl{font-weight:800;color:var(--accent);text-align:center;font-size:15px}.wp-sp3 input{display:block;width:100%;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;font:inherit;font-size:15px;color:var(--text)}.wp-sp3 input:focus{outline:none;border-color:var(--accent)}
 .wp-spc{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin:8px 0;background:var(--surface)}.wp-spc>h4{margin:0 0 2px;color:var(--accent)}
 .wp-ooBtn{display:block;width:100%;margin:10px 0 4px;text-align:left;background:var(--surface);border:1px dashed var(--accent);color:var(--accent);border-radius:var(--radius);padding:13px 14px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .wp-standpill{display:inline-block;white-space:nowrap;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);background:var(--accent-soft)}
@@ -1413,7 +1414,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v243</span>
+    <span class="app-ver" id="appVer" title="App version">v244</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3910,7 +3911,7 @@ var WP=(function(){
       +'<div class="wp-fl">Category</div>'+seg('category',['Woven','Knitted'],t.category)
       +(w?'<div class="wp-fl">Stand</div>'+seg('stand',['Single Stand','Double Stand'],t.stand):'')
       +(t.category==='Knitted'?'<div class="wp-fl">Beam type</div><div class="wp-stand" style="margin:6px 0 12px;grid-template-columns:1fr 1fr"><button type="button" class="'+(t.split?'':'on')+'" data-wp-ooset="split|0">Single beam</button><button type="button" class="'+(t.split?'on':'')+'" data-wp-ooset="split|1">Split beam A B C</button></div>':'')
-      +(t.category&&t.split&&t.category==='Knitted'?['A','B','C'].map(function(L,k){var q=t.sp[k];return '<div class="wp-spc"><h4>'+L+'</h4><div class="wp-grid"><div><h4>Base</h4>'+f('wpOSb'+k+'E','Ends',q.be,'number')+f('wpOSb'+k+'Y','Yarn',q.by,'text','e.g. 150/0 Navy')+'</div><div><h4>Design</h4>'+f('wpOSd'+k+'E','Ends',q.de,'number')+f('wpOSd'+k+'Y','Yarn',q.dy,'text','e.g. 300D Yellow')+'</div></div></div>';}).join('')
+      +(t.category&&t.split&&t.category==='Knitted'?['b','d'].map(function(sd){var nm=sd==='b'?'Base':'Design';return '<div class="wp-spc"><h4>'+nm+'</h4><div class="wp-sp3">'+['A','B','C'].map(function(L,k){var q=t.sp[k];return '<div><span class="wp-spl">'+L+'</span><input id="wpOS'+sd+k+'E" type="number" inputmode="numeric" min="0" value="'+esc(q[sd+'e']||'')+'" placeholder="Ends" aria-label="'+nm+' '+L+' ends" autocomplete="off"><input id="wpOS'+sd+k+'Y" type="text" value="'+esc(q[sd+'y']||'')+'" placeholder="Yarn" aria-label="'+nm+' '+L+' yarn" autocomplete="off"></div>';}).join('')+'</div></div>';}).join('')
         +'<div class="wp-fl">Beams and meters (same for A, B and C)</div><div class="wp-grid"><div><h4>Base</h4>'+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div><div><h4>Design</h4>'+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>'
       :t.category?'<div class="wp-grid"><div><h4>Base</h4>'+f('wpOBE','Ends',t.baseEnds,'number')+f('wpOBY','Yarn',t.baseYarn)+f('wpOBB','No. of beams',t.baseBeams,'number')+f('wpOBM','Meters per beam',t.baseMeters,'number')+'</div>'
         +'<div><h4>Design</h4>'+f('wpODE','Ends',t.designEnds,'number')+f('wpODY','Yarn',t.designYarn)+f('wpODB','No. of beams',t.designBeams,'number')+f('wpODM','Meters per beam',t.designMeters,'number')+'</div></div>':'')
