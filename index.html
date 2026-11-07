@@ -1407,7 +1407,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v231</span>
+    <span class="app-ver" id="appVer" title="App version">v232</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -3773,9 +3773,9 @@ var WP=(function(){
   function call(fn,args){return fetch('/api/warping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fn:fn,args:args||{}})}).then(function(r){return r.json().then(function(j){j._status=r.status;return j;});});}
   function api(fn,args){return call(fn,args).then(function(j){if(j._status===401){showLock(j.error);throw new Error(j.error||'Signed out');}if(!j.ok)throw new Error(j.error||'Something went wrong');return j.data;});}
   function n(v){return Number(v||0).toLocaleString('en-IN');}
-  function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}
+  function canP(){return can('warping.plan');}function canE(){return can('warping.execute');}function canD(){return canP()||can('warping.dash');}function home(){return canD()?'dash':canE()?'exec':'ready';}
   var WIC={dash:'i-dashboard',plan:'i-note',exec:'i-gear',ready:'i-warehouse'},WLB={dash:'Dash',plan:'Plan',exec:'Program',ready:'Ready'};
-  function navTabs(){var t=['dash'];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
+  function navTabs(){var t=canD()?['dash']:[];if(canP())t.push('plan');if(canE())t.push('exec');t.push('ready');return t;}
   function nav(){var n=$('wpNav'),t=navTabs();if(!n)return;n.style.gridTemplateColumns='repeat('+t.length+',1fr)';n.innerHTML=t.map(function(k){return '<button type="button" class="'+(tab===k?'on':'')+'"'+(tab===k?' aria-current="page"':'')+' data-wp-tab="'+k+'"><span><svg class="ic" aria-hidden="true"><use href="#'+WIC[k]+'"/></svg></span>'+WLB[k]+'</button>';}).join('');}
   function tabs(){return '';}
   function sumHtml(){
@@ -3809,7 +3809,8 @@ var WP=(function(){
       +'<div class="wp-grid" style="margin-top:10px"><div><h4>Base</h4><div class="wp-ends">Ends <b>'+(j.baseEnds?n(j.baseEnds):'—')+'</b></div>'+f('wpEBB','No. of beams',j.baseBeams)+f('wpEBM','Meters per beam',j.baseMeters)+'</div><div><h4>Design</h4><div class="wp-ends">Ends <b>'+(j.designEnds?n(j.designEnds):'—')+'</b></div>'+f('wpEDB','No. of beams',j.designBeams)+f('wpEDM','Meters per beam',j.designMeters)+'</div></div>'
       +'<div class="us-err" id="wpEErr" role="alert"></div><div class="us-act"><button type="button" class="us-cancel" data-wp-ecancel="1">Cancel</button><button type="button" class="btn-submit" id="wpESave" data-wp-esave="'+esc(j.id)+'">Save changes</button></div></div>';
   }
-  function canCan(){return can('warping.cancel')&&!!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
+  function boss(){return !!ME&&(ME.isAdmin||ME.role==='Admin'||ME.role==='Partner');}
+  function canCan(){return can('warping.cancel')&&boss();}function canArc(){return can('warping.archive')&&boss();}
   function sizeLn(e,b,m){var o=[];if(+e)o.push(+e+' Ends');if(+b)o.push(+b+' Beam'+(+b===1?'':'s'));if(+m)o.push(Number(m).toLocaleString('en-IN')+' Meters');return o.join(', ');}
   function bname(j){var a=sizeLn(j.baseEnds,j.baseBeams,j.baseMeters),d=sizeLn(j.designEnds,j.designBeams,j.designMeters);return '<span class="wp-bt"><span>'+esc(j.tape)+'</span>'+(a?'<small class="wp-bsub">'+a+'</small>':'')+(d?'<small class="wp-bsub">'+d+'</small>':'')+'</span>';}
   function acts(j,x){
@@ -3824,8 +3825,8 @@ var WP=(function(){
       if(ask==='del')return two('<button type="button" class="wp-big danger" data-wp-del="'+sid+'">Delete?</button>');
       s+='<div class="wp-row3">'+(can('warping.cancel')?'<button type="button" class="wp-sm del" data-wp-askdel="'+sid+'">Delete</button>':'<span></span>')+'<button type="button" class="wp-big" data-wp-exec="'+sid+'">Send to program</button><button type="button" class="wp-sm" data-wp-edit="'+sid+'">Edit</button></div>';
     }
-    if(j.status==='Done'&&!x&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
-    if(j.status==='Archived'&&can('warping.archive'))s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
+    if(j.status==='Done'&&!x&&canArc())s+='<button type="button" class="wp-sm wp-arch" data-wp-arch="'+sid+'">Archive</button>';
+    if(j.status==='Archived'&&canArc())s+='<button type="button" class="wp-sm wp-wide" data-wp-unarch="'+sid+'">Restore to Beams ready</button>';
     if(x&&j.status!=='Done'&&j.status!=='Archived'&&canCan()&&ask!=='done')s+='<button type="button" class="wp-cancelbtn" data-wp-askcan="'+sid+'">Cancel job</button>';
     return s;
   }
@@ -3960,7 +3961,7 @@ var WP=(function(){
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
     var ae=document.activeElement&&document.activeElement.id,tops=[];
-    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Planner':tab==='exec'?'Warping program list':'Warped and Ready')+'</p></div>'+(can('warping.archive')?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg><span>Archive</span></button>':'')+(tab==='dash'&&can('warping.analytics')?'<button type="button" class="wp-archbtn wp-admbtn" data-wp-adm="1"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg><span>Admin</span></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
+    box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Planner':tab==='exec'?'Warping program list':'Warped and Ready')+'</p></div>'+(canArc()?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg><span>Archive</span></button>':'')+(tab==='dash'&&can('warping.analytics')&&boss()?'<button type="button" class="wp-archbtn wp-admbtn" data-wp-adm="1"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg><span>Admin</span></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
     if(keep){var q=$('wpQ');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
     total();
@@ -3976,7 +3977,7 @@ var WP=(function(){
   function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=ovr(d.jobs);draw();}).catch(fail);}
   function loadAna(){var v=ver;return api('warp.analytics',{pin:anaPin}).then(function(d){if(v===ver)ana=d;draw();}).catch(fail);}
   function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='ana'?(anaPin?loadAna():Promise.resolve()):tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab='dash';sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId&&!noting)refresh();},60000);}
+  function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab=home();sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId&&!noting)refresh();},60000);}
   function save(){
     var g=function(i){return $(i).value;},er=$('wpErr');er.textContent='';
     var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
@@ -4049,7 +4050,7 @@ var WP=(function(){
     var t=e.target,x;if(!t.closest||(!t.closest('#v-warp')&&!t.closest('#wpNav')))return;
     if(t.closest('[data-wp-adm]'))return askPin();
     if((x=t.closest('[data-wp-bf]'))){bf=x.getAttribute('data-wp-bf');openJ=null;return draw();}
-    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!=='dash')?'dash':nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
+    if((x=t.closest('[data-wp-tab]'))){var nt=x.getAttribute('data-wp-tab');tab=(nt===tab&&nt!==home())?home():(nt==='dash'&&!canD())?home():nt;if(tab!=='ana'){anaPin='';ana=null;}addT=null;sel=null;vr=null;editId=null;askId=null;msg='';draw();return refresh();}
     if((x=t.closest('[data-wp-tape]')))return pickTape(x.getAttribute('data-wp-tape'));
     if((x=t.closest('[data-wp-addnote]'))){var w=$('wpNoteWrap');if(w){w.innerHTML='<textarea class="wp-note" id="wpNote" rows="2" maxlength="300" placeholder="Add a note" aria-label="Note"></textarea>';$('wpNote').focus();}return;}
     if((x=t.closest('[data-wp-noteedit]')))return swapNote(x.getAttribute('data-wp-noteedit'),true);
