@@ -1413,7 +1413,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       <span class="rlabel">Refresh</span>
     </button>
-    <span class="app-ver" id="appVer" title="App version">v242</span>
+    <span class="app-ver" id="appVer" title="App version">v243</span>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -4016,6 +4016,7 @@ var WP=(function(){
   }
   function draw(){
     var box=$('wpView');if(!box)return;var keep=document.activeElement&&document.activeElement.id==='wpQ';
+    if(oo&&$('wpON'))ooVals();if(addT&&$('wpTN'))tapeVals();   // any redraw first keeps what has been typed in the one-off / new-tape forms
     var ae=document.activeElement&&document.activeElement.id,tops=[];
     box.innerHTML='<div class="us-bar wp-bar"><div><p>'+(tab==='archive'?'Archived beams':tab==='ana'?'Admin':tab==='dash'?'Warping Dashboard':tab==='plan'?'Planner':tab==='exec'?'Warping program list':'Warped and Ready')+'</p></div>'+(canArc()?'<button type="button" class="wp-archbtn'+(tab==='archive'?' on':'')+'" data-wp-tab="archive" aria-pressed="'+(tab==='archive')+'" title="Archive"><svg class="ic" aria-hidden="true"><use href="#i-archive"/></svg><span>Archive</span></button>':'')+(tab==='dash'&&can('warping.analytics')&&boss()?'<button type="button" class="wp-archbtn wp-admbtn" data-wp-adm="1"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg><span>Admin</span></button>':'')+'</div>'+(tab==='dash'?'<div class="wp-sum" id="wpSum">'+sumHtml()+'</div>':'')+(tab==='dash'?drawBoard():tab==='plan'?drawPlan():tab==='exec'?drawExec():tab==='archive'?drawArchive():tab==='ana'?drawAna():drawReady());
     nav();
@@ -4033,7 +4034,7 @@ var WP=(function(){
   function loadBoard(){loadSum();var v=ver;return api('warp.board').then(function(d){if(v===ver)board=ovr(d.jobs);draw();}).catch(fail);}
   function loadAna(){var v=ver;return api('warp.analytics',{pin:anaPin}).then(function(d){if(v===ver)ana=d;draw();}).catch(fail);}
   function refresh(){if(pend)return Promise.resolve();loadSum();return tab==='ana'?(anaPin?loadAna():Promise.resolve()):tab==='archive'?loadArchived():tab==='dash'?loadBoard():tab==='plan'?loadPlan():tab==='exec'?loadExec():loadReady();}
-  function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab=home();sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId&&!noting)refresh();},60000);}
+  function open(){if(!canP()&&!canE())return;anaPin='';ana=null;tab=home();sel=null;vr=null;editId=null;askId=null;draw();refresh();clearInterval(timer);timer=setInterval(function(){if(current==='warp'&&!document.hidden&&!sel&&!editId&&!askId&&!addT&&!oo&&!noting)refresh();},60000);}
   function save(){
     var g=function(i){return $(i).value;},er=$('wpErr');er.textContent='';
     var cn=function(v){v=String(v||'').trim();return v===''?0:(/^\d+$/.test(v)?+v:NaN);};
@@ -4145,6 +4146,7 @@ var WP=(function(){
   document.addEventListener('input',function(e){
     var t=e.target;if(t.id==='wpQ'){qs=t.value;var l=$('wpTapes');if(l)l.innerHTML=sugg();}
     else if(/^wp[BD][BM]$/.test(t.id||''))total();
+    else if(oo&&/^wpO/.test(t.id||''))ooVals();
   });
   return {open:open};
 })();
